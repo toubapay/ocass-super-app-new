@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "362253661054",
+    "project_id": "ocass-by-devteam",
+    "storage_bucket": "ocass-by-devteam.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:9a137cd60dbcf35887f92f",
+        "android_client_info": {
+          "package_name": "com.Ocass.express"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:520842db4579c9c987f92f",
+        "android_client_info": {
+          "package_name": "com.Ocass.marchand"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:2ab7d36a370183bf87f92f",
+        "android_client_info": {
+          "package_name": "com.Ocass.order"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.sixamtech.demandium.user",
+            "sha256_cert_fingerprints": [
+                "9A:1C:9D:C7:50:82:8D:78:D3:84:A3:67:E1:66:5B:3B:E3:5A:20:03:6B:06:A2:85:F7:9F:8F:84:4E:0A:83:06"
+            ]
+        }
+    }
+]
