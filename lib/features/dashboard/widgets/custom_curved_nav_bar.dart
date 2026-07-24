@@ -28,13 +28,7 @@ class CustomCurvedNavBar extends StatelessWidget {
       height: 65,
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1)),
       ),
       child: Row(
         children: List.generate(items.length, (index) {
@@ -46,26 +40,8 @@ class CustomCurvedNavBar extends StatelessWidget {
               onTap: () => onTap(index),
               behavior: HitTestBehavior.opaque,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
-                  /// 🔹 TOP INDICATOR
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    height: 4,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: isSelected ? primaryColor : Colors.transparent,
-                      boxShadow: isSelected
-                          ? [
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: const Offset(0, 5),
-                        ),
-                      ]
-                          : [],
-                    ),
-                  ),
 
                   const SizedBox(height: 6),
 

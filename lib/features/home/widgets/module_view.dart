@@ -18,7 +18,6 @@ import 'package:sixam_mart/common/widgets/item_view.dart';
 import 'package:sixam_mart/common/widgets/item_widget2.dart';
 import 'package:sixam_mart/common/widgets/title_widget.dart';
 import 'package:sixam_mart/features/address/controllers/address_controller.dart';
-import 'package:sixam_mart/features/address/domain/models/address_model.dart';
 import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart';
 import 'package:sixam_mart/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:sixam_mart/features/home/widgets/popular_store_view.dart';
@@ -262,621 +261,251 @@ class _ModuleViewState extends State<ModuleView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        /// 🔹 LOCATION AND NOTIFICATION BAR (ADDED ON TOP)
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            color: Colors.transparent,
-            padding: const EdgeInsets.symmetric(
-              horizontal: Dimensions.paddingSizeSmall,
-              vertical: Dimensions.paddingSizeSmall,
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(
+              Dimensions.paddingSizeSmall,
+              Dimensions.paddingSizeSmall,
+              Dimensions.paddingSizeSmall,
+              Dimensions.paddingSizeLarge,
             ),
-            child: Row(
+            decoration: BoxDecoration(
+              color: primaryColor,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(28),
+                bottomRight: Radius.circular(28),
+              ),
+            ),
+            child: Column(
               children: [
-                /// 🔹 LOCATION SECTION
-                Expanded(
-                  child: InkWell(
-                    onTap: () => Get.find<LocationController>()
-                        .navigateToLocationScreen('home'),
-                    child: GetBuilder<LocationController>(
-                      builder: (locationController) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AuthHelper.isLoggedIn()
-                                  ? AddressHelper
-                                          .getUserAddressFromSharedPref()!
-                                      .addressType!
-                                      .tr
-                                  : 'Livraison'.tr,
-                              style: robotoMedium.copyWith(
-                                color: const Color(0xFF000000),
-                                fontSize: Dimensions.fontSizeOverLarge2,
-                                fontWeight: FontWeight.w900,
+                /// 🔹 LOCATION PILL + PROFILE
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                        onTap: () => Get.find<LocationController>().navigateToLocationScreen('home'),
+                        child: GetBuilder<LocationController>(
+                          builder: (locationController) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: Dimensions.paddingSizeDefault,
+                                vertical: Dimensions.paddingSizeSmall,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    AddressHelper
-                                            .getUserAddressFromSharedPref()!
-                                        .address!,
-                                    style: robotoRegular.copyWith(
-                                      color: Colors.black.withOpacity(0.8),
-                                      fontSize: Dimensions.fontSizeDefault,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.home_filled, color: primaryColor, size: 20),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      AuthHelper.isLoggedIn()
+                                          ? AddressHelper.getUserAddressFromSharedPref()!.address!
+                                          : 'Livraison'.tr,
+                                      style: robotoBold.copyWith(
+                                        color: Colors.black87,
+                                        fontSize: Dimensions.fontSizeDefault,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.expand_more, color: Colors.black54, size: 18),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GetBuilder<NotificationController>(
+                      builder: (notificationController) {
+                        return GetBuilder<ProfileController>(
+                          builder: (profileController) {
+                            final bool isLoggedIn = AuthHelper.isLoggedIn();
+                            final String? image = profileController.userInfoModel?.userInfo?.imageFullUrl;
+
+                            return Stack(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => Get.to(MenuScreen()),
+                                  child: CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: Colors.white,
+                                    backgroundImage: isLoggedIn && image != null && image.isNotEmpty
+                                        ? NetworkImage(image)
+                                        : null,
+                                    child: (!isLoggedIn || image == null || image.isEmpty)
+                                        ? Icon(CupertinoIcons.person, color: primaryColor, size: 22)
+                                        : null,
                                   ),
                                 ),
-                                Icon(
-                                  Icons.expand_more,
-                                  color: Colors.black.withOpacity(0.8),
-                                  size: 18,
-                                ),
+                                if (notificationController.hasNotification)
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: Container(
+                                      height: 10,
+                                      width: 10,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(width: 1, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
                               ],
-                            ),
-                          ],
+                            );
+                          },
                         );
                       },
                     ),
-                  ),
+                  ],
                 ),
 
-                /// NOTIFICATION ICON
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: GetBuilder<NotificationController>(
-                    builder: (notificationController) {
-                      return GetBuilder<ProfileController>(
-                        builder: (profileController) {
-                          final bool isLoggedIn = AuthHelper.isLoggedIn();
-                          final String? image = profileController
-                              .userInfoModel?.userInfo?.imageFullUrl;
+                const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
-                          return Stack(
-                            children: [
-                              GestureDetector(
-                                onTap: () => Get.to(MenuScreen()),
-                                child: CircleAvatar(
-                                  radius: 25, // 👈 size control
-                                  backgroundColor: Theme.of(context).cardColor,
-                                  backgroundImage: isLoggedIn &&
-                                          image != null &&
-                                          image.isNotEmpty
-                                      ? NetworkImage(image)
-                                      : null,
-                                  child: (!isLoggedIn ||
-                                          image == null ||
-                                          image.isEmpty)
-                                      ? Icon(
-                                          CupertinoIcons.person,
-                                          color: Theme.of(context).primaryColor,
-                                          size: 26,
-                                        )
-                                      : null,
-                                ),
-                              ),
-
-                              /// 🔴 Notification dot
-                              notificationController.hasNotification
-                                  ? Positioned(
-                                      top: 2,
-                                      right: 2,
-                                      child: Container(
-                                        height: 10,
-                                        width: 10,
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            width: 1,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : const SizedBox(),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-        /// EXISTING CONTENT (STARTING AFTER THE TOP BAR)
-        Padding(
-          padding: const EdgeInsets.only(top: 80), // Space for the top bar
-
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildBannerWidget(),
-                const SizedBox(height: 10),
-
-
-                GetBuilder<ProfileController>(
-                  builder: (profileController) {
-                    final balance =
-                        profileController.userInfoModel?.walletBalance ?? 0;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: WalletCard(
-                        title: "OcassWallet",
-                        balance: "$balance",
-                      ),
-                    );
-                  },
-                ),
-
+                /// 🔹 CATEGORY GRID
                 widget.splashController.moduleList != null
                     ? widget.splashController.moduleList!.isNotEmpty
                         ? Builder(
                             builder: (context) {
                               List<Widget> tiles = [];
-                              if (widget.splashController.moduleList != null) {
-                                for (int index = 0; index < widget.splashController.moduleList!.length; index++) {
-                                  final module = widget.splashController.moduleList![index];
-                                  tiles.add(Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // ===== CARD =====
-                                      CustomInkWell(
-                                        onTap: () async {
-                                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                                          prefs.setInt('mid', module.id!);
-                                          widget.splashController.switchModule(index, true);
-                                        },
-                                        radius: Dimensions.radiusExtraLarge,
-                                        child: Container(
-                                          width: 72,
-                                          height: 72,
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: const BoxDecoration(
-                                            color: Colors.transparent,
-                                          ),
-                                          child: CustomImage(
-                                            image: module.iconFullUrl ?? '',
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      // ===== LABEL =====
-                                      SizedBox(
-                                        width: 76,
-                                        child: Text(
-                                          module.moduleName ?? '',
-                                          textAlign: TextAlign.center,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: robotoMedium.copyWith(
-                                            fontSize: Dimensions.fontSizeSmall,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ));
-                                }
+                              for (int index = 0; index < widget.splashController.moduleList!.length; index++) {
+                                final module = widget.splashController.moduleList![index];
+                                tiles.add(_buildModuleTile(
+                                  icon: CustomImage(image: module.iconFullUrl ?? '', width: 34, height: 34, fit: BoxFit.contain),
+                                  label: module.moduleName ?? '',
+                                  onTap: () async {
+                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    prefs.setInt('mid', module.id!);
+                                    widget.splashController.switchModule(index, true);
+                                  },
+                                ));
                               }
 
                               bool showAirtime = (widget.splashController.configModel?.airtimeStatus ?? 0) == 1;
                               bool showBillPayment = (widget.splashController.configModel?.billPaymentStatus ?? 0) == 1;
 
                               if (showAirtime) {
-                                // ──── AIRTIME TILE ────
-                                tiles.add(Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CustomInkWell(
-                                      onTap: () async {
-                                        Get.toNamed(RouteHelper.getAirtimeRoute());
-                                      },
-                                      radius: Dimensions.radiusExtraLarge,
-                                      child: Container(
-                                        width: 72,
-                                        height: 72,
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.transparent,
-                                        ),
-                                        child: (widget.splashController.configModel?.airtimeLogo != null &&
-                                                widget.splashController.configModel!.airtimeLogo!.isNotEmpty)
-                                            ? CustomImage(
-                                                image: widget.splashController.configModel?.airtimeLogoFullUrl ?? '',
-                                                width: 64,
-                                                height: 64,
-                                                isLogo: true,
-                                                fit: BoxFit.contain,
-                                              )
-                                            : Image.asset(
-                                                'assets/image/airtime.jpeg',
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.contain,
-                                              ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: 76,
-                                      child: Text(
-                                        widget.splashController.configModel?.airtimeName ?? 'AirTime',
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: robotoMedium.copyWith(
-                                          fontSize: Dimensions.fontSizeSmall,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                tiles.add(_buildModuleTile(
+                                  icon: (widget.splashController.configModel?.airtimeLogo != null &&
+                                          widget.splashController.configModel!.airtimeLogo!.isNotEmpty)
+                                      ? CustomImage(image: widget.splashController.configModel?.airtimeLogoFullUrl ?? '', width: 34, height: 34, isLogo: true, fit: BoxFit.contain)
+                                      : Image.asset('assets/image/airtime.jpeg', width: 34, height: 34, fit: BoxFit.contain),
+                                  label: widget.splashController.configModel?.airtimeName ?? 'AirTime',
+                                  onTap: () => Get.toNamed(RouteHelper.getAirtimeRoute()),
                                 ));
                               }
 
                               if (showBillPayment) {
-                                // ──── BILL PAYMENT TILE ────
-                                tiles.add(Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CustomInkWell(
-                                      onTap: () => Get.toNamed(RouteHelper.getBillPaymentRoute()),
-                                      radius: Dimensions.radiusExtraLarge,
-                                      child: Container(
-                                        width: 72,
-                                        height: 72,
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.transparent,
-                                        ),
-                                        child: (widget.splashController.configModel?.billPaymentLogo != null &&
-                                                widget.splashController.configModel!.billPaymentLogo!.isNotEmpty)
-                                            ? CustomImage(
-                                                image: widget.splashController.configModel?.billPaymentLogoFullUrl ?? '',
-                                                width: 64,
-                                                height: 64,
-                                                isLogo: true,
-                                                fit: BoxFit.contain,
-                                              )
-                                            : Container(
-                                                decoration: const BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                    colors: [
-                                                      Color(0xFF003366),
-                                                      Color(0xFF0066CC)
-                                                    ],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  ),
-                                                ),
-                                                child: const Icon(
-                                                  Icons.receipt_long_rounded,
-                                                  color: Colors.white,
-                                                  size: 36,
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: 76,
-                                      child: Text(
-                                        widget.splashController.configModel?.billPaymentName ?? 'Bill Pay',
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: robotoMedium.copyWith(
-                                          fontSize: Dimensions.fontSizeSmall,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                tiles.add(_buildModuleTile(
+                                  icon: (widget.splashController.configModel?.billPaymentLogo != null &&
+                                          widget.splashController.configModel!.billPaymentLogo!.isNotEmpty)
+                                      ? CustomImage(image: widget.splashController.configModel?.billPaymentLogoFullUrl ?? '', width: 34, height: 34, isLogo: true, fit: BoxFit.contain)
+                                      : Icon(Icons.receipt_long_rounded, color: primaryColor, size: 32),
+                                  label: widget.splashController.configModel?.billPaymentName ?? 'Bill Pay',
+                                  onTap: () => Get.toNamed(RouteHelper.getBillPaymentRoute()),
                                 ));
                               }
 
-                              // ──── LISTING TILE ────
-                              tiles.add(Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CustomInkWell(
-                                    onTap: () async {
-                                      SharedPreferences prefs = Get.find();
-                                      log('entering listing with user model ${Get.find<ProfileController>().userInfoModel?.phone}');
-                                      if (Get.find<ProfileController>().userInfoModel != null) {
-                                        prefs.setString(
-                                            'listingName',
-                                            ((Get.find<ProfileController>().userInfoModel!.fName) ?? '') +
-                                                " " +
-                                                (Get.find<ProfileController>().userInfoModel!.lName ?? ''));
-                                        prefs.setString(
-                                            'listingEmail',
-                                            Get.find<ProfileController>().userInfoModel!.email ?? '');
-                                        prefs.setString(
-                                            'listingNumber',
-                                            Get.find<ProfileController>().userInfoModel!.phone ?? '');
-                                      } else {
-                                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                                        prefs.remove('listingNumber');
-                                      }
-                                    },
-                                    radius: Dimensions.radiusExtraLarge,
-                                    child: Container(
-                                      width: 72,
-                                      height: 72,
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.transparent,
-                                      ),
-                                      child: Image.asset(
-                                        'assets/image/listing.jpeg',
-                                        width: 64,
-                                        height: 64,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  SizedBox(
-                                    width: 76,
-                                    child: Text(
-                                      'Listing'.tr,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: robotoMedium.copyWith(
-                                        fontSize: Dimensions.fontSizeSmall,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              tiles.add(_buildModuleTile(
+                                icon: Image.asset('assets/image/listing.jpeg', width: 34, height: 34, fit: BoxFit.contain),
+                                label: 'Listing'.tr,
+                                onTap: () async {
+                                  SharedPreferences prefs = Get.find();
+                                  log('entering listing with user model ${Get.find<ProfileController>().userInfoModel?.phone}');
+                                  if (Get.find<ProfileController>().userInfoModel != null) {
+                                    prefs.setString(
+                                        'listingName',
+                                        ((Get.find<ProfileController>().userInfoModel!.fName) ?? '') +
+                                            " " +
+                                            (Get.find<ProfileController>().userInfoModel!.lName ?? ''));
+                                    prefs.setString('listingEmail', Get.find<ProfileController>().userInfoModel!.email ?? '');
+                                    prefs.setString('listingNumber', Get.find<ProfileController>().userInfoModel!.phone ?? '');
+                                  } else {
+                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    prefs.remove('listingNumber');
+                                  }
+                                },
                               ));
 
-                              // ──── SERVICE TILE ────
-                              tiles.add(Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CustomInkWell(
-                                    onTap: () {
-                                      log('address : ${AddressHelper.getUserAddressFromSharedPref()?.toJson()}');
-                                      Get.to(BottomNavScreen(
-                                          pageIndex: 0,
-                                          showServiceNotAvailableDialog: false));
-                                    },
-                                    radius: Dimensions.radiusExtraLarge,
-                                    child: Container(
-                                      width: 72,
-                                      height: 72,
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.transparent,
-                                      ),
-                                      child: Image.asset(
-                                        'demandium/assets/images/service.png',
-                                        width: 64,
-                                        height: 64,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  SizedBox(
-                                    width: 76,
-                                    child: Text(
-                                      'Service'.tr,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: robotoMedium.copyWith(
-                                        fontSize: Dimensions.fontSizeSmall,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              tiles.add(_buildModuleTile(
+                                icon: Image.asset('demandium/assets/images/service.png', width: 34, height: 34, fit: BoxFit.contain),
+                                label: 'Service'.tr,
+                                onTap: () {
+                                  log('address : ${AddressHelper.getUserAddressFromSharedPref()?.toJson()}');
+                                  Get.to(BottomNavScreen(pageIndex: 0, showServiceNotAvailableDialog: false));
+                                },
                               ));
 
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 8),
-                                      ),
-                                    ],
-                                    border: Border.all(color: Colors.grey.shade100),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 4,
-                                            height: 16,
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context).primaryColor,
-                                              borderRadius: BorderRadius.circular(2),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Nos Services'.tr,
-                                            style: robotoBold.copyWith(
-                                              fontSize: Dimensions.fontSizeLarge,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16),
-                                      GridView.builder(
-                                        shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        padding: EdgeInsets.zero,
-                                        itemCount: tiles.length,
-                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 4,
-                                          mainAxisSpacing: 16,
-                                          crossAxisSpacing: 8,
-                                          childAspectRatio: 0.75,
-                                        ),
-                                        itemBuilder: (context, index) {
-                                          return tiles[index];
-                                        },
-                                      ),
-                                    ],
-                                  ),
+                              return GridView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                itemCount: tiles.length,
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  mainAxisSpacing: Dimensions.paddingSizeDefault,
+                                  crossAxisSpacing: Dimensions.paddingSizeSmall,
+                                  childAspectRatio: 0.8,
                                 ),
+                                itemBuilder: (context, index) => tiles[index],
                               );
-                            }
+                            },
                           )
                         : Center(
                             child: Padding(
-                              padding: const EdgeInsets.only(
-                                top: Dimensions.paddingSizeSmall,
-                              ),
-                              child: Text('no_module_found'.tr),
+                              padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                              child: Text('no_module_found'.tr, style: const TextStyle(color: Colors.white)),
                             ),
                           )
-                    : ModuleShimmer(
-                        isEnabled: widget.splashController.moduleList == null,
-                      ),
+                    : ModuleShimmer(isEnabled: widget.splashController.moduleList == null),
+              ],
+            ),
+          ),
+
+          /// 🔹 WHITE CONTENT AREA
+          Container(
+            width: double.infinity,
+            color: Theme.of(context).colorScheme.surface,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+                _buildBannerWidget(),
+                const SizedBox(height: 10),
+
+                GetBuilder<ProfileController>(
+                  builder: (profileController) {
+                    final balance = profileController.userInfoModel?.walletBalance ?? 0;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: WalletCard(title: "OcassWallet", balance: "$balance"),
+                    );
+                  },
+                ),
 
                 GetBuilder<AddressController>(
                   builder: (locationController) {
-                    List<AddressModel?> addressList = [];
-                    if (AuthHelper.isLoggedIn() &&
-                        locationController.addressList != null) {
-                      addressList = [];
-                      bool contain = false;
-                      if (AddressHelper.getUserAddressFromSharedPref()!.id !=
-                          null) {
-                        for (int index = 0;
-                            index < locationController.addressList!.length;
-                            index++) {
-                          if (locationController.addressList![index].id ==
-                              AddressHelper.getUserAddressFromSharedPref()!
-                                  .id) {
-                            contain = true;
-                            break;
-                          }
-                        }
-                      }
-                      if (!contain) {
-                        addressList.add(
-                          AddressHelper.getUserAddressFromSharedPref(),
-                        );
-                      }
-                      addressList.addAll(locationController.addressList!);
+                    if (AuthHelper.isLoggedIn() && locationController.addressList == null) {
+                      return AddressShimmer(isEnabled: true);
                     }
-                    return (!AuthHelper.isLoggedIn() ||
-                            locationController.addressList != null)
-                        ? addressList.isNotEmpty
-                            ? const Column(
-                                children: [
-                                  // const SizedBox(
-                                  //     height: Dimensions.paddingSizeLarge),
-                                  // Padding(
-                                  //   padding: const EdgeInsets.symmetric(
-                                  //       horizontal: Dimensions.paddingSizeSmall),
-                                  //   child: TitleWidget(title: 'deliver_to'.tr),
-                                  // ),
-                                  // const SizedBox(
-                                  //     height: Dimensions.paddingSizeExtraSmall),
-                                  // SizedBox(
-                                  //   height: 80,
-                                  //   child: ListView.builder(
-                                  //     physics: const BouncingScrollPhysics(),
-                                  //     itemCount: addressList.length,
-                                  //     scrollDirection: Axis.horizontal,
-                                  //     padding: const EdgeInsets.only(
-                                  //         left: Dimensions.paddingSizeSmall,
-                                  //         right: Dimensions.paddingSizeSmall,
-                                  //         top: Dimensions.paddingSizeExtraSmall),
-                                  //     itemBuilder: (context, index) {
-                                  //       return Container(
-                                  //         width: 300,
-                                  //         padding: const EdgeInsets.only(
-                                  //             right: Dimensions.paddingSizeSmall),
-                                  //         child: AddressWidget(
-                                  //           address: addressList[index],
-                                  //           fromAddress: false,
-                                  //           onTap: () {
-                                  //             if (AddressHelper
-                                  //                         .getUserAddressFromSharedPref()!
-                                  //                     .id !=
-                                  //                 addressList[index]!.id) {
-                                  //               Get.dialog(
-                                  //                   const CustomLoaderWidget(),
-                                  //                   barrierDismissible: false);
-                                  //               Get.find<LocationController>()
-                                  //                   .saveAddressAndNavigate(
-                                  //                 addressList[index],
-                                  //                 false,
-                                  //                 null,
-                                  //                 false,
-                                  //                 ResponsiveHelper.isDesktop(
-                                  //                     context),
-                                  //               );
-                                  //             }
-                                  //           },
-                                  //         ),
-                                  //       );
-                                  //     },
-                                  //   ),
-                                  // ),
-                                ],
-                              )
-                            : const SizedBox()
-                        : AddressShimmer(
-                            isEnabled: AuthHelper.isLoggedIn() &&
-                                locationController.addressList == null,
-                          );
+                    return const SizedBox();
                   },
                 ),
-                // const PromotionalBannerView(),
-                // Padding(
-                //   padding: const EdgeInsets.all(8.0),
-                //   child: CachedNetworkImage(
-                //     imageUrl:
-                //         'https://app.ocass.net/public/assets/landing/module2.jpg',
-                //     fit: BoxFit.cover,
-                //     width: double.infinity,
-                //     placeholder: (c, s) => const SizedBox(), // almost invisible
-                //   ),
-                // ),
 
                 GetBuilder<BannerController>(
                   builder: (bannerController) {
@@ -886,9 +515,57 @@ class _ModuleViewState extends State<ModuleView> {
                 isLoggedIn ? const PromoCodeBannerView() : const SizedBox(),
                 const PopularStoreView(isPopular: false, isFeatured: true),
                 const SizedBox(height: 30),
-                // const HeaderWidget(),
                 const SizedBox(height: 50),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModuleTile({
+    required Widget icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomInkWell(
+          onTap: onTap,
+          radius: Dimensions.radiusExtraLarge,
+          child: Container(
+            width: 60,
+            height: 60,
+            padding: const EdgeInsets.all(13),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 3)),
+              ],
+            ),
+            child: icon,
+          ),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 78),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: robotoMedium.copyWith(
+              fontSize: Dimensions.fontSizeExtraSmall,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
         ),
@@ -904,50 +581,40 @@ class ModuleShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: Dimensions.paddingSizeExtraSmall,
-        crossAxisSpacing: Dimensions.paddingSizeExtraSmall,
-        childAspectRatio: (1 / 1),
+        crossAxisCount: 4,
+        mainAxisSpacing: Dimensions.paddingSizeDefault,
+        crossAxisSpacing: Dimensions.paddingSizeSmall,
+        childAspectRatio: 0.8,
       ),
-      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-      itemCount: 6,
+      padding: EdgeInsets.zero,
+      itemCount: 8,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
-            color: Theme.of(context).cardColor,
-            boxShadow: const [
-              BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1),
+        return Shimmer(
+          duration: const Duration(seconds: 2),
+          enabled: isEnabled,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              Container(
+                height: 15,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
             ],
-          ),
-          child: Shimmer(
-            duration: const Duration(seconds: 2),
-            enabled: isEnabled,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      Dimensions.radiusExtraLarge,
-                    ),
-                    color: Colors.grey[300],
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-                Center(
-                  child: Container(
-                    height: 15,
-                    width: 50,
-                    color: Colors.grey[300],
-                  ),
-                ),
-              ],
-            ),
           ),
         );
       },
