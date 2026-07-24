@@ -44,7 +44,6 @@ import '../../banner/controllers/banner_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
 import 'banner_view.dart';
 import 'module_page_last.dart';
-import 'package:eClassify/main.dart';
 
 class ModuleView extends StatefulWidget {
   final SplashController splashController;
@@ -621,7 +620,6 @@ class _ModuleViewState extends State<ModuleView> {
                                         SharedPreferences prefs = await SharedPreferences.getInstance();
                                         prefs.remove('listingNumber');
                                       }
-                                      Get.offAll(EclassyApp());
                                     },
                                     radius: Dimensions.radiusExtraLarge,
                                     child: Container(
