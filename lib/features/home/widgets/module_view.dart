@@ -1,14 +1,10 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:demandium/feature/bottomNav/view/bottom_nav_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:sixam_mart/common/models/module_model.dart';
@@ -35,10 +31,8 @@ import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../../common/widgets/wallet_card.dart';
-import '../../../util/app_constants.dart';
 import '../../banner/controllers/banner_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
 import 'banner_view.dart';
@@ -53,211 +47,9 @@ class ModuleView extends StatefulWidget {
 }
 
 class _ModuleViewState extends State<ModuleView> {
-  static const String _baseBannerPath =
-      '${AppConstants.baseUrl}/public/assets/landing/module';
-  static const List<String> _supportedExtensions = [
-    '.jpg',
-    '.png',
-    '.gif',
-    '.mp4',
-  ];
   bool isLoggedIn = AuthHelper.isLoggedIn();
 
-  String? _bannerUrl;
-  bool _isVideo = false;
-  VideoPlayerController? _videoController;
-  bool _isLoading = true;
   final ScrollController _horizontalController = ScrollController();
-  @override
-  void initState() {
-    super.initState();
-    _initBanner();
-  }
-
-  @override
-  void didUpdateWidget(covariant ModuleView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final oldUrl = oldWidget.splashController.configModel?.homeModuleBannerFullUrl;
-    final newUrl = widget.splashController.configModel?.homeModuleBannerFullUrl;
-    if (oldUrl != newUrl) {
-      _initBanner();
-    }
-  }
-
-  void _initBanner() {
-    final customBanner = widget.splashController.configModel?.homeModuleBannerFullUrl;
-    if (customBanner != null && customBanner.isNotEmpty && !customBanner.endsWith('img2.jpg')) {
-      if (mounted) {
-        setState(() {
-          _bannerUrl = customBanner;
-          _isVideo = customBanner.toLowerCase().endsWith('.mp4');
-          _isLoading = false;
-        });
-      } else {
-        _bannerUrl = customBanner;
-        _isVideo = customBanner.toLowerCase().endsWith('.mp4');
-        _isLoading = false;
-      }
-      if (_isVideo) {
-        _initializeVideo();
-      } else {
-        _videoController?.dispose();
-        _videoController = null;
-      }
-    } else {
-      _videoController?.dispose();
-      _videoController = null;
-      _findAvailableBanner();
-    }
-  }
-
-  Future<void> _findAvailableBanner() async {
-    for (String ext in _supportedExtensions) {
-      final url = '$_baseBannerPath$ext';
-      try {
-        final response = await http.head(Uri.parse(url));
-        if (response.statusCode == 200) {
-          if (mounted) {
-            setState(() {
-              _bannerUrl = url;
-              _isVideo = ext == '.mp4';
-              _isLoading = false;
-            });
-            if (_isVideo) {
-              _initializeVideo();
-            }
-          }
-          return;
-        }
-      } catch (_) {
-        // Continue to next extension
-      }
-    }
-    // No banner found
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _initializeVideo() async {
-    _videoController?.dispose();
-    _videoController = null;
-
-    final url = _bannerUrl!;
-    try {
-      final directory = await getTemporaryDirectory();
-      final fileName = 'cached_banner_${url.split('/').last}';
-      final file = File('${directory.path}/$fileName');
-
-      if (await file.exists()) {
-        _videoController = VideoPlayerController.file(file);
-      } else {
-        _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
-        _downloadAndCacheVideo(url, file);
-      }
-    } catch (_) {
-      _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
-    }
-
-    if (_videoController != null) {
-      try {
-        await _videoController!.initialize();
-        if (mounted) {
-          setState(() {});
-          _videoController!.setLooping(true);
-          _videoController!.setVolume(0);
-          _videoController!.play();
-        }
-      } catch (_) {
-        // Fallback or ignore
-      }
-    }
-  }
-
-  Future<void> _downloadAndCacheVideo(String url, File file) async {
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        await file.writeAsBytes(response.bodyBytes);
-      }
-    } catch (_) {
-      // Ignore download failures
-    }
-  }
-
-  @override
-  void dispose() {
-    _videoController?.dispose();
-    super.dispose();
-  }
-
-  Widget _buildBannerWidget() {
-    if (_isLoading || _bannerUrl == null) {
-      return Container(
-        width: double.infinity,
-        height: 130,
-        color: Colors.grey.shade50,
-        child: Shimmer(
-          duration: const Duration(seconds: 2),
-          enabled: true,
-          child: Container(color: Colors.grey.shade100),
-        ),
-      );
-    }
-
-    if (_isVideo) {
-      if (_videoController != null && _videoController!.value.isInitialized) {
-        return FittedBox(
-          fit: BoxFit.fitWidth,
-          alignment: Alignment.topCenter,
-          child: SizedBox(
-            width: _videoController!.value.size.width,
-            height: _videoController!.value.size.height,
-            child: VideoPlayer(_videoController!),
-          ),
-        );
-      } else {
-        // Video is loading/initializing: show a premium shimmer container
-        return Container(
-          width: double.infinity,
-          height: 130,
-          color: Colors.grey.shade50,
-          child: Shimmer(
-            duration: const Duration(seconds: 2),
-            enabled: true,
-            child: Container(color: Colors.grey.shade100),
-          ),
-        );
-      }
-    }
-
-    // For jpg, png, gif - use CachedNetworkImage
-    return ClipRect(
-      child: CachedNetworkImage(
-        imageUrl: _bannerUrl!,
-        fit: BoxFit.fitWidth,
-        width: double.infinity,
-        alignment: Alignment.topCenter,
-        placeholder: (context, url) => Container(
-          width: double.infinity,
-          height: 130,
-          color: Colors.grey.shade50,
-          child: Shimmer(
-            duration: const Duration(seconds: 2),
-            enabled: true,
-            child: Container(color: Colors.grey.shade100),
-          ),
-        ),
-        errorWidget: (context, url, error) => Container(
-          width: double.infinity,
-          height: 130,
-          color: Colors.grey.shade50,
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +178,7 @@ class _ModuleViewState extends State<ModuleView> {
                               for (int index = 0; index < widget.splashController.moduleList!.length; index++) {
                                 final module = widget.splashController.moduleList![index];
                                 tiles.add(_buildModuleTile(
-                                  icon: CustomImage(image: module.iconFullUrl ?? '', width: 34, height: 34, fit: BoxFit.contain),
+                                  icon: CustomImage(image: module.iconFullUrl ?? '', width: 44, height: 44, fit: BoxFit.contain),
                                   label: module.moduleName ?? '',
                                   onTap: () async {
                                     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -403,8 +195,8 @@ class _ModuleViewState extends State<ModuleView> {
                                 tiles.add(_buildModuleTile(
                                   icon: (widget.splashController.configModel?.airtimeLogo != null &&
                                           widget.splashController.configModel!.airtimeLogo!.isNotEmpty)
-                                      ? CustomImage(image: widget.splashController.configModel?.airtimeLogoFullUrl ?? '', width: 34, height: 34, isLogo: true, fit: BoxFit.contain)
-                                      : Image.asset('assets/image/airtime.jpeg', width: 34, height: 34, fit: BoxFit.contain),
+                                      ? CustomImage(image: widget.splashController.configModel?.airtimeLogoFullUrl ?? '', width: 44, height: 44, isLogo: true, fit: BoxFit.contain)
+                                      : Image.asset('assets/image/airtime.jpeg', width: 44, height: 44, fit: BoxFit.contain),
                                   label: widget.splashController.configModel?.airtimeName ?? 'AirTime',
                                   onTap: () => Get.toNamed(RouteHelper.getAirtimeRoute()),
                                 ));
@@ -414,15 +206,15 @@ class _ModuleViewState extends State<ModuleView> {
                                 tiles.add(_buildModuleTile(
                                   icon: (widget.splashController.configModel?.billPaymentLogo != null &&
                                           widget.splashController.configModel!.billPaymentLogo!.isNotEmpty)
-                                      ? CustomImage(image: widget.splashController.configModel?.billPaymentLogoFullUrl ?? '', width: 34, height: 34, isLogo: true, fit: BoxFit.contain)
-                                      : Icon(Icons.receipt_long_rounded, color: primaryColor, size: 32),
+                                      ? CustomImage(image: widget.splashController.configModel?.billPaymentLogoFullUrl ?? '', width: 44, height: 44, isLogo: true, fit: BoxFit.contain)
+                                      : Icon(Icons.receipt_long_rounded, color: primaryColor, size: 40),
                                   label: widget.splashController.configModel?.billPaymentName ?? 'Bill Pay',
                                   onTap: () => Get.toNamed(RouteHelper.getBillPaymentRoute()),
                                 ));
                               }
 
                               tiles.add(_buildModuleTile(
-                                icon: Image.asset('assets/image/listing.jpeg', width: 34, height: 34, fit: BoxFit.contain),
+                                icon: Image.asset('assets/image/listing.jpeg', width: 44, height: 44, fit: BoxFit.contain),
                                 label: 'Listing'.tr,
                                 onTap: () async {
                                   SharedPreferences prefs = Get.find();
@@ -443,7 +235,7 @@ class _ModuleViewState extends State<ModuleView> {
                               ));
 
                               tiles.add(_buildModuleTile(
-                                icon: Image.asset('demandium/assets/images/service.png', width: 34, height: 34, fit: BoxFit.contain),
+                                icon: Image.asset('demandium/assets/images/service.png', width: 44, height: 44, fit: BoxFit.contain),
                                 label: 'Service'.tr,
                                 onTap: () {
                                   log('address : ${AddressHelper.getUserAddressFromSharedPref()?.toJson()}');
@@ -457,10 +249,10 @@ class _ModuleViewState extends State<ModuleView> {
                                 padding: EdgeInsets.zero,
                                 itemCount: tiles.length,
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
-                                  mainAxisSpacing: Dimensions.paddingSizeDefault,
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: Dimensions.paddingSizeLarge,
                                   crossAxisSpacing: Dimensions.paddingSizeSmall,
-                                  childAspectRatio: 0.8,
+                                  childAspectRatio: 0.85,
                                 ),
                                 itemBuilder: (context, index) => tiles[index],
                               );
@@ -485,8 +277,6 @@ class _ModuleViewState extends State<ModuleView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: Dimensions.paddingSizeDefault),
-                _buildBannerWidget(),
-                const SizedBox(height: 10),
 
                 GetBuilder<ProfileController>(
                   builder: (profileController) {
@@ -536,9 +326,9 @@ class _ModuleViewState extends State<ModuleView> {
           onTap: onTap,
           radius: Dimensions.radiusExtraLarge,
           child: Container(
-            width: 60,
-            height: 60,
-            padding: const EdgeInsets.all(13),
+            width: 76,
+            height: 76,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
@@ -551,8 +341,8 @@ class _ModuleViewState extends State<ModuleView> {
         ),
         const SizedBox(height: Dimensions.paddingSizeExtraSmall),
         Container(
-          constraints: const BoxConstraints(maxWidth: 78),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          constraints: const BoxConstraints(maxWidth: 96),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -563,7 +353,7 @@ class _ModuleViewState extends State<ModuleView> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: robotoMedium.copyWith(
-              fontSize: Dimensions.fontSizeExtraSmall,
+              fontSize: Dimensions.fontSizeSmall,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -581,10 +371,10 @@ class ModuleShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: Dimensions.paddingSizeDefault,
+        crossAxisCount: 3,
+        mainAxisSpacing: Dimensions.paddingSizeLarge,
         crossAxisSpacing: Dimensions.paddingSizeSmall,
-        childAspectRatio: 0.8,
+        childAspectRatio: 0.85,
       ),
       padding: EdgeInsets.zero,
       itemCount: 8,
@@ -598,8 +388,8 @@ class ModuleShimmer extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                height: 60,
-                width: 60,
+                height: 76,
+                width: 76,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
@@ -607,8 +397,8 @@ class ModuleShimmer extends StatelessWidget {
               ),
               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
               Container(
-                height: 15,
-                width: 60,
+                height: 18,
+                width: 76,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
