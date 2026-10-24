@@ -24,6 +24,14 @@ class AppConstants {
   static const String checkPaymentStatusUri = '/api/v1/customer/wallet/check-payment-status';
   static const String getProvidersUri = '/api/v1/customer/wallet/get-providers';
   static const String billPaymentHistoryUri = '/api/v1/customer/wallet/bill-payment-history';
+  // ── Insurance (multi-insurer comparison) Backend API ───────────────────
+  static const String insuranceOptionsUri = '/api/v1/customer/insurance/auto/options';
+  static const String insuranceQuotesUri = '/api/v1/customer/insurance/auto/quotes';
+  static const String insuranceQuoteRequestUri = '/api/v1/customer/insurance/quote-requests';
+  static const String insurancePurchaseUri = '/api/v1/customer/insurance/quotes';
+  static const String insurancePoliciesUri = '/api/v1/customer/insurance/policies';
+  // PayDunya sends the customer back here when the payment ends (?flag=success|fail|cancel).
+  static const String insurancePaymentCallbackPath = '/insurance-payment-callback';
   // ────────────────────────────────────────────────────────────────────────────
 
   static const String baseUrl = 'https://app.ocass.net';

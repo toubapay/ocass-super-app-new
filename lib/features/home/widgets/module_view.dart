@@ -597,6 +597,48 @@ class _ModuleViewState extends State<ModuleView> {
                                 ));
                               }
 
+                              // ──── INSURANCE TILE ────
+                              tiles.add(Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CustomInkWell(
+                                    onTap: () => Get.toNamed(RouteHelper.getInsuranceRoute()),
+                                    radius: Dimensions.radiusExtraLarge,
+                                    child: Container(
+                                      width: 72,
+                                      height: 72,
+                                      padding: const EdgeInsets.all(4),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF0B6E4F), Color(0xFF14A06F)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                        ),
+                                        child: const Icon(Icons.shield_outlined, color: Colors.white, size: 36),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: 76,
+                                    child: Text(
+                                      'ins_insurance'.tr,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: robotoMedium.copyWith(
+                                        fontSize: Dimensions.fontSizeSmall,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ));
+
                               // ──── LISTING TILE ────
                               tiles.add(Column(
                                 mainAxisSize: MainAxisSize.min,
