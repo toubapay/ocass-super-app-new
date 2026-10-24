@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart';
 import 'package:sixam_mart/features/bill_payment/controllers/bill_payment_controller.dart';
+import 'package:sixam_mart/features/insurance/controllers/insurance_controller.dart';
 import 'package:sixam_mart/features/brands/controllers/brands_controller.dart';
 import 'package:sixam_mart/features/brands/domain/repositories/brands_repository.dart';
 import 'package:sixam_mart/features/brands/domain/repositories/brands_repository_interface.dart';
@@ -502,6 +503,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => TaxiFavouriteController(taxiFavouriteServiceInterface: Get.find()));
   Get.lazyPut(() => AirtimeController());
   Get.lazyPut(() => BillPaymentController());
+  Get.lazyPut(() => InsuranceController(), fenix: true);
 
   /// Retrieving localized data
   Map<String, Map<String, String>> languages = {};
