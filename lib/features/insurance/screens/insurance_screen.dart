@@ -112,11 +112,28 @@ class _QuoteFormState extends State<_QuoteForm> with AutomaticKeepAliveClientMix
   @override
   void initState() {
     super.initState();
+    final profile = Get.find<ProfileController>();
+    _prefillPolicyholder();
+    // Opened before the profile loaded (e.g. straight from a link or a cold
+    // start): fetch it, then fill whatever the customer has not typed yet.
+    if (profile.userInfoModel == null) {
+      profile.getUserInfo().then((_) {
+        if (mounted) setState(_prefillPolicyholder);
+      });
+    }
+  }
+
+  /// Fills empty policyholder fields from the profile; never overwrites typing.
+  void _prefillPolicyholder() {
     final user = Get.find<ProfileController>().userInfoModel;
-    _lastName.text = user?.lName ?? '';
-    _firstName.text = user?.fName ?? '';
-    _phone.text = user?.phone ?? '';
-    _email.text = user?.email ?? '';
+    if (user == null) return;
+    void fill(TextEditingController controller, String? value) {
+      if (controller.text.trim().isEmpty && (value ?? '').isNotEmpty) controller.text = value!;
+    }
+    fill(_lastName, user.lName);
+    fill(_firstName, user.fName);
+    fill(_phone, user.phone);
+    fill(_email, user.email);
   }
 
   @override
