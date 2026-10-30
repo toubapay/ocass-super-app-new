@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:sixam_mart/features/language/controllers/language_controller.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
@@ -63,6 +64,16 @@ class WalletCardWidget extends StatelessWidget {
                       ),
                     ) : const SizedBox(),
                   ]),
+
+                  if (Get.find<SplashController>().mobileMoneyModule != null) ...[
+                    const SizedBox(height: Dimensions.paddingSizeDefault),
+                    OutlinedButton.icon(
+                      onPressed: () => Get.toNamed(RouteHelper.getMobileMoneyRoute()),
+                      icon: Icon(Icons.send_rounded, color: Theme.of(context).cardColor, size: 18),
+                      label: Text('mm_send_money'.tr, style: robotoMedium.copyWith(color: Theme.of(context).cardColor)),
+                      style: OutlinedButton.styleFrom(side: BorderSide(color: Theme.of(context).cardColor)),
+                    ),
+                  ],
                 ]),
               ),
 

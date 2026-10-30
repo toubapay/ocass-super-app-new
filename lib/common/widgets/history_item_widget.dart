@@ -7,6 +7,13 @@ import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/images.dart';
 import 'package:sixam_mart/util/styles.dart';
 
+// Wallet debits; transfers and reversals go either way, so their side comes
+// from the amounts.
+bool _isDebit(Transaction t) {
+  const debitTypes = ['order_place', 'partial_payment', 'bill_payment', 'airtime_purchase', 'transfer_sent'];
+  return debitTypes.contains(t.transactionType) || (t.transactionType == 'transfer_reversal' && (t.debit ?? 0) > 0);
+}
+
 class HistoryItemWidget extends StatelessWidget {
   final int index;
   final bool fromWallet;
@@ -22,12 +29,12 @@ class HistoryItemWidget extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               fromWallet ? Row(children: [
             
-                data![index].transactionType == 'order_place' || data![index].transactionType == 'partial_payment' || data![index].transactionType == 'bill_payment' || data![index].transactionType == 'airtime_purchase'
+                _isDebit(data![index])
                     ? Image.asset(Images.walletDebitIcon, height: 15, width: 15)
                     : Image.asset(Images.walletCreditIcon, height: 15, width: 15),
                 const SizedBox(width: Dimensions.paddingSizeExtraSmall),
             
-                Text(data![index].transactionType == 'order_place' || data![index].transactionType == 'partial_payment' || data![index].transactionType == 'bill_payment' || data![index].transactionType == 'airtime_purchase'
+                Text(_isDebit(data![index])
                     ? '- ${PriceConverter.convertPrice(data![index].debit! + data![index].adminBonus!)}'
                     : '+ ${PriceConverter.convertPrice(data![index].credit! + data![index].adminBonus!)}',
                   style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault), maxLines: 1, overflow: TextOverflow.ellipsis, textDirection: TextDirection.ltr,
@@ -53,6 +60,7 @@ class HistoryItemWidget extends StatelessWidget {
                     : data![index].transactionType == 'referrer' ? 'earned_by_referral'.tr
                     : data![index].transactionType == 'order_place' ? '${'order_place'.tr} # ${data![index].reference}'
                     : (data![index].transactionType == 'bill_payment' || data![index].transactionType == 'airtime_purchase') ? '${data![index].reference}'
+                    : (data![index].transactionType ?? '').startsWith('transfer_') ? '${data![index].transactionType!.tr} · ${data![index].reference}'
                     : data![index].transactionType!.tr,
                 style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall,color: Theme.of(context).hintColor),
                 maxLines: 2, overflow: TextOverflow.ellipsis,
@@ -70,8 +78,8 @@ class HistoryItemWidget extends StatelessWidget {
             const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
             Text(
-              fromWallet ? data![index].transactionType == 'order_place' || data![index].transactionType == 'partial_payment' || data![index].transactionType == 'bill_payment' || data![index].transactionType == 'airtime_purchase' ? 'debit'.tr : 'credit'.tr : data![index].transactionType == 'point_to_wallet' ? 'debit'.tr : 'credit'.tr,
-              style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: fromWallet ? data![index].transactionType == 'order_place' || data![index].transactionType == 'partial_payment' || data![index].transactionType == 'bill_payment' || data![index].transactionType == 'airtime_purchase'
+              fromWallet ? _isDebit(data![index]) ? 'debit'.tr : 'credit'.tr : data![index].transactionType == 'point_to_wallet' ? 'debit'.tr : 'credit'.tr,
+              style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: fromWallet ? _isDebit(data![index])
                   ? Colors.red : Colors.green : data![index].transactionType == 'point_to_wallet' ? Colors.red : Colors.green),
               maxLines: 1, overflow: TextOverflow.ellipsis,
             ),

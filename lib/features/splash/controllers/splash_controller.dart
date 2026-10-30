@@ -52,6 +52,10 @@ class SplashController extends GetxController implements GetxService {
 
   List<ModuleModel>? _moduleList;
   List<ModuleModel>? get moduleList => _moduleList;
+  // The mobile money module (wallet transfers) has no stores, so it is kept
+  // out of moduleList and opened from its own tile.
+  ModuleModel? _mobileMoneyModule;
+  ModuleModel? get mobileMoneyModule => _mobileMoneyModule;
 
   int _moduleIndex = 0;
   int get moduleIndex => _moduleIndex;
@@ -308,8 +312,11 @@ class SplashController extends GetxController implements GetxService {
     log("preparing module list $moduleList");
     if (moduleList != null) {
       _moduleList = [];
+      _mobileMoneyModule = null;
       for (var module in moduleList) {
-        if (module.moduleType != AppConstants.taxi && GetPlatform.isWeb) {
+        if (module.moduleType == AppConstants.mobileMoney) {
+          _mobileMoneyModule = module;
+        } else if (module.moduleType != AppConstants.taxi && GetPlatform.isWeb) {
           _moduleList!.add(module);
         } else if (!GetPlatform.isWeb) {
           _moduleList!.add(module);

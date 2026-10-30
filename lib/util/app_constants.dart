@@ -32,6 +32,13 @@ class AppConstants {
   static const String insurancePurchaseUri = '/api/v1/customer/insurance/quotes';
   static const String insurancePoliciesUri = '/api/v1/customer/insurance/policies';
   // PayDunya sends the customer back here when the payment ends (?flag=success|fail|cancel).
+  // ── Ocass Money (wallet-to-wallet transfers) ───────────────────
+  static const String mobileMoneyConfigUri = '/api/v1/customer/mobile-money/config';
+  static const String mobileMoneyLookupUri = '/api/v1/customer/mobile-money/lookup';
+  static const String mobileMoneyPreviewUri = '/api/v1/customer/mobile-money/preview';
+  static const String mobileMoneySendUri = '/api/v1/customer/mobile-money/send';
+  static const String mobileMoneyPinUri = '/api/v1/customer/mobile-money/pin';
+  static const String mobileMoneyTransfersUri = '/api/v1/customer/mobile-money/transfers';
   static const String insurancePaymentCallbackPath = '/insurance-payment-callback';
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -363,6 +370,7 @@ class AppConstants {
   static const String ecommerce = 'ecommerce';
   static const String grocery = 'grocery';
   static const String taxi = 'rental';
+  static const String mobileMoney = 'mobile_money';
 
   static List<LanguageModel> languages = [
     LanguageModel(

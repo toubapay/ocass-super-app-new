@@ -597,6 +597,53 @@ class _ModuleViewState extends State<ModuleView> {
                                 ));
                               }
 
+                              // ──── MOBILE MONEY TILE (shown while the admin keeps the module active) ────
+                              final mobileMoney = widget.splashController.mobileMoneyModule;
+                              if (mobileMoney != null) {
+                                tiles.add(Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CustomInkWell(
+                                      onTap: () => Get.toNamed(RouteHelper.getMobileMoneyRoute()),
+                                      radius: Dimensions.radiusExtraLarge,
+                                      child: Container(
+                                        width: 72,
+                                        height: 72,
+                                        padding: const EdgeInsets.all(4),
+                                        child: (mobileMoney.iconFullUrl ?? '').isNotEmpty
+                                            ? CustomImage(image: mobileMoney.iconFullUrl!, width: 64, height: 64, fit: BoxFit.contain)
+                                            : Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
+                                                  gradient: const LinearGradient(
+                                                    colors: [Color(0xFF6B4F05), Color(0xFFD4AF37)],
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                  ),
+                                                ),
+                                                child: const Icon(Icons.send_to_mobile_outlined, color: Colors.white, size: 34),
+                                              ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: 76,
+                                      child: Text(
+                                        mobileMoney.moduleName ?? 'mm_title'.tr,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ));
+                              }
+
                               // ──── INSURANCE TILE ────
                               tiles.add(Column(
                                 mainAxisSize: MainAxisSize.min,
