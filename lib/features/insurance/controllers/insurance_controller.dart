@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sixam_mart/common/widgets/custom_snackbar.dart';
 import 'package:sixam_mart/features/insurance/domain/models/insurance_models.dart';
 import 'package:sixam_mart/features/insurance/domain/repositories/insurance_repository.dart';
@@ -24,6 +25,30 @@ class InsuranceController extends GetxController {
   int? get purchasingQuoteId => _purchasingQuoteId;
 
   List<InsurancePolicy>? _policies;
+
+  /// The quote being built across the wizard steps (type, carte grise, vehicle, value, duration).
+  InsuranceDraft? draft;
+
+  /// Starts a new quote for a car or a two-wheeler, prefilled from the profile.
+  void startDraft({required bool isMoto, String? lastName, String? firstName, String? phone, String? email}) {
+    draft = InsuranceDraft(isMoto: isMoto)
+      ..lastName = lastName
+      ..firstName = firstName
+      ..phone = phone
+      ..email = email;
+  }
+
+  /// Reads the carte grise photos. Returns null when reading is not set up on
+  /// the server or failed: the customer then types the details.
+  Future<VehicleExtraction?> analyzeVehicleDocument(XFile front, XFile? back) async {
+    final response = await _repository.analyzeVehicleDocument(front, back);
+    if (response.statusCode == 200 && response.body is Map && response.body['vehicle'] is Map) {
+      final extraction = VehicleExtraction.fromJson(Map<String, dynamic>.from(response.body['vehicle']));
+      draft?.apply(extraction);
+      return extraction;
+    }
+    return null;
+  }
   List<InsurancePolicy>? get policies => _policies;
 
   /// Offers already sorted cheapest first by the backend.

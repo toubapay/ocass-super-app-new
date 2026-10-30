@@ -202,3 +202,131 @@ class InsurancePurchaseError {
   final List<String> missingFields;
   InsurancePurchaseError({required this.code, required this.message, this.missingFields = const []});
 }
+
+/// What the carte grise reading returned. Every field may be null: an
+/// unreadable value is left for the customer to type, never guessed.
+class VehicleExtraction {
+  final String? vehicleType;
+  final int? fiscalPower;
+  final int? seats;
+  final String? registrationNumber;
+  final String? chassisNumber;
+  final String? brand;
+  final String? model;
+  final String? firstRegistrationDate;
+  final String? fuel;
+  final int? cylinder;
+
+  VehicleExtraction({
+    this.vehicleType,
+    this.fiscalPower,
+    this.seats,
+    this.registrationNumber,
+    this.chassisNumber,
+    this.brand,
+    this.model,
+    this.firstRegistrationDate,
+    this.fuel,
+    this.cylinder,
+  });
+
+  factory VehicleExtraction.fromJson(Map<String, dynamic> json) {
+    int? toInt(dynamic v) => v == null ? null : int.tryParse(v.toString());
+    String? toStr(dynamic v) => (v == null || v.toString().trim().isEmpty) ? null : v.toString();
+    return VehicleExtraction(
+      vehicleType: toStr(json['vehicle_type']),
+      fiscalPower: toInt(json['fiscal_power']),
+      seats: toInt(json['seats']),
+      registrationNumber: toStr(json['registration_number']),
+      chassisNumber: toStr(json['chassis_number']),
+      brand: toStr(json['brand']),
+      model: toStr(json['model']),
+      firstRegistrationDate: toStr(json['first_registration_date']),
+      fuel: toStr(json['fuel']),
+      cylinder: toInt(json['cylinder']),
+    );
+  }
+
+  /// How many fields the reading filled, to tell the customer what to check.
+  int get filledCount => [vehicleType, fiscalPower, seats, registrationNumber, chassisNumber, brand, model, firstRegistrationDate, fuel, cylinder]
+      .where((v) => v != null)
+      .length;
+}
+
+/// The quote request being built across the wizard steps.
+class InsuranceDraft {
+  bool isMoto;
+  String usage = 'private';
+  bool commercialUse = false;
+  String? brand;
+  String? model;
+  String? registrationNumber;
+  String? chassisNumber;
+  int? fiscalPower;
+  int? cylinder;
+  int? seats;
+  String fuel = 'petrol';
+  DateTime? firstRegistration;
+  int? newValue;
+  int? value;
+  int durationMonths = 12;
+  DateTime startDate = DateTime.now();
+  String? coverageLevel;
+  String? lastName;
+  String? firstName;
+  String? phone;
+  String? email;
+
+  InsuranceDraft({required this.isMoto}) {
+    if (isMoto) usage = 'motorcycle';
+  }
+
+  /// Fills from the carte grise reading; only what was readable.
+  void apply(VehicleExtraction e) {
+    if (e.vehicleType != null) {
+      isMoto = e.vehicleType == 'motorcycle';
+      usage = isMoto ? 'motorcycle' : (usage == 'motorcycle' ? 'private' : usage);
+    }
+    brand = e.brand ?? brand;
+    model = e.model ?? model;
+    registrationNumber = e.registrationNumber ?? registrationNumber;
+    chassisNumber = e.chassisNumber ?? chassisNumber;
+    fiscalPower = e.fiscalPower ?? fiscalPower;
+    cylinder = e.cylinder ?? cylinder;
+    seats = e.seats ?? seats;
+    fuel = e.fuel ?? fuel;
+    firstRegistration = DateTime.tryParse(e.firstRegistrationDate ?? '') ?? firstRegistration;
+  }
+
+  Map<String, dynamic> toRequest() {
+    String day(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final vehicle = <String, dynamic>{
+      'usage': usage,
+      'brand': brand,
+      'model': model,
+      'registration_number': registrationNumber,
+      'chassis_number': chassisNumber,
+      'fiscal_power': isMoto ? null : fiscalPower,
+      'cylinder': isMoto ? cylinder : null,
+      'seats': seats,
+      'fuel': fuel,
+      'value': value,
+      'new_value': newValue,
+      'commercial_use': isMoto && commercialUse ? true : null,
+      'first_registration_date': firstRegistration == null ? null : day(firstRegistration!),
+    }..removeWhere((_, v) => v == null || (v is String && v.trim().isEmpty));
+    final owner = <String, dynamic>{
+      'last_name': lastName,
+      'first_name': firstName,
+      'phone': phone,
+      'email': email,
+    }..removeWhere((_, v) => v == null || v.trim().isEmpty);
+    return {
+      'vehicle': vehicle,
+      'owner': owner,
+      'duration_months': durationMonths,
+      'start_date': day(startDate),
+      'coverage_level': coverageLevel,
+    };
+  }
+}

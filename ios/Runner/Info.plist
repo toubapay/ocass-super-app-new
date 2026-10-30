@@ -63,7 +63,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Ocass app requires access to the camera to upload customer profile picture.</string>
+	<string>Ocass uses the camera for your profile picture and to photograph your carte grise for an insurance quote.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Ocass app needs access to your contacts to quickly select a recipient for AirTime top-up.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

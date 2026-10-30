@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sixam_mart/api/api_client.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
@@ -9,6 +10,14 @@ class InsuranceRepository {
   ApiClient get _api => Get.find<ApiClient>();
 
   Future<Response> getOptions() => _api.getData(AppConstants.insuranceOptionsUri, handleError: false);
+
+  /// Sends the carte grise photos to be read. The backend never stores them.
+  Future<Response> analyzeVehicleDocument(XFile front, XFile? back) => _api.postMultipartData(
+        AppConstants.insuranceVehicleAnalyzeUri,
+        {},
+        [MultipartBody('front', front), if (back != null) MultipartBody('back', back)],
+        handleError: false,
+      );
 
   Future<Response> requestQuotes(Map<String, dynamic> body) =>
       _api.postData(AppConstants.insuranceQuotesUri, body, handleError: false, timeout: 60);
