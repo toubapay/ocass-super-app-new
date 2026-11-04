@@ -99,6 +99,7 @@ flutter:
   assets:
     - assets/image/
     - assets/image/billpayment/
+    - assets/image/services/
     - assets/language/
     - assets/map/
     - assets/json/
