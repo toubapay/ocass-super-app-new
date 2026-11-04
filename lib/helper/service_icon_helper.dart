@@ -16,13 +16,18 @@ class ServiceIcons {
   static const String bill = '$_dir/bill.svg';
   static const String beauty = '$_dir/beauty.svg';
   static const String smartHome = '$_dir/smart_home.svg';
+  static const String rider = '$_dir/rider.svg';
+  static const String safety = '$_dir/safety.svg';
+  static const String handover = '$_dir/handover.svg';
+  static const String electronics = '$_dir/electronics.svg';
 
   static const Map<String, String> _byType = {
     'grocery': grocery,
     'food': food,
     'pharmacy': pharmacy,
     'ecommerce': shop,
-    'parcel': parcel,
+    // Delivery module tile: the rider on his motorbike.
+    'parcel': rider,
     'rental': car,
     'mobile_money': money,
   };
@@ -36,5 +41,24 @@ class ServiceIcons {
       if (RegExp(r'home|maison|domo').hasMatch(name)) return smartHome;
     }
     return _byType[module.moduleType];
+  }
+
+  /// Picture for a parcel type by its name, as on the web app.
+  static String forParcelType(String? name) {
+    final n = (name ?? '').toLowerCase();
+    if (RegExp(r'electr|phone|t[ée]l[ée]phon|ordinat').hasMatch(n)) return electronics;
+    if (RegExp(r'aliment|food|course|march[ée]|grocer').hasMatch(n)) return grocery;
+    if (RegExp(r'restau|repas|meal').hasMatch(n)) return food;
+    if (RegExp(r'document|papier|lettre').hasMatch(n)) return bill;
+    return parcel;
+  }
+
+  /// Picture for a "why choose us" point by its title, as on the web app.
+  static String forWhyChoose(String? title, int index) {
+    final t = (title ?? '').toLowerCase();
+    if (RegExp(r'safe|s[ée]cur|protect|care|soin').hasMatch(t)) return safety;
+    if (RegExp(r'fast|rapid|express|vite|delivery|livraison').hasMatch(t)) return rider;
+    if (RegExp(r'24|service|dispon|anytime').hasMatch(t)) return handover;
+    return [safety, rider, handover][index % 3];
   }
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:sixam_mart/helper/service_icon_helper.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:sixam_mart/features/banner/controllers/banner_controller.dart';
@@ -120,6 +121,8 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
                                           itemBuilder: (context, index) {
                                             return DeliverItemCardWidget(
                                               isDeliverItem: true,
+                                              fallbackAsset: ServiceIcons.forParcelType(
+                                                  parcelController.parcelCategoryList![index].name),
                                               image:
                                                   '${parcelController.parcelCategoryList![index].imageFullUrl}',
                                               itemName: parcelController
@@ -397,6 +400,7 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
         return DeliverItemCardWidget(
           image:
               '${parcelController.whyChooseDetails!.banners![index].imageFullUrl}',
+          fallbackAsset: ServiceIcons.forWhyChoose(parcelController.whyChooseDetails!.banners![index].title, index),
           itemName: parcelController.whyChooseDetails!.banners![index].title!,
           description: parcelController
               .whyChooseDetails!.banners![index].shortDescription!,
@@ -435,6 +439,7 @@ class _ParcelCategoryScreenState extends State<ParcelCategoryScreen> {
               child: DeliverItemCardWidget(
                 image:
                     '${parcelController.whyChooseDetails!.banners![index].imageFullUrl}',
+                fallbackAsset: ServiceIcons.forWhyChoose(parcelController.whyChooseDetails!.banners![index].title, index),
                 itemName:
                     parcelController.whyChooseDetails!.banners![index].title!,
                 description: parcelController
