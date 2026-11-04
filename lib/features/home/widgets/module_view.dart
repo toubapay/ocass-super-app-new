@@ -1,3 +1,5 @@
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sixam_mart/helper/service_icon_helper.dart';
 import 'dart:developer';
 import 'dart:io';
 
@@ -450,12 +452,16 @@ class _ModuleViewState extends State<ModuleView> {
                                           decoration: const BoxDecoration(
                                             color: Colors.transparent,
                                           ),
-                                          child: CustomImage(
-                                            image: module.iconFullUrl ?? '',
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.contain,
-                                          ),
+                                          // Same illustrated icons as the Noor web app; the
+                                          // admin's image only for module types without one.
+                                          child: ServiceIcons.forModule(module) != null
+                                              ? SvgPicture.asset(ServiceIcons.forModule(module)!, width: 64, height: 64)
+                                              : CustomImage(
+                                                  image: module.iconFullUrl ?? '',
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.contain,
+                                                ),
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -499,21 +505,7 @@ class _ModuleViewState extends State<ModuleView> {
                                         decoration: const BoxDecoration(
                                           color: Colors.transparent,
                                         ),
-                                        child: (widget.splashController.configModel?.airtimeLogo != null &&
-                                                widget.splashController.configModel!.airtimeLogo!.isNotEmpty)
-                                            ? CustomImage(
-                                                image: widget.splashController.configModel?.airtimeLogoFullUrl ?? '',
-                                                width: 64,
-                                                height: 64,
-                                                isLogo: true,
-                                                fit: BoxFit.contain,
-                                              )
-                                            : Image.asset(
-                                                'assets/image/airtime.jpeg',
-                                                width: 64,
-                                                height: 64,
-                                                fit: BoxFit.contain,
-                                              ),
+                                        child: SvgPicture.asset(ServiceIcons.airtime, width: 64, height: 64),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -550,32 +542,7 @@ class _ModuleViewState extends State<ModuleView> {
                                         decoration: const BoxDecoration(
                                           color: Colors.transparent,
                                         ),
-                                        child: (widget.splashController.configModel?.billPaymentLogo != null &&
-                                                widget.splashController.configModel!.billPaymentLogo!.isNotEmpty)
-                                            ? CustomImage(
-                                                image: widget.splashController.configModel?.billPaymentLogoFullUrl ?? '',
-                                                width: 64,
-                                                height: 64,
-                                                isLogo: true,
-                                                fit: BoxFit.contain,
-                                              )
-                                            : Container(
-                                                decoration: const BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                    colors: [
-                                                      Color(0xFF003366),
-                                                      Color(0xFF0066CC)
-                                                    ],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  ),
-                                                ),
-                                                child: const Icon(
-                                                  Icons.receipt_long_rounded,
-                                                  color: Colors.white,
-                                                  size: 36,
-                                                ),
-                                              ),
+                                        child: SvgPicture.asset(ServiceIcons.bill, width: 64, height: 64),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -610,19 +577,7 @@ class _ModuleViewState extends State<ModuleView> {
                                         width: 72,
                                         height: 72,
                                         padding: const EdgeInsets.all(4),
-                                        child: (mobileMoney.iconFullUrl ?? '').isNotEmpty
-                                            ? CustomImage(image: mobileMoney.iconFullUrl!, width: 64, height: 64, fit: BoxFit.contain)
-                                            : Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                                  gradient: const LinearGradient(
-                                                    colors: [Color(0xFF6B4F05), Color(0xFFD4AF37)],
-                                                    begin: Alignment.topLeft,
-                                                    end: Alignment.bottomRight,
-                                                  ),
-                                                ),
-                                                child: const Icon(Icons.send_to_mobile_outlined, color: Colors.white, size: 34),
-                                              ),
+                                        child: SvgPicture.asset(ServiceIcons.money, width: 64, height: 64),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -655,17 +610,7 @@ class _ModuleViewState extends State<ModuleView> {
                                       width: 72,
                                       height: 72,
                                       padding: const EdgeInsets.all(4),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
-                                          gradient: const LinearGradient(
-                                            colors: [Color(0xFF0B6E4F), Color(0xFF14A06F)],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                        ),
-                                        child: const Icon(Icons.shield_outlined, color: Colors.white, size: 36),
-                                      ),
+                                      child: SvgPicture.asset(ServiceIcons.insurance, width: 64, height: 64),
                                     ),
                                   ),
                                   const SizedBox(height: 8),
