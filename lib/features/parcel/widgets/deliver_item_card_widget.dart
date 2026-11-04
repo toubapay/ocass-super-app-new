@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sixam_mart/common/widgets/custom_ink_well.dart';
 import 'package:sixam_mart/helper/responsive_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
@@ -11,7 +12,11 @@ class DeliverItemCardWidget extends StatelessWidget {
   final String description;
   final bool isDeliverItem;
   final Function? onTap;
-  const DeliverItemCardWidget({super.key, required this.image, required this.itemName, required this.description, this.isDeliverItem = false, this.onTap});
+  // Illustration shown when the admin uploaded no image.
+  final String? fallbackAsset;
+  const DeliverItemCardWidget({super.key, required this.image, required this.itemName, required this.description, this.isDeliverItem = false, this.onTap, this.fallbackAsset});
+
+  bool get _hasImage => image.isNotEmpty && image != 'null';
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +36,12 @@ class DeliverItemCardWidget extends StatelessWidget {
         radius: Dimensions.radiusDefault,
         padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
         child: Column(children: [
-          CustomImage(
-            image: image,
-            width: 45,
-          ),
+          !_hasImage && fallbackAsset != null
+              ? SvgPicture.asset(fallbackAsset!, width: 45, height: 45)
+              : CustomImage(
+                  image: image,
+                  width: 45,
+                ),
 
           Text(itemName, maxLines: 1, overflow: TextOverflow.ellipsis, style: robotoMedium),
 
@@ -45,10 +52,12 @@ class DeliverItemCardWidget extends StatelessWidget {
           ),
         ]),
       ) : Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        CustomImage(
-          image: image,
-          height: 40, width: 40,
-        ),
+        !_hasImage && fallbackAsset != null
+            ? SvgPicture.asset(fallbackAsset!, width: 40, height: 40)
+            : CustomImage(
+                image: image,
+                height: 40, width: 40,
+              ),
         const SizedBox(width: Dimensions.paddingSizeSmall),
 
         Expanded(
