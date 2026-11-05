@@ -20,6 +20,9 @@ class ServiceIcons {
   static const String safety = '$_dir/safety.svg';
   static const String handover = '$_dir/handover.svg';
   static const String electronics = '$_dir/electronics.svg';
+  static const String taxi = '$_dir/taxi.svg';
+  static const String motoTaxi = '$_dir/moto_taxi.svg';
+  static const String van = '$_dir/van.svg';
 
   static const Map<String, String> _byType = {
     'grocery': grocery,
@@ -30,6 +33,7 @@ class ServiceIcons {
     'parcel': rider,
     'rental': car,
     'mobile_money': money,
+    'taxi': taxi,
   };
 
   /// Picture for a module: by its type, or by its name for shop modules
@@ -42,6 +46,9 @@ class ServiceIcons {
     }
     return _byType[module.moduleType];
   }
+
+  /// Picture for a ride category's vehicle type.
+  static String forVehicle(String type) => type == 'moto' || type == 'tricycle' ? motoTaxi : type == 'van' ? van : car;
 
   /// Picture for a parcel type by its name, as on the web app.
   static String forParcelType(String? name) {
