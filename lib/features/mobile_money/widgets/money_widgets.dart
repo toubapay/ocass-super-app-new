@@ -96,3 +96,53 @@ class TransferTile extends StatelessWidget {
     );
   }
 }
+
+/// Round avatar with the person's photo, or a grey silhouette.
+class MoneyAvatar extends StatelessWidget {
+  final String? imageUrl;
+  final double size;
+  const MoneyAvatar({super.key, this.imageUrl, this.size = 48});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(color: Color(0xFFECECEF), shape: BoxShape.circle),
+      child: imageUrl != null && imageUrl!.isNotEmpty
+          ? Image.network(imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.person, color: const Color(0xFF8E8E93), size: size * 0.55))
+          : Icon(Icons.person, color: const Color(0xFF8E8E93), size: size * 0.55),
+    );
+  }
+}
+
+/// One person in the recipient list: avatar, name, "77 123 45 67".
+class MoneyPersonRow extends StatelessWidget {
+  final String name;
+  final String phone;
+  final String? imageUrl;
+  final String? subtitle;
+  final VoidCallback? onTap;
+  const MoneyPersonRow({super.key, required this.name, required this.phone, this.imageUrl, this.subtitle, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(children: [
+          MoneyAvatar(imageUrl: imageUrl),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: robotoMedium.copyWith(fontSize: 17)),
+              Text(subtitle ?? formatLocal(localDigits(phone)), style: robotoRegular.copyWith(fontSize: 15, color: Theme.of(context).hintColor)),
+            ]),
+          ),
+        ]),
+      ),
+    );
+  }
+}
