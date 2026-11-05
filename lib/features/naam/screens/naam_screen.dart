@@ -16,7 +16,8 @@ const _gold = Color(0xFFD4AF37);
 /// Naam's round "N" badge, green with a gold letter.
 class NaamAvatar extends StatelessWidget {
   final double size;
-  const NaamAvatar({super.key, this.size = 40});
+  final String? label;
+  const NaamAvatar({super.key, this.size = 40, this.label});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -28,7 +29,12 @@ class NaamAvatar extends StatelessWidget {
           color: _green,
           border: Border.all(color: _gold, width: size > 34 ? 2 : 1.5),
         ),
-        child: Text('N', style: TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: size * 0.46)),
+        child: label == null
+            ? Text('N', style: TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: size * 0.46))
+            : Column(mainAxisSize: MainAxisSize.min, children: [
+                Text('N', style: TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: size * 0.42, height: 1)),
+                Text(label!, style: TextStyle(color: _gold, fontWeight: FontWeight.w700, fontSize: size * 0.16)),
+              ]),
       );
 }
 
