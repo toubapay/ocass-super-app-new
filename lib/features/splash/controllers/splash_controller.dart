@@ -56,6 +56,9 @@ class SplashController extends GetxController implements GetxService {
   // out of moduleList and opened from its own tile.
   ModuleModel? _mobileMoneyModule;
   ModuleModel? get mobileMoneyModule => _mobileMoneyModule;
+  // Noor Taxi: opens the ride screen, not a store module.
+  ModuleModel? _rideModule;
+  ModuleModel? get rideModule => _rideModule;
 
   int _moduleIndex = 0;
   int get moduleIndex => _moduleIndex;
@@ -313,9 +316,12 @@ class SplashController extends GetxController implements GetxService {
     if (moduleList != null) {
       _moduleList = [];
       _mobileMoneyModule = null;
+      _rideModule = null;
       for (var module in moduleList) {
         if (module.moduleType == AppConstants.mobileMoney) {
           _mobileMoneyModule = module;
+        } else if (module.moduleType == AppConstants.rideHailing) {
+          _rideModule = module;
         } else if (module.moduleType != AppConstants.taxi && GetPlatform.isWeb) {
           _moduleList!.add(module);
         } else if (!GetPlatform.isWeb) {

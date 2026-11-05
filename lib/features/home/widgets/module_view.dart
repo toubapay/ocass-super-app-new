@@ -564,6 +564,41 @@ class _ModuleViewState extends State<ModuleView> {
                                 ));
                               }
 
+                              // ──── NOOR TAXI TILE (the ride-hailing module, when active) ────
+                              final ride = widget.splashController.rideModule;
+                              if (ride != null) {
+                                tiles.add(Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CustomInkWell(
+                                      onTap: () => Get.toNamed(RouteHelper.getRideRoute()),
+                                      radius: Dimensions.radiusExtraLarge,
+                                      child: Container(
+                                        width: 72,
+                                        height: 72,
+                                        padding: const EdgeInsets.all(4),
+                                        child: SvgPicture.asset(ServiceIcons.taxi, width: 64, height: 64),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: 76,
+                                      child: Text(
+                                        ride.moduleName ?? 'ride_title'.tr,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ));
+                              }
+
                               // ──── MOBILE MONEY TILE (shown while the admin keeps the module active) ────
                               final mobileMoney = widget.splashController.mobileMoneyModule;
                               if (mobileMoney != null) {

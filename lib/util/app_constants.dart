@@ -39,6 +39,11 @@ class AppConstants {
   static const String mobileMoneySendUri = '/api/v1/customer/mobile-money/send';
   static const String mobileMoneyPinUri = '/api/v1/customer/mobile-money/pin';
   static const String mobileMoneyTransfersUri = '/api/v1/customer/mobile-money/transfers';
+  // Noor Taxi (the backend's `taxi` module: ride hailing, not the rental module).
+  static const String rideConfigUri = '/api/v1/customer/taxi/config';
+  static const String rideEstimateUri = '/api/v1/customer/taxi/estimate';
+  static const String rideTripsUri = '/api/v1/customer/taxi/trips';
+  static const String rideCurrentUri = '/api/v1/customer/taxi/trips/current';
   static const String insurancePaymentCallbackPath = '/insurance-payment-callback';
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -371,6 +376,8 @@ class AppConstants {
   static const String grocery = 'grocery';
   static const String taxi = 'rental';
   static const String mobileMoney = 'mobile_money';
+  // Ride hailing (Noor Taxi). `taxi` above is the rental module's type.
+  static const String rideHailing = 'taxi';
 
   static List<LanguageModel> languages = [
     LanguageModel(

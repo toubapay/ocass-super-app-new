@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="van-body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d8dde6"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="32" cy="53" rx="28" ry="3.5" fill="#000000" opacity="0.12"/>
+  <path d="M5 44V26c0-3 2-6 6-6h28c3 0 5 1 7 3l8 9c4 1 6 4 6 8v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" fill="url(#van-body)" stroke="#c4cad6"/>
+  <rect x="10" y="24" width="9" height="9" rx="2" fill="#2c3e5a"/>
+  <rect x="22" y="24" width="10" height="9" rx="2" fill="#2c3e5a"/>
+  <path d="M35 24h4c1.8 0 3 .6 4.2 2l5.8 7H35z" fill="#2c3e5a"/>
+  <rect x="55" y="38" width="4" height="3" rx="1.5" fill="#ffd34d"/>
+  <rect x="5" y="37" width="3.5" height="3" rx="1.5" fill="#ff6a5a"/>
+  <circle cx="17" cy="48" r="6.5" fill="#1d2433"/>
+  <circle cx="17" cy="48" r="2.8" fill="#9aa4b5"/>
+  <circle cx="48" cy="48" r="6.5" fill="#1d2433"/>
+  <circle cx="48" cy="48" r="2.8" fill="#9aa4b5"/>
+</svg>

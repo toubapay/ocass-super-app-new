@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="mt-body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd34d"/>
+      <stop offset="1" stop-color="#f0a500"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="32" cy="58" rx="26" ry="3" fill="#000000" opacity="0.12"/>
+  <path d="M22 34c0-9 3.5-14 10-14 4.5 0 7 3 7 7l-2 7z" fill="#16794f"/>
+  <path d="M35 25l9 3" stroke="#16794f" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M27 34l9 1 2 9" stroke="#1d2433" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="33" cy="12" r="6.5" fill="#f0a500"/>
+  <path d="M30 11h8.5a1.6 1.6 0 0 1 0 3.2H30z" fill="#2c3e5a"/>
+  <path d="M6 39h28l8-10h5l-4 14a6 6 0 0 1-6 4H22a8 8 0 0 0-15-1.5A5 5 0 0 1 6 39z" fill="url(#mt-body)"/>
+  <rect x="9" y="34" width="26" height="5" rx="2.5" fill="#2b2f3a"/>
+  <path d="M45 29l3-8" stroke="#1d2433" stroke-width="3" stroke-linecap="round"/>
+  <rect x="45" y="18.5" width="8" height="3" rx="1.5" fill="#1d2433"/>
+  <circle cx="46" cy="33" r="2.2" fill="#ffffff"/>
+  <circle cx="14.5" cy="51" r="7.5" fill="#1d2433"/>
+  <circle cx="14.5" cy="51" r="3" fill="#9aa4b5"/>
+  <circle cx="47" cy="51" r="7.5" fill="#1d2433"/>
+  <circle cx="47" cy="51" r="3" fill="#9aa4b5"/>
+</svg>
