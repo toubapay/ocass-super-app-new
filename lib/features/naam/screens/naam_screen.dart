@@ -204,7 +204,7 @@ class _NaamScreenState extends State<NaamScreen> {
       return;
     }
     setState(() => _speaking = key);
-    NaamVoice.instance.speak(text, lang ?? _uiVoiceLang, useServer: _cfg?['wolof_voice'] == true, onEnd: () {
+    NaamVoice.instance.speak(text, lang ?? _uiVoiceLang, useServer: _cfg?['human_voice'] == true || ((lang ?? _uiVoiceLang) == 'wo' && _cfg?['wolof_voice'] == true), onEnd: () {
       if (mounted && _speaking == key) setState(() => _speaking = null);
     });
   }

@@ -8,17 +8,19 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
-/// Naam's voice. French (and Arabic, English) is read by the phone's own
-/// voice (flutter_tts). Wolof comes from the admin's Wolof voice server
-/// through /api/v1/naam/speak when one is set; otherwise the French voice
-/// reads it, since no phone has a Wolof voice.
+/// Naam's voice. When the admin set a server voice (ElevenLabs for a natural
+/// voice, or the Wolof voice server), the audio comes from /api/v1/naam/speak.
+/// Otherwise the phone's own voice reads it (flutter_tts), its best French
+/// female voice; Wolof is then read with the French voice.
 class NaamVoice {
   NaamVoice._();
   static final NaamVoice instance = NaamVoice._();
 
   static const _locales = {'fr': 'fr-FR', 'wo': 'fr-FR', 'ar': 'ar-SA', 'en': 'en-US'};
-  // Female voices first, as Naam is a young woman.
-  static final _preferred = RegExp(r'amélie|amelie|audrey|aurélie|aurelie|marie|julie|céline|celine|hortense|denise|léa|virginie|female|femme|fr-fr-x-fr[ac]', caseSensitive: false);
+  // The phone's higher-quality voices first (iOS Premium/Enhanced, Android
+  // network voices), then female voices, as Naam is a young woman.
+  static final _quality = RegExp(r'premium|enhanced|natural|neural|network', caseSensitive: false);
+  static final _female = RegExp(r'amélie|amelie|audrey|aurélie|aurelie|marie|julie|céline|celine|hortense|denise|léa|virginie|female|femme|fr-fr-x-fr[ac]', caseSensitive: false);
 
   final FlutterTts _tts = FlutterTts();
   final AudioPlayer _player = AudioPlayer();
@@ -70,7 +72,7 @@ class NaamVoice {
     final clean = speakable(text);
     if (clean.isEmpty) return _finish();
 
-    if (lang == 'wo' && useServer) {
+    if (useServer) {
       try {
         final res = await http
             .post(Uri.parse('${AppConstants.baseUrl}${AppConstants.naamSpeakUri}'),
@@ -101,7 +103,9 @@ class NaamVoice {
           .whereType<Map>()
           .where((v) => (v['locale'] ?? '').toString().toLowerCase().replaceAll('_', '-').startsWith(locale.substring(0, 2)))
           .toList();
-      final voice = matching.firstWhere((v) => _preferred.hasMatch('${v['name']}'), orElse: () => matching.isNotEmpty ? matching.first : {});
+      int score(Map v) => (_quality.hasMatch('${v['name']}') ? 4 : 0) + (_female.hasMatch('${v['name']}') ? 2 : 0);
+      matching.sort((a, b) => score(b) - score(a));
+      final voice = matching.isNotEmpty ? matching.first : <dynamic, dynamic>{};
       if (voice.isNotEmpty) {
         await _tts.setVoice({'name': '${voice['name']}', 'locale': '${voice['locale']}'});
       }
