@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixam_mart/api/api_client.dart';
@@ -11,31 +12,14 @@ import 'package:sixam_mart/util/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _green = Color(0xFF0F6B3E);
-const _gold = Color(0xFFD4AF37);
 
-/// Naam's round "N" badge, green with a gold letter.
+/// Naam's portrait: a young Senegalese woman in a pink hijab, on Noor green.
 class NaamAvatar extends StatelessWidget {
   final double size;
-  final String? label;
-  const NaamAvatar({super.key, this.size = 40, this.label});
+  const NaamAvatar({super.key, this.size = 40});
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: _green,
-          border: Border.all(color: _gold, width: size > 34 ? 2 : 1.5),
-        ),
-        child: label == null
-            ? Text('N', style: TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: size * 0.46))
-            : Column(mainAxisSize: MainAxisSize.min, children: [
-                Text('N', style: TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: size * 0.42, height: 1)),
-                Text(label!, style: TextStyle(color: _gold, fontWeight: FontWeight.w700, fontSize: size * 0.16)),
-              ]),
-      );
+  Widget build(BuildContext context) => SvgPicture.asset('assets/image/naam.svg', width: size, height: size);
 }
 
 class _Msg {
