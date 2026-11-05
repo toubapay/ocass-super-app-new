@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/language/controllers/language_controller.dart';
 import 'dart:developer';
 
 import 'package:sixam_mart/common/enums/data_source_enum.dart';
@@ -146,6 +147,7 @@ class SplashController extends GetxController implements GetxService {
     if (response.statusCode == 200) {
       _data = response.body;
       _configModel = ConfigModel.fromJson(response.body);
+      Get.find<LocalizationController>().applyAdminLanguages(_configModel!.appLanguages, _configModel!.defaultAppLanguage);
       if (_configModel!.module != null) {
         setModule(_configModel!.module);
       } else if (GetPlatform.isWeb || (loadModuleData && _module != null)) {

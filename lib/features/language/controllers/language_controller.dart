@@ -52,9 +52,32 @@ class LocalizationController extends GetxController implements GetxService {
   void loadCurrentLanguage() async {
     _locale = languageServiceInterface.getLocaleFromSharedPref();
     _isLtr = _locale.languageCode != 'ar';
-    _selectedLanguageIndex = languageServiceInterface.setSelectedIndex(AppConstants.languages, _locale);
     _languages = [];
     _languages.addAll(AppConstants.languages);
+    _selectedLanguageIndex = languageServiceInterface.setSelectedIndex(_languages, _locale);
+    update();
+  }
+
+  /// Keeps only the languages the admin offers (Admin → App languages, sent
+  /// in /config), in the admin's order. A language the admin turned off
+  /// switches to the admin's default.
+  void applyAdminLanguages(List<String> codes, String? defaultCode) {
+    if (codes.isEmpty) return;
+    final offered = <LanguageModel>[];
+    for (final code in codes) {
+      final match = AppConstants.languages.where((l) => l.languageCode == code);
+      if (match.isNotEmpty) offered.add(match.first);
+    }
+    if (offered.isEmpty) return;
+    _languages = offered;
+    if (!_languages.any((l) => l.languageCode == _locale.languageCode)) {
+      final fallback = _languages.firstWhere((l) => l.languageCode == defaultCode, orElse: () => _languages.first);
+      Get.updateLocale(Locale(fallback.languageCode!, fallback.countryCode));
+      _locale = Locale(fallback.languageCode!, fallback.countryCode);
+      _isLtr = languageServiceInterface.setLTR(_locale);
+      saveLanguage(_locale);
+    }
+    _selectedLanguageIndex = languageServiceInterface.setSelectedIndex(_languages, _locale);
     update();
   }
 
@@ -76,9 +99,9 @@ class LocalizationController extends GetxController implements GetxService {
   }
 
   void searchSelectedLanguage() {
-    for (var language in AppConstants.languages) {
+    for (var language in _languages) {
       if (language.languageCode!.toLowerCase().contains(_locale.languageCode.toLowerCase())) {
-        _selectedLanguageIndex = AppConstants.languages.indexOf(language);
+        _selectedLanguageIndex = _languages.indexOf(language);
       }
     }
   }

@@ -214,12 +214,10 @@ class _ChooseLanguageScreenState extends State<ChooseLanguageScreen> {
                               localizationController.selectedLanguageIndex !=
                                   -1) {
                             localizationController.setLanguage(Locale(
-                              AppConstants
-                                  .languages[localizationController
+                              localizationController.languages[localizationController
                                       .selectedLanguageIndex]
                                   .languageCode!,
-                              AppConstants
-                                  .languages[localizationController
+                              localizationController.languages[localizationController
                                       .selectedLanguageIndex]
                                   .countryCode,
                             ));

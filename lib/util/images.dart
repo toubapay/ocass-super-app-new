@@ -15,6 +15,7 @@ class Images {
   static const String english = 'assets/image/english.png';
   static const String spanish = 'assets/image/spanish.png';
   static const String french = 'assets/image/fr.png';
+  static const String senegal = 'assets/image/senegal.png';
   static const String infoError = 'assets/image/infoError.png';
   static const String trackLocationIcon = 'assets/image/trackLocationIcon.png';
   static const String editIcon = 'assets/image/editIcon.png';

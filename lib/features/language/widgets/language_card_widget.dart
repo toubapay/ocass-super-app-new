@@ -19,8 +19,8 @@ class LanguageCardWidget extends StatelessWidget {
       onTap: () {
         if(fromBottomSheet){
           localizationController.setLanguage(Locale(
-            AppConstants.languages[index].languageCode!,
-            AppConstants.languages[index].countryCode,
+            localizationController.languages[index].languageCode!,
+            localizationController.languages[index].countryCode,
           ), fromBottomSheet: fromBottomSheet);
         }
         localizationController.setSelectLanguageIndex(index);

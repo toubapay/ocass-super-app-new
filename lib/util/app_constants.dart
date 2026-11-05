@@ -386,6 +386,11 @@ class AppConstants {
         countryCode: 'FR',
         languageCode: 'fr'),
     LanguageModel(
+        imageUrl: Images.senegal,
+        languageName: 'Wolof',
+        countryCode: 'SN',
+        languageCode: 'wo'),
+    LanguageModel(
         imageUrl: Images.english,
         languageName: 'English',
         countryCode: 'US',

@@ -78,8 +78,8 @@ class _LanguageBottomSheetWidgetState extends State<LanguageBottomSheetWidget> {
                 onPressed: () {
                   if(localizationController.languages.isNotEmpty && localizationController.selectedLanguageIndex != -1) {
                     localizationController.saveCacheLanguage(Locale(
-                      AppConstants.languages[localizationController.selectedLanguageIndex].languageCode!,
-                      AppConstants.languages[localizationController.selectedLanguageIndex].countryCode,
+                      localizationController.languages[localizationController.selectedLanguageIndex].languageCode!,
+                      localizationController.languages[localizationController.selectedLanguageIndex].countryCode,
                     ));
                   }
                   Get.back();

@@ -26,7 +26,7 @@ class SettingPage extends StatelessWidget {
         padding: EdgeInsets.all(Dimensions.paddingSizeDefault),
         child: Column(children: [
 
-          ProfileButtonWidget(icon: Icons.language, title: 'language'.tr, languageName: AppConstants.languages[Get.find<LocalizationController>().selectedLanguageIndex].languageName, onTap: () {
+          ProfileButtonWidget(icon: Icons.language, title: 'language'.tr, languageName: Get.find<LocalizationController>().languages.isNotEmpty ? Get.find<LocalizationController>().languages[Get.find<LocalizationController>().selectedLanguageIndex.clamp(0, Get.find<LocalizationController>().languages.length - 1)].languageName : '', onTap: () {
             _manageLanguageFunctionality();
           }),
           const SizedBox(height: Dimensions.paddingSizeSmall),
