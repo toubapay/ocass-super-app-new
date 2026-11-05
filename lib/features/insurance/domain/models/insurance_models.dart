@@ -254,6 +254,61 @@ class VehicleExtraction {
 }
 
 /// The quote request being built across the wizard steps.
+/// What the AI read on the driving licence (null where unreadable).
+class LicenseExtraction {
+  final String? lastName;
+  final String? firstName;
+  final String? birthDate;
+  final String? licenseNumber;
+  final String? categories;
+  final String? issueDate;
+  final String? expiryDate;
+
+  LicenseExtraction({this.lastName, this.firstName, this.birthDate, this.licenseNumber, this.categories, this.issueDate, this.expiryDate});
+
+  factory LicenseExtraction.fromJson(Map<String, dynamic> json) {
+    String? s(dynamic v) => (v == null || v.toString().trim().isEmpty) ? null : v.toString();
+    return LicenseExtraction(
+      lastName: s(json['last_name']),
+      firstName: s(json['first_name']),
+      birthDate: s(json['birth_date']),
+      licenseNumber: s(json['license_number']),
+      categories: s(json['categories']),
+      issueDate: s(json['issue_date']),
+      expiryDate: s(json['expiry_date']),
+    );
+  }
+
+  int get filledCount => [lastName, firstName, birthDate, licenseNumber, categories, issueDate, expiryDate].where((v) => v != null).length;
+
+  bool get expired {
+    final d = DateTime.tryParse(expiryDate ?? '');
+    return d != null && d.isBefore(DateTime.now());
+  }
+}
+
+/// Vehicle age bands, as in Wave, with the first-registration year sent for rating.
+class VehicleAge {
+  final String code;
+  final String labelKey;
+  final int yearsAgo;
+  const VehicleAge(this.code, this.labelKey, this.yearsAgo);
+
+  static const all = [
+    VehicleAge('lt3', 'ins_age_lt3', 1),
+    VehicleAge('3to5', 'ins_age_3to5', 4),
+    VehicleAge('5to10', 'ins_age_5to10', 7),
+    VehicleAge('gt10', 'ins_age_gt10', 12),
+  ];
+
+  static VehicleAge? byCode(String? code) => all.where((a) => a.code == code).firstOrNull;
+
+  static String codeFor(DateTime firstRegistration) {
+    final years = DateTime.now().year - firstRegistration.year;
+    return years < 3 ? 'lt3' : years <= 5 ? '3to5' : years <= 10 ? '5to10' : 'gt10';
+  }
+}
+
 class InsuranceDraft {
   bool isMoto;
   String usage = 'private';
@@ -276,6 +331,14 @@ class InsuranceDraft {
   String? firstName;
   String? phone;
   String? email;
+  // Wave's two usages: 'personal' (private tariff) or 'professional' (commercial).
+  String? usageChoice;
+  String? ageCode;
+  String? licenseNumber;
+  DateTime? birthDate;
+  String? licenseCategories;
+  String? licenseIssueDate;
+  String? licenseExpiryDate;
 
   InsuranceDraft({required this.isMoto}) {
     if (isMoto) usage = 'motorcycle';
@@ -298,6 +361,28 @@ class InsuranceDraft {
     firstRegistration = DateTime.tryParse(e.firstRegistrationDate ?? '') ?? firstRegistration;
   }
 
+  /// Fills the policyholder from the driving licence reading; only what was readable.
+  void applyLicense(LicenseExtraction e) {
+    lastName = e.lastName ?? lastName;
+    firstName = e.firstName ?? firstName;
+    licenseNumber = e.licenseNumber ?? licenseNumber;
+    birthDate = DateTime.tryParse(e.birthDate ?? '') ?? birthDate;
+    licenseCategories = e.categories ?? licenseCategories;
+    licenseIssueDate = e.issueDate ?? licenseIssueDate;
+    licenseExpiryDate = e.expiryDate ?? licenseExpiryDate;
+  }
+
+  /// Personnel / Professionnel to the tariff usage (a moto keeps its own, with commercial use).
+  void setUsageChoice(String choice) {
+    usageChoice = choice;
+    if (isMoto) {
+      usage = 'motorcycle';
+      commercialUse = choice == 'professional';
+    } else {
+      usage = choice == 'professional' ? 'commercial' : 'private';
+    }
+  }
+
   Map<String, dynamic> toRequest() {
     String day(DateTime d) => '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
     final vehicle = <String, dynamic>{
@@ -314,12 +399,20 @@ class InsuranceDraft {
       'new_value': newValue,
       'commercial_use': isMoto && commercialUse ? true : null,
       'first_registration_date': firstRegistration == null ? null : day(firstRegistration!),
+      'first_registration_year': firstRegistration?.year ??
+          (VehicleAge.byCode(ageCode) == null ? null : DateTime.now().year - VehicleAge.byCode(ageCode)!.yearsAgo),
     }..removeWhere((_, v) => v == null || (v is String && v.trim().isEmpty));
     final owner = <String, dynamic>{
+      'name': [firstName, lastName].where((s) => s != null && s.trim().isNotEmpty).join(' '),
       'last_name': lastName,
       'first_name': firstName,
       'phone': phone,
       'email': email,
+      'license_number': licenseNumber?.toUpperCase(),
+      'birth_date': birthDate == null ? null : day(birthDate!),
+      'license_categories': licenseCategories,
+      'license_issue_date': licenseIssueDate,
+      'license_expiry_date': licenseExpiryDate,
     }..removeWhere((_, v) => v == null || v.trim().isEmpty);
     return {
       'vehicle': vehicle,

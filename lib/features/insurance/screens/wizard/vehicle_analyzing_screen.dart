@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sixam_mart/features/insurance/controllers/insurance_controller.dart';
-import 'package:sixam_mart/features/insurance/screens/wizard/vehicle_info_screen.dart';
+import 'package:sixam_mart/features/insurance/screens/wizard/vehicle_basics_screen.dart';
+import 'package:sixam_mart/features/insurance/widgets/license_art.dart';
 import 'package:sixam_mart/util/dimensions.dart';
 import 'package:sixam_mart/util/styles.dart';
 
-/// Sends the carte grise photos to be read, then opens the vehicle form
-/// prefilled with whatever was readable. A failed reading still continues:
-/// the customer types the details instead.
+/// "Nous analysons tes informations": sends the licence photos to be read
+/// (scan animation meanwhile), then opens the vehicle step. A failed reading
+/// still continues: the customer types the details instead.
 class VehicleAnalyzingScreen extends StatefulWidget {
   final XFile front;
   final XFile? back;
@@ -26,31 +27,29 @@ class _VehicleAnalyzingScreenState extends State<VehicleAnalyzingScreen> {
   }
 
   Future<void> _analyze() async {
-    final extraction = await Get.find<InsuranceController>().analyzeVehicleDocument(widget.front, widget.back);
+    // The animation stays at least a moment, so the step doesn't just flash.
+    final minWait = Future.delayed(const Duration(milliseconds: 1800));
+    final license = await Get.find<InsuranceController>().analyzeDriverLicense(widget.front, widget.back);
+    await minWait;
     if (!mounted) return;
-    Get.off(() => VehicleInfoScreen(readFields: extraction?.filledCount ?? 0, readingAttempted: true));
+    Get.off(() => VehicleBasicsScreen(license: license, readingAttempted: true));
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width * 0.66;
     return Scaffold(
+      appBar: AppBar(elevation: 0, backgroundColor: Colors.transparent, foregroundColor: Theme.of(context).textTheme.bodyLarge?.color),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              SizedBox(
-                width: 56,
-                height: 56,
-                child: CircularProgressIndicator(strokeWidth: 4, color: Theme.of(context).primaryColor),
-              ),
-              const SizedBox(height: Dimensions.paddingSizeLarge),
-              Text('ins_reading_card'.tr, textAlign: TextAlign.center, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-              Text('ins_reading_card_hint'.tr, textAlign: TextAlign.center,
-                  style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),
-            ]),
-          ),
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeLarge, 0, Dimensions.paddingSizeLarge, Dimensions.paddingSizeLarge),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('ins_analyzing_title'.tr, style: robotoBold.copyWith(fontSize: 24, height: 1.25)),
+            const SizedBox(height: Dimensions.paddingSizeSmall),
+            Text('ins_analyzing_hint'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: 16)),
+            Expanded(child: Center(child: ScanningLicenseArt(width: width))),
+          ]),
         ),
       ),
     );

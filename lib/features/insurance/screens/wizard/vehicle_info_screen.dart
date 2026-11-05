@@ -7,15 +7,12 @@ import 'package:sixam_mart/features/insurance/domain/models/insurance_models.dar
 import 'package:sixam_mart/features/insurance/screens/wizard/vehicle_value_screen.dart';
 import 'package:sixam_mart/features/insurance/widgets/insurance_fields.dart';
 import 'package:sixam_mart/util/dimensions.dart';
-import 'package:sixam_mart/util/styles.dart';
 
-/// The vehicle and policyholder details, prefilled from the carte grise
-/// reading when there was one. Everything stays editable: the customer
-/// confirms what the attestation will say.
+/// Identification: the policyholder (prefilled from the driving licence
+/// reading) and what identifies the vehicle on the attestation. Rating
+/// details (power, seats, age, usage) are on the previous step.
 class VehicleInfoScreen extends StatefulWidget {
-  final int readFields;
-  final bool readingAttempted;
-  const VehicleInfoScreen({super.key, this.readFields = 0, this.readingAttempted = false});
+  const VehicleInfoScreen({super.key});
 
   @override
   State<VehicleInfoScreen> createState() => _VehicleInfoScreenState();
@@ -24,17 +21,13 @@ class VehicleInfoScreen extends StatefulWidget {
 class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
   final _formKey = GlobalKey<FormState>();
   late final InsuranceDraft _draft;
-  late final TextEditingController _power, _cylinder, _seats, _plate, _chassis, _brand, _model, _last, _first, _phone, _email;
-  bool _submitted = false;
+  late final TextEditingController _plate, _chassis, _brand, _model, _last, _first, _phone, _email, _license;
 
   @override
   void initState() {
     super.initState();
     _draft = Get.find<InsuranceController>().draft ?? InsuranceDraft(isMoto: false);
     String text(Object? v) => v?.toString() ?? '';
-    _power = TextEditingController(text: text(_draft.fiscalPower));
-    _cylinder = TextEditingController(text: text(_draft.cylinder));
-    _seats = TextEditingController(text: text(_draft.seats));
     _plate = TextEditingController(text: text(_draft.registrationNumber));
     _chassis = TextEditingController(text: text(_draft.chassisNumber));
     _brand = TextEditingController(text: text(_draft.brand));
@@ -43,11 +36,12 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
     _first = TextEditingController(text: text(_draft.firstName));
     _phone = TextEditingController(text: text(_draft.phone));
     _email = TextEditingController(text: text(_draft.email));
+    _license = TextEditingController(text: text(_draft.licenseNumber));
   }
 
   @override
   void dispose() {
-    for (final c in [_power, _cylinder, _seats, _plate, _chassis, _brand, _model, _last, _first, _phone, _email]) {
+    for (final c in [_plate, _chassis, _brand, _model, _last, _first, _phone, _email, _license]) {
       c.dispose();
     }
     super.dispose();
@@ -57,22 +51,30 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: _draft.firstRegistration ?? DateTime(now.year - 5),
+      initialDate: _draft.firstRegistration ??
+          DateTime(now.year - (VehicleAge.byCode(_draft.ageCode)?.yearsAgo ?? 5)),
       firstDate: DateTime(1950),
       lastDate: now,
     );
     if (picked != null) setState(() => _draft.firstRegistration = picked);
   }
 
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _draft.birthDate ?? DateTime(now.year - 30),
+      firstDate: DateTime(1920),
+      lastDate: DateTime(now.year - 16, now.month, now.day),
+    );
+    if (picked != null) setState(() => _draft.birthDate = picked);
+  }
+
   void _next() {
-    setState(() => _submitted = true);
-    if (!_formKey.currentState!.validate() || _draft.firstRegistration == null) return;
+    if (!_formKey.currentState!.validate()) return;
     String? text(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
-    int? number(TextEditingController c) => int.tryParse(c.text.trim());
     _draft
-      ..fiscalPower = number(_power)
-      ..cylinder = number(_cylinder)
-      ..seats = number(_seats)
+      ..licenseNumber = text(_license)?.toUpperCase()
       ..registrationNumber = text(_plate)?.toUpperCase()
       ..chassisNumber = text(_chassis)?.toUpperCase()
       ..brand = text(_brand)
@@ -88,46 +90,21 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
   Widget build(BuildContext context) {
     final moto = _draft.isMoto;
     final options = Get.find<InsuranceController>().options;
-    // Two-wheelers have their own usage; the car list leaves it out.
-    final carUsages = {
-      for (final u in options?.usages ?? <InsuranceChoice>[])
-        if (u.code != 'motorcycle') u.code: u.label,
-    };
-    if (carUsages.isEmpty) carUsages['private'] = 'Affaires et promenade';
-
     return Scaffold(
-      appBar: CustomAppBar(title: 'ins_vehicle_info'.tr),
+      appBar: CustomAppBar(title: 'ins_identification'.tr),
       body: Form(
         key: _formKey,
         child: ListView(padding: const EdgeInsets.all(Dimensions.paddingSizeDefault), children: [
-          if (widget.readingAttempted) _ReadingBanner(readFields: widget.readFields),
-          InsuranceSection(title: moto ? 'ins_your_motorbike'.tr : 'ins_your_car'.tr),
-          if (moto) ...[
-            Row(children: [
-              Expanded(child: InsuranceTextField(controller: _cylinder, label: 'ins_cylinder'.tr, required: true, numeric: true)),
-              const SizedBox(width: Dimensions.paddingSizeSmall),
-              Expanded(child: InsuranceTextField(controller: _seats, label: 'ins_seats'.tr, numeric: true)),
-            ]),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              value: _draft.commercialUse,
-              onChanged: (v) => setState(() => _draft.commercialUse = v),
-              title: Text('ins_moto_commercial'.tr, style: robotoRegular),
-              subtitle: Text('ins_moto_commercial_hint'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)),
-            ),
-          ] else ...[
-            Row(children: [
-              Expanded(child: InsuranceTextField(controller: _power, label: 'ins_fiscal_power'.tr, required: true, numeric: true)),
-              const SizedBox(width: Dimensions.paddingSizeSmall),
-              Expanded(child: InsuranceTextField(controller: _seats, label: 'ins_seats'.tr, numeric: true)),
-            ]),
-            InsuranceDropdown<String>(
-              label: 'ins_usage'.tr,
-              value: _draft.usage,
-              items: carUsages,
-              onChanged: (v) => setState(() => _draft.usage = v ?? 'private'),
-            ),
-          ],
+          InsuranceSection(title: 'ins_policyholder'.tr, hint: 'ins_policyholder_hint'.tr),
+          Row(children: [
+            Expanded(child: InsuranceTextField(controller: _last, label: 'ins_last_name'.tr, required: true, caps: true)),
+            const SizedBox(width: Dimensions.paddingSizeSmall),
+            Expanded(child: InsuranceTextField(controller: _first, label: 'ins_first_name'.tr, required: true)),
+          ]),
+          InsuranceTextField(controller: _license, label: 'ins_license_number'.tr, caps: true),
+          InsuranceDateField(label: 'ins_birth_date'.tr, value: _draft.birthDate, onTap: _pickBirthDate),
+          InsuranceTextField(controller: _phone, label: 'ins_phone'.tr, keyboard: TextInputType.phone),
+          InsuranceTextField(controller: _email, label: 'ins_email'.tr, keyboard: TextInputType.emailAddress),
           InsuranceSection(title: 'ins_identification'.tr, hint: 'ins_identification_hint'.tr),
           InsuranceTextField(
             controller: _plate,
@@ -147,10 +124,9 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
             Expanded(child: InsuranceTextField(controller: _model, label: 'ins_model'.tr, required: true, caps: true)),
           ]),
           InsuranceDateField(
-            label: 'ins_first_registration_date'.tr,
+            label: 'ins_first_registration_optional'.tr,
             value: _draft.firstRegistration,
             onTap: _pickFirstRegistration,
-            showRequiredError: _submitted,
           ),
           InsuranceDropdown<String>(
             label: 'ins_fuel'.tr,
@@ -158,42 +134,9 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
             items: {for (final f in options?.fuels ?? <InsuranceChoice>[]) f.code: f.label}..putIfAbsent('petrol', () => 'Essence'),
             onChanged: (v) => setState(() => _draft.fuel = v ?? 'petrol'),
           ),
-          InsuranceSection(title: 'ins_policyholder'.tr),
-          Row(children: [
-            Expanded(child: InsuranceTextField(controller: _last, label: 'ins_last_name'.tr, required: true, caps: true)),
-            const SizedBox(width: Dimensions.paddingSizeSmall),
-            Expanded(child: InsuranceTextField(controller: _first, label: 'ins_first_name'.tr, required: true)),
-          ]),
-          InsuranceTextField(controller: _phone, label: 'ins_phone'.tr, keyboard: TextInputType.phone),
-          InsuranceTextField(controller: _email, label: 'ins_email'.tr, keyboard: TextInputType.emailAddress),
         ]),
       ),
       bottomNavigationBar: InsuranceStepBar(child: CustomButton(buttonText: 'ins_next'.tr, onPressed: _next)),
-    );
-  }
-}
-
-class _ReadingBanner extends StatelessWidget {
-  final int readFields;
-  const _ReadingBanner({required this.readFields});
-
-  @override
-  Widget build(BuildContext context) {
-    final ok = readFields > 0;
-    final color = ok ? Theme.of(context).primaryColor : Colors.orange.shade800;
-    return Container(
-      padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(Dimensions.radiusDefault)),
-      child: Row(children: [
-        Icon(ok ? Icons.auto_awesome : Icons.edit_note, color: color),
-        const SizedBox(width: Dimensions.paddingSizeSmall),
-        Expanded(
-          child: Text(
-            ok ? 'ins_read_ok'.trParams({'count': '$readFields'}) : 'ins_read_none'.tr,
-            style: robotoRegular.copyWith(color: color),
-          ),
-        ),
-      ]),
     );
   }
 }

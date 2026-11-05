@@ -9,6 +9,8 @@ class MobileMoneyRepository {
 
   Future<Response> getConfig() => _api.getData(AppConstants.mobileMoneyConfigUri, handleError: false);
 
+  Future<Response> lookup(String phone) => _api.postData(AppConstants.mobileMoneyLookupUri, {'phone': phone}, handleError: false);
+
   Future<Response> preview(String phone, double amount) =>
       _api.postData(AppConstants.mobileMoneyPreviewUri, {'phone': phone, 'amount': amount}, handleError: false);
 

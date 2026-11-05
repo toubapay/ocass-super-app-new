@@ -50,6 +50,9 @@ class ConfigModel {
   int? refEarningStatus;
   double? refEarningExchangeRate;
   List<SocialLogin>? socialLogin;
+  // Languages the admin offers in the apps (Admin → App languages): codes, default first.
+  List<String> appLanguages = [];
+  String? defaultAppLanguage;
   List<SocialLogin>? appleLogin;
   bool? refundActiveStatus;
   int? refundPolicyStatus;
@@ -268,6 +271,14 @@ class ConfigModel {
     refEarningStatus = json['ref_earning_status'];
     refundActiveStatus = json['refund_active_status'];
     refEarningExchangeRate = json['ref_earning_exchange_rate']?.toDouble();
+    if (json['app_languages'] is List) {
+      for (final l in json['app_languages']) {
+        if (l is Map && l['code'] != null) {
+          appLanguages.add(l['code'].toString());
+          if (l['default'] == true) defaultAppLanguage = l['code'].toString();
+        }
+      }
+    }
     if (json['social_login'] != null) {
       socialLogin = <SocialLogin>[];
       json['social_login'].forEach((v) {
