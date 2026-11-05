@@ -15,7 +15,27 @@ class NaamFab extends StatelessWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () => Get.toNamed(RouteHelper.getNaamRoute()),
-            child: Material(elevation: 6, shape: const CircleBorder(), child: const NaamAvatar(size: 56)),
+            child: Material(
+              elevation: 6,
+              shape: const CircleBorder(),
+              color: Colors.transparent,
+              child: Stack(clipBehavior: Clip.none, children: [
+                const NaamAvatar(size: 60, label: 'Naam'),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    width: 11,
+                    height: 11,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF22C55E),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFF0F6B3E), width: 2),
+                    ),
+                  ),
+                ),
+              ]),
+            ),
           ),
         ),
       );

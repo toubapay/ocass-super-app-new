@@ -471,21 +471,27 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                   ),
                 ),
-          floatingActionButton: AuthHelper.isLoggedIn() &&
+          // Naam is always one tap away; the cashback offer sits above it.
+          floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (AuthHelper.isLoggedIn() &&
                   homeController.cashBackOfferList != null &&
-                  homeController.cashBackOfferList!.isNotEmpty
-              ? homeController.showFavButton
-                  ? Padding(
-                      padding: EdgeInsets.only(
-                          bottom: 50.0,
-                          right: ResponsiveHelper.isDesktop(context) ? 50 : 0),
-                      child: InkWell(
-                        onTap: () => Get.dialog(const CashBackDialogWidget()),
-                        child: const CashBackLogoWidget(),
-                      ),
-                    )
-                  : null
-              : const NaamFab(),
+                  homeController.cashBackOfferList!.isNotEmpty &&
+                  homeController.showFavButton)
+                Padding(
+                  padding: EdgeInsets.only(
+                      bottom: 12,
+                      right: ResponsiveHelper.isDesktop(context) ? 50 : 0),
+                  child: InkWell(
+                    onTap: () => Get.dialog(const CashBackDialogWidget()),
+                    child: const CashBackLogoWidget(),
+                  ),
+                ),
+              const NaamFab(),
+            ],
+          ),
         );
       });
     });
