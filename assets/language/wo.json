@@ -1557,5 +1557,15 @@
   "ins_policyholder_hint": "Jële nañu leen ci sa permis. Seetal leen : ñoo nekk ci attestation bi.",
   "ins_license_number": "Nimerou permis",
   "ins_birth_date": "Bisu juddu",
-  "ins_first_registration_optional": "Bis bi mu njëkk a dox (bu la neexee)"
+  "ins_first_registration_optional": "Bis bi mu njëkk a dox (bu la neexee)",
+  "naam_menu": "Naam, sa ndimbal",
+  "naam_subtitle": "Sa ndimbal Noor · Faranse, Wolof",
+  "naam_greeting": "Salaam aleykoum ! Maa ngi tudd Naam. Lan laa la mën a dimbali ?",
+  "naam_unavailable": "Naam nekkul fii ak leegi. Service client bi mu ngi fi.",
+  "naam_talk_to_advisor": "Waxtaan ak ab conseiller",
+  "naam_new_conversation": "Waxtaan bu bees",
+  "naam_hint": "Bindal Naam…",
+  "naam_typing": "Naam mu ngi bind…",
+  "naam_send": "Yónne",
+  "naam_error": "Naam mënul a tontu. Jéemaatal ci kanam tuuti."
 }

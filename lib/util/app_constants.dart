@@ -24,6 +24,11 @@ class AppConstants {
   static const String checkPaymentStatusUri = '/api/v1/customer/wallet/check-payment-status';
   static const String getProvidersUri = '/api/v1/customer/wallet/get-providers';
   static const String billPaymentHistoryUri = '/api/v1/customer/wallet/bill-payment-history';
+  // ── Naam, the AI assistant ──
+  static const String naamConfigUri = '/api/v1/naam/config';
+  static const String naamHistoryUri = '/api/v1/naam/history';
+  static const String naamChatUri = '/api/v1/naam/chat';
+
   // ── Insurance (multi-insurer comparison) Backend API ───────────────────
   static const String insuranceOptionsUri = '/api/v1/customer/insurance/auto/options';
   static const String insuranceQuotesUri = '/api/v1/customer/insurance/auto/quotes';

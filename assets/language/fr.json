@@ -2765,5 +2765,15 @@
   "ins_policyholder_hint": "Repris de ton permis de conduire. Vérifie-les : ils figurent sur l'attestation.",
   "ins_license_number": "Numéro du permis de conduire",
   "ins_birth_date": "Date de naissance",
-  "ins_first_registration_optional": "Première mise en circulation (facultatif)"
+  "ins_first_registration_optional": "Première mise en circulation (facultatif)",
+  "naam_menu": "Naam, ton assistant",
+  "naam_subtitle": "Ton assistant Noor · Français, Wolof",
+  "naam_greeting": "Salaam aleykoum ! Je suis Naam. Comment puis-je t’aider ?",
+  "naam_unavailable": "Naam est momentanément indisponible. Le service client reste joignable.",
+  "naam_talk_to_advisor": "Parler à un conseiller",
+  "naam_new_conversation": "Nouvelle conversation",
+  "naam_hint": "Écris à Naam…",
+  "naam_typing": "Naam écrit…",
+  "naam_send": "Envoyer",
+  "naam_error": "Naam n’a pas pu répondre. Réessaie dans un instant."
 }

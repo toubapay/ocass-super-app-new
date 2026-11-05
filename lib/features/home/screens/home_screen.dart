@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:sixam_mart/features/naam/widgets/naam_fab.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/common/enums/data_source_enum.dart';
@@ -484,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   : null
-              : null,
+              : const NaamFab(),
         );
       });
     });

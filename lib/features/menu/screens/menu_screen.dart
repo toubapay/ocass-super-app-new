@@ -400,6 +400,11 @@ class _MenuScreenState extends State<MenuScreen> {
                   title: 'help_support'.tr,
                   children: [
                     _buildMenuItem(
+                      icon: Icons.auto_awesome,
+                      title: 'naam_menu'.tr,
+                      onTap: () => Get.toNamed(RouteHelper.getNaamRoute()),
+                    ),
+                    _buildMenuItem(
                       icon: Icons.chat,
                       title: 'live_chat'.tr,
                       onTap: () =>
