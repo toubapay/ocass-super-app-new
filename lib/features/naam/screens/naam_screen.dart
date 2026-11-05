@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixam_mart/api/api_client.dart';
@@ -13,13 +12,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 const _green = Color(0xFF0F6B3E);
 
-/// Naam's portrait: a young Senegalese woman in a pink hijab, on Noor green.
+/// Naam's portrait: a young Senegalese woman in a pink hijab, framed in Noor gold.
 class NaamAvatar extends StatelessWidget {
   final double size;
   const NaamAvatar({super.key, this.size = 40});
 
   @override
-  Widget build(BuildContext context) => SvgPicture.asset('assets/image/naam.svg', width: size, height: size);
+  Widget build(BuildContext context) => Image.asset('assets/image/naam.webp', width: size, height: size, fit: BoxFit.cover);
 }
 
 class _Msg {
