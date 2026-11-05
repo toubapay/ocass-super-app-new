@@ -4,7 +4,7 @@ import 'package:sixam_mart/common/widgets/custom_app_bar.dart';
 import 'package:sixam_mart/common/widgets/custom_button.dart';
 import 'package:sixam_mart/common/widgets/not_logged_in_screen.dart';
 import 'package:sixam_mart/features/insurance/controllers/insurance_controller.dart';
-import 'package:sixam_mart/features/insurance/screens/wizard/carte_grise_capture_screen.dart';
+import 'package:sixam_mart/features/insurance/screens/wizard/license_capture_screen.dart';
 import 'package:sixam_mart/features/insurance/widgets/insurance_policies_view.dart';
 import 'package:sixam_mart/features/profile/controllers/profile_controller.dart';
 import 'package:sixam_mart/helper/auth_helper.dart';
@@ -89,7 +89,7 @@ class _QuoteIntro extends StatelessWidget {
       phone: user?.phone,
       email: user?.email,
     );
-    Get.to(() => const CarteGriseCaptureScreen(side: CarteGriseSide.front));
+    Get.to(() => const LicenseCaptureScreen(side: LicenseSide.front));
   }
 
   void _chooseType(BuildContext context) {

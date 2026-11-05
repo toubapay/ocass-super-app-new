@@ -19,6 +19,14 @@ class InsuranceRepository {
         handleError: false,
       );
 
+  /// Sends the driving licence photos to be read. The backend never stores them.
+  Future<Response> analyzeDriverLicense(XFile front, XFile? back) => _api.postMultipartData(
+        AppConstants.insuranceLicenseAnalyzeUri,
+        {},
+        [MultipartBody('front', front), if (back != null) MultipartBody('back', back)],
+        handleError: false,
+      );
+
   Future<Response> requestQuotes(Map<String, dynamic> body) =>
       _api.postData(AppConstants.insuranceQuotesUri, body, handleError: false, timeout: 60);
 

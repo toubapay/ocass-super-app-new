@@ -49,6 +49,19 @@ class InsuranceController extends GetxController {
     }
     return null;
   }
+
+  /// Reads the driving licence photos into the policyholder. Null when reading
+  /// is not set up on the server or failed: the customer types the details.
+  Future<LicenseExtraction?> analyzeDriverLicense(XFile front, XFile? back) async {
+    final response = await _repository.analyzeDriverLicense(front, back);
+    if (response.statusCode == 200 && response.body is Map && response.body['license'] is Map) {
+      final extraction = LicenseExtraction.fromJson(Map<String, dynamic>.from(response.body['license']));
+      draft?.applyLicense(extraction);
+      return extraction;
+    }
+    return null;
+  }
+
   List<InsurancePolicy>? get policies => _policies;
 
   /// Offers already sorted cheapest first by the backend.

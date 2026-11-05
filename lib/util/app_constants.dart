@@ -28,6 +28,7 @@ class AppConstants {
   static const String insuranceOptionsUri = '/api/v1/customer/insurance/auto/options';
   static const String insuranceQuotesUri = '/api/v1/customer/insurance/auto/quotes';
   static const String insuranceVehicleAnalyzeUri = '/api/v1/customer/insurance/vehicle/analyze';
+  static const String insuranceLicenseAnalyzeUri = '/api/v1/customer/insurance/license/analyze';
   static const String insuranceQuoteRequestUri = '/api/v1/customer/insurance/quote-requests';
   static const String insurancePurchaseUri = '/api/v1/customer/insurance/quotes';
   static const String insurancePoliciesUri = '/api/v1/customer/insurance/policies';
