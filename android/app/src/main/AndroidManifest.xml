@@ -24,6 +24,10 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 
     <queries>
+        <!-- Naam's voice (flutter_tts): lets the app find the phone's text-to-speech engine. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
