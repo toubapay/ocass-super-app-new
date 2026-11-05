@@ -2775,5 +2775,9 @@
   "naam_hint": "Write to Naam…",
   "naam_typing": "Naam is typing…",
   "naam_send": "Send",
-  "naam_error": "Naam couldn't answer. Try again in a moment."
+  "naam_error": "Naam couldn't answer. Try again in a moment.",
+  "naam_listen": "Listen",
+  "naam_stop": "Stop",
+  "naam_voice_off": "Turn off Naam's voice",
+  "naam_voice_on": "Turn on Naam's voice"
 }

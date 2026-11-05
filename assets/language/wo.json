@@ -1567,5 +1567,9 @@
   "naam_hint": "Bindal Naam…",
   "naam_typing": "Naam mu ngi bind…",
   "naam_send": "Yónne",
-  "naam_error": "Naam mënul a tontu. Jéemaatal ci kanam tuuti."
+  "naam_error": "Naam mënul a tontu. Jéemaatal ci kanam tuuti.",
+  "naam_listen": "Déglu",
+  "naam_stop": "Taxawal",
+  "naam_voice_off": "Dindil baatu Naam",
+  "naam_voice_on": "Taalal baatu Naam"
 }

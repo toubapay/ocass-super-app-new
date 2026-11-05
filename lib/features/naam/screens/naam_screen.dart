@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixam_mart/api/api_client.dart';
 import 'package:sixam_mart/features/language/controllers/language_controller.dart';
+import 'package:sixam_mart/features/naam/naam_voice.dart';
 import 'package:sixam_mart/features/naam/widgets/naam_text.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/util/app_constants.dart';
@@ -25,12 +26,14 @@ class _Msg {
   final String role;
   final String text;
   final List<Map<String, dynamic>> sources;
-  _Msg(this.role, this.text, [this.sources = const []]);
+  final String? lang;
+  _Msg(this.role, this.text, [this.sources = const [], this.lang]);
 
   factory _Msg.fromJson(Map<String, dynamic> j) => _Msg(
         j['role'] == 'assistant' ? 'assistant' : 'user',
         (j['text'] ?? '').toString(),
         ((j['sources'] as List?) ?? []).whereType<Map>().map((s) => Map<String, dynamic>.from(s)).toList(),
+        j['lang']?.toString(),
       );
 }
 
@@ -71,6 +74,11 @@ class _NaamScreenState extends State<NaamScreen> {
   late final String _guestId;
   bool _busy = false;
   String? _error;
+  // Naam reads her replies aloud; the speaker button in the app bar turns it off.
+  static const _voiceKey = 'naam_voice_auto';
+  late bool _autoVoice = _prefs.getBool(_voiceKey) ?? true;
+  Object? _speaking;
+  bool get _voiceOn => _cfg?['voice'] == true;
 
   ApiClient get _api => Get.find<ApiClient>();
   SharedPreferences get _prefs => Get.find<SharedPreferences>();
@@ -87,6 +95,7 @@ class _NaamScreenState extends State<NaamScreen> {
 
   @override
   void dispose() {
+    NaamVoice.instance.stop();
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -153,7 +162,8 @@ class _NaamScreenState extends State<NaamScreen> {
       if (res.statusCode == 200 && res.body is Map) {
         _conversationId = res.body['conversation_id']?.toString();
         if (_conversationId != null) _prefs.setString(_convKey, _conversationId!);
-        _messages.add(_Msg.fromJson({'role': 'assistant', 'text': res.body['reply'], 'sources': res.body['sources']}));
+        _messages.add(_Msg.fromJson({'role': 'assistant', 'text': res.body['reply'], 'lang': res.body['lang'], 'sources': res.body['sources']}));
+        if (_voiceOn && _autoVoice) _say(_messages.length - 1, res.body['reply'].toString(), res.body['lang']?.toString());
       } else {
         _error = _errorText(res);
       }
@@ -167,6 +177,50 @@ class _NaamScreenState extends State<NaamScreen> {
       return errors.first['message'].toString();
     }
     return 'naam_error'.tr;
+  }
+
+  String get _uiVoiceLang => _lang == 'wo' ? 'wo' : (_lang == 'ar' ? 'ar' : 'fr');
+
+  void _say(Object key, String text, String? lang) {
+    if (_speaking == key) {
+      NaamVoice.instance.stop();
+      return;
+    }
+    setState(() => _speaking = key);
+    NaamVoice.instance.speak(text, lang ?? _uiVoiceLang, useServer: _cfg?['wolof_voice'] == true, onEnd: () {
+      if (mounted && _speaking == key) setState(() => _speaking = null);
+    });
+  }
+
+  void _toggleVoice() {
+    setState(() => _autoVoice = !_autoVoice);
+    _prefs.setBool(_voiceKey, _autoVoice);
+    if (!_autoVoice) NaamVoice.instance.stop();
+  }
+
+  Widget _listenButton(Object key, String text, String? lang) {
+    final on = _speaking == key;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: () => _say(key, text, lang),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: on ? _green : _green.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: on ? _green : _green.withValues(alpha: 0.25)),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(on ? Icons.stop_rounded : Icons.volume_up_rounded, size: 15, color: on ? const Color(0xFFF2D27A) : _green),
+            const SizedBox(width: 4),
+            Text(on ? 'naam_stop'.tr : 'naam_listen'.tr,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: on ? const Color(0xFFF2D27A) : _green)),
+          ]),
+        ),
+      ),
+    );
   }
 
   void _restart() {
@@ -210,6 +264,12 @@ class _NaamScreenState extends State<NaamScreen> {
           ),
         ]),
         actions: [
+          if (_voiceOn)
+            IconButton(
+              icon: Icon(_autoVoice ? Icons.volume_up_rounded : Icons.volume_off_rounded),
+              tooltip: _autoVoice ? 'naam_voice_off'.tr : 'naam_voice_on'.tr,
+              onPressed: _toggleVoice,
+            ),
           if (_messages.isNotEmpty)
             IconButton(icon: const Icon(Icons.restart_alt), tooltip: 'naam_new_conversation'.tr, onPressed: _restart),
         ],
@@ -228,8 +288,8 @@ class _NaamScreenState extends State<NaamScreen> {
                     child: Text('naam_unavailable'.tr, style: bodyStyle),
                   )
                 else
-                  _bubble(context, _Msg('assistant', greeting.isNotEmpty ? greeting : 'naam_greeting'.tr), bodyStyle),
-                for (final m in _messages) _bubble(context, m, bodyStyle),
+                  _bubble(context, _Msg('assistant', greeting.isNotEmpty ? greeting : 'naam_greeting'.tr, const [], _uiVoiceLang), bodyStyle, key: 'greeting'),
+                for (final (i, m) in _messages.indexed) _bubble(context, m, bodyStyle, key: i),
                 if (_busy) _typing(context),
                 if (enabled && _messages.isEmpty)
                   Padding(
@@ -267,7 +327,7 @@ class _NaamScreenState extends State<NaamScreen> {
     );
   }
 
-  Widget _bubble(BuildContext context, _Msg m, TextStyle style) {
+  Widget _bubble(BuildContext context, _Msg m, TextStyle style, {Object? key}) {
     final theme = Theme.of(context);
     final mine = m.role == 'user';
     final bubble = Container(
@@ -287,6 +347,7 @@ class _NaamScreenState extends State<NaamScreen> {
           ? Text(m.text, style: style.copyWith(color: Colors.white))
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               NaamText(text: m.text, style: style),
+              if (_voiceOn && key != null) _listenButton(key, m.text, m.lang),
               if (m.sources.isNotEmpty) ...[
                 const Divider(height: 16),
                 for (final s in m.sources)

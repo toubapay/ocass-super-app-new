@@ -2775,5 +2775,9 @@
   "naam_hint": "Écris à Naam…",
   "naam_typing": "Naam écrit…",
   "naam_send": "Envoyer",
-  "naam_error": "Naam n’a pas pu répondre. Réessaie dans un instant."
+  "naam_error": "Naam n’a pas pu répondre. Réessaie dans un instant.",
+  "naam_listen": "Écouter",
+  "naam_stop": "Arrêter",
+  "naam_voice_off": "Couper la voix de Naam",
+  "naam_voice_on": "Activer la voix de Naam"
 }

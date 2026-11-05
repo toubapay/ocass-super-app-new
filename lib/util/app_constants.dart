@@ -28,6 +28,7 @@ class AppConstants {
   static const String naamConfigUri = '/api/v1/naam/config';
   static const String naamHistoryUri = '/api/v1/naam/history';
   static const String naamChatUri = '/api/v1/naam/chat';
+  static const String naamSpeakUri = '/api/v1/naam/speak';
 
   // ── Insurance (multi-insurer comparison) Backend API ───────────────────
   static const String insuranceOptionsUri = '/api/v1/customer/insurance/auto/options';
