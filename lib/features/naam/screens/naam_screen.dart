@@ -29,13 +29,16 @@ class _Msg {
   final String text;
   final List<Map<String, dynamic>> sources;
   final String? lang;
-  _Msg(this.role, this.text, [this.sources = const [], this.lang]);
+  // Buttons under the reply: {type: page | web | maps, url, label, open_now}.
+  final List<Map<String, dynamic>> actions;
+  _Msg(this.role, this.text, [this.sources = const [], this.lang, this.actions = const []]);
 
   factory _Msg.fromJson(Map<String, dynamic> j) => _Msg(
         j['role'] == 'assistant' ? 'assistant' : 'user',
         (j['text'] ?? '').toString(),
         ((j['sources'] as List?) ?? []).whereType<Map>().map((s) => Map<String, dynamic>.from(s)).toList(),
         j['lang']?.toString(),
+        ((j['actions'] as List?) ?? []).whereType<Map>().map((a) => Map<String, dynamic>.from(a)).toList(),
       );
 }
 
@@ -179,7 +182,14 @@ class _NaamScreenState extends State<NaamScreen> {
       if (res.statusCode == 200 && res.body is Map) {
         _conversationId = res.body['conversation_id']?.toString();
         if (_conversationId != null) _prefs.setString(_convKey, _conversationId!);
-        _messages.add(_Msg.fromJson({'role': 'assistant', 'text': res.body['reply'], 'lang': res.body['lang'], 'sources': res.body['sources']}));
+        _messages.add(_Msg.fromJson({'role': 'assistant', 'text': res.body['reply'], 'lang': res.body['lang'], 'sources': res.body['sources'], 'actions': res.body['actions']}));
+        // The customer asked to go to a screen: open it once the reply has been seen.
+        final go = _messages.last.actions.where((a) => a['type'] == 'page' && a['open_now'] == true).firstOrNull;
+        if (go != null) {
+          Future.delayed(const Duration(milliseconds: 1800), () {
+            if (mounted) NaamText.open('${go['url']}');
+          });
+        }
         if (_voiceOn && _autoVoice) _say(_messages.length - 1, res.body['reply'].toString(), res.body['lang']?.toString());
       } else {
         _error = _errorText(res);
@@ -297,6 +307,39 @@ class _NaamScreenState extends State<NaamScreen> {
     setState(() => _autoVoice = !_autoVoice);
     _prefs.setBool(_voiceKey, _autoVoice);
     if (!_autoVoice) NaamVoice.instance.stop();
+  }
+
+  /// Naam's buttons: an app screen, a website, or Google Maps directions
+  /// (the Google Maps link opens the Maps app, from the current position).
+  Widget _actionButtons(List<Map<String, dynamic>> actions) {
+    final valid = actions.where((a) {
+      final url = '${a['url'] ?? ''}';
+      final label = '${a['label'] ?? ''}'.trim();
+      if (label.isEmpty) return false;
+      return a['type'] == 'page' ? (url.startsWith('/') && !url.startsWith('//')) : (['web', 'maps'].contains(a['type']) && url.startsWith('https://'));
+    }).toList();
+    if (valid.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Wrap(spacing: 8, runSpacing: 8, children: [
+        for (final a in valid)
+          ElevatedButton.icon(
+            onPressed: () => NaamText.open('${a['url']}'),
+            icon: Icon(
+              a['type'] == 'maps' ? Icons.navigation_rounded : (a['type'] == 'web' ? Icons.open_in_new_rounded : Icons.arrow_forward_rounded),
+              size: 16,
+            ),
+            label: Text('${a['label']}', style: const TextStyle(fontWeight: FontWeight.w700)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: a['type'] == 'maps' ? const Color(0xFF1A73E8) : _green,
+              foregroundColor: a['type'] == 'maps' ? Colors.white : const Color(0xFFF2D27A),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: const StadiumBorder(),
+            ),
+          ),
+      ]),
+    );
   }
 
   Widget _listenButton(Object key, String text, String? lang) {
@@ -449,6 +492,7 @@ class _NaamScreenState extends State<NaamScreen> {
           : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               NaamText(text: m.text, style: style),
               if (_voiceOn && key != null) _listenButton(key, m.text, m.lang),
+              if (m.actions.isNotEmpty) _actionButtons(m.actions),
               if (m.sources.isNotEmpty) ...[
                 const Divider(height: 16),
                 for (final s in m.sources)
