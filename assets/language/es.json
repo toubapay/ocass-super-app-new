@@ -1966,5 +1966,15 @@
   "ins_policyholder_hint": "Taken from your driving licence. Check them: they appear on the certificate.",
   "ins_license_number": "Driving licence number",
   "ins_birth_date": "Date of birth",
-  "ins_first_registration_optional": "First registration (optional)"
+  "ins_first_registration_optional": "First registration (optional)",
+  "naam_menu": "Naam, your assistant",
+  "naam_subtitle": "Your Noor assistant · French, Wolof",
+  "naam_greeting": "Salaam aleykoum! I'm Naam. How can I help you?",
+  "naam_unavailable": "Naam is unavailable right now. Customer service is still reachable.",
+  "naam_talk_to_advisor": "Talk to an advisor",
+  "naam_new_conversation": "New conversation",
+  "naam_hint": "Write to Naam…",
+  "naam_typing": "Naam is typing…",
+  "naam_send": "Send",
+  "naam_error": "Naam couldn't answer. Try again in a moment."
 }

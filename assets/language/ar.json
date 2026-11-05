@@ -1990,5 +1990,15 @@
   "ins_policyholder_hint": "مأخوذة من رخصة القيادة. تحقّق منها: فهي تظهر على الشهادة.",
   "ins_license_number": "رقم رخصة القيادة",
   "ins_birth_date": "تاريخ الميلاد",
-  "ins_first_registration_optional": "أول تسجيل (اختياري)"
+  "ins_first_registration_optional": "أول تسجيل (اختياري)",
+  "naam_menu": "نعم، مساعدك",
+  "naam_subtitle": "مساعدك في نور · الفرنسية، الولوف",
+  "naam_greeting": "السلام عليكم! أنا نعم. كيف يمكنني مساعدتك؟",
+  "naam_unavailable": "نعم غير متاح حاليًا. خدمة العملاء متاحة.",
+  "naam_talk_to_advisor": "التحدث إلى مستشار",
+  "naam_new_conversation": "محادثة جديدة",
+  "naam_hint": "اكتب إلى نعم…",
+  "naam_typing": "نعم يكتب…",
+  "naam_send": "إرسال",
+  "naam_error": "لم يتمكن نعم من الرد. حاول مرة أخرى بعد قليل."
 }

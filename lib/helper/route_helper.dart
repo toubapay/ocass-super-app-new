@@ -5,6 +5,7 @@ import 'package:sixam_mart/features/bill_payment/domain/models/bill_payment_hist
 import 'package:sixam_mart/features/bill_payment/screens/bill_payment_detail_screen.dart';
 import 'package:sixam_mart/features/bill_payment/screens/bill_payment_screen.dart';
 import 'package:sixam_mart/features/insurance/screens/insurance_screen.dart';
+import 'package:sixam_mart/features/naam/screens/naam_screen.dart';
 import 'package:sixam_mart/features/mobile_money/controllers/mobile_money_controller.dart';
 import 'package:sixam_mart/features/mobile_money/screens/mobile_money_screen.dart';
 import 'package:sixam_mart/features/ride/controllers/ride_controller.dart';
@@ -172,6 +173,7 @@ class RouteHelper {
   static const String insurance = '/insurance';
   static const String mobileMoney = '/mobile-money';
   static const String ride = '/ride';
+  static const String naam = '/naam';
 
   static String getInitialRoute({bool fromSplash = false}) =>
       '$initial?from-splash=$fromSplash';
@@ -419,6 +421,7 @@ class RouteHelper {
   static String getBillPaymentDetailRoute() => billPaymentDetail;
   static String getInsuranceRoute({bool policies = false}) => '$insurance?tab=${policies ? 1 : 0}';
   static String getMobileMoneyRoute() => mobileMoney;
+  static String getNaamRoute() => naam;
   static String getRideRoute() => ride;
 
   static List<GetPage> routes = [
@@ -989,6 +992,7 @@ class RouteHelper {
           Get.lazyPut(() => RideController());
           return getRoute(const RideScreen());
         }),
+    GetPage(name: naam, page: () => getRoute(const NaamScreen())),
     GetPage(
         name: insurance,
         page: () => getRoute(InsuranceScreen(initialTab: Get.parameters['tab'] == '1' ? 1 : 0))),
