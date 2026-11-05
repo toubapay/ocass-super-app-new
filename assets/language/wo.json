@@ -1571,5 +1571,11 @@
   "naam_listen": "Déglu",
   "naam_stop": "Taxawal",
   "naam_voice_off": "Dindil baatu Naam",
-  "naam_voice_on": "Taalal baatu Naam"
+  "naam_voice_on": "Taalal baatu Naam",
+  "naam_mic_talk": "Wax ak Naam",
+  "naam_mic_stop": "Taxawal déglu bi",
+  "naam_mic_listening": "Maa ngi lay déglu… waxal leegi",
+  "naam_mic_unavailable": "Mikro bi jëfandikoowul. Bindal sa bataaxal.",
+  "naam_mic_no_speech": "Dégguma dara. Jéemaatal.",
+  "naam_mic_not_understood": "Xamuma li nga wax. Jéemaatal walla nga bind."
 }
