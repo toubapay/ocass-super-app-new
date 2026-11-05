@@ -19,19 +19,31 @@ class NaamFab extends StatelessWidget {
               elevation: 6,
               shape: const CircleBorder(),
               color: Colors.transparent,
-              child: Stack(clipBehavior: Clip.none, children: [
-                const NaamAvatar(size: 60, label: 'Naam'),
+              child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+                const NaamAvatar(size: 62),
                 Positioned(
-                  top: 4,
-                  right: 4,
+                  top: 3,
+                  right: 3,
                   child: Container(
                     width: 11,
                     height: 11,
                     decoration: BoxDecoration(
                       color: const Color(0xFF22C55E),
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF0F6B3E), width: 2),
+                      border: Border.all(color: const Color(0xFF0E4D3A), width: 2),
                     ),
+                  ),
+                ),
+                Positioned(
+                  bottom: -7,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0E4D3A),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: const Color(0xFFF2D27A), width: 1.5),
+                    ),
+                    child: const Text('Naam', style: TextStyle(color: Color(0xFFF2D27A), fontSize: 10, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ]),
