@@ -2779,5 +2779,11 @@
   "naam_listen": "Écouter",
   "naam_stop": "Arrêter",
   "naam_voice_off": "Couper la voix de Naam",
-  "naam_voice_on": "Activer la voix de Naam"
+  "naam_voice_on": "Activer la voix de Naam",
+  "naam_mic_talk": "Parler à Naam",
+  "naam_mic_stop": "Arrêter l’écoute",
+  "naam_mic_listening": "Je t’écoute… parle maintenant",
+  "naam_mic_unavailable": "Le micro n’est pas disponible. Écris ton message.",
+  "naam_mic_no_speech": "Je n’ai rien entendu. Réessaie.",
+  "naam_mic_not_understood": "Je n’ai pas compris. Réessaie ou écris ton message."
 }

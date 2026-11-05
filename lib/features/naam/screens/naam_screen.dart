@@ -9,6 +9,8 @@ import 'package:sixam_mart/features/naam/naam_voice.dart';
 import 'package:sixam_mart/features/naam/widgets/naam_text.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/util/app_constants.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:url_launcher/url_launcher.dart';
 
 const _green = Color(0xFF0F6B3E);
@@ -80,6 +82,16 @@ class _NaamScreenState extends State<NaamScreen> {
   Object? _speaking;
   bool get _voiceOn => _cfg?['voice'] == true;
 
+  // Talking to Naam with the phone's speech recognition. The plugin is one
+  // shared instance (the search screen uses it too), so its listeners are
+  // put back when this screen closes.
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _listening = false;
+  bool _hooked = false;
+  String _heard = '';
+  stt.SpeechErrorListener? _prevError;
+  stt.SpeechStatusListener? _prevStatus;
+
   ApiClient get _api => Get.find<ApiClient>();
   SharedPreferences get _prefs => Get.find<SharedPreferences>();
   String get _lang => Get.find<LocalizationController>().locale.languageCode;
@@ -96,6 +108,11 @@ class _NaamScreenState extends State<NaamScreen> {
   @override
   void dispose() {
     NaamVoice.instance.stop();
+    if (_hooked) {
+      _speech.cancel();
+      _speech.errorListener = _prevError;
+      _speech.statusListener = _prevStatus;
+    }
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -190,6 +207,90 @@ class _NaamScreenState extends State<NaamScreen> {
     NaamVoice.instance.speak(text, lang ?? _uiVoiceLang, useServer: _cfg?['wolof_voice'] == true, onEnd: () {
       if (mounted && _speaking == key) setState(() => _speaking = null);
     });
+  }
+
+  Future<void> _toggleMic() async {
+    if (_listening) {
+      await _speech.stop();
+      return;
+    }
+    if (_busy) return;
+    await NaamVoice.instance.stop();
+    setState(() => _error = null);
+    var ok = false;
+    try {
+      ok = await _speech.initialize();
+    } catch (_) {}
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _error = 'naam_mic_unavailable'.tr);
+      return;
+    }
+    if (!_hooked) {
+      _prevError = _speech.errorListener;
+      _prevStatus = _speech.statusListener;
+      _hooked = true;
+    }
+    _speech.errorListener = (SpeechRecognitionError e) {
+      if (!mounted) return;
+      final quiet = e.errorMsg.contains('no_match') || e.errorMsg.contains('speech_timeout');
+      setState(() {
+        _listening = false;
+        _error = quiet ? 'naam_mic_no_speech'.tr : 'naam_mic_not_understood'.tr;
+      });
+    };
+    _speech.statusListener = (status) {
+      if (status == stt.SpeechToText.doneStatus || status == stt.SpeechToText.notListeningStatus) _micDone();
+    };
+    final locale = await _speechLocale();
+    _heard = '';
+    setState(() => _listening = true);
+    try {
+      await _speech.listen(
+        onResult: (r) {
+          _heard = r.recognizedWords;
+          _input.text = _heard;
+          _input.selection = TextSelection.collapsed(offset: _input.text.length);
+          if (r.finalResult) _micDone();
+        },
+        localeId: locale,
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+        listenOptions: stt.SpeechListenOptions(partialResults: true, cancelOnError: true, listenMode: stt.ListenMode.dictation),
+      );
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _listening = false;
+          _error = 'naam_mic_unavailable'.tr;
+        });
+      }
+    }
+  }
+
+  void _micDone() {
+    if (!mounted || !_listening) return;
+    final text = _heard.trim();
+    _heard = '';
+    setState(() => _listening = false);
+    if (text.isNotEmpty) {
+      _input.clear();
+      _send(text);
+    }
+  }
+
+  /// Wolof when the phone can recognise it, else French (Wolof is heard as French).
+  Future<String?> _speechLocale() async {
+    final want = _lang == 'ar' ? ['ar'] : (_lang == 'wo' ? ['wo', 'fr'] : (_lang == 'en' ? ['en'] : ['fr']));
+    try {
+      final ids = (await _speech.locales()).map((l) => l.localeId).toList();
+      for (final w in want) {
+        final exact = ids.where((id) => id.toLowerCase().startsWith(w)).toList();
+        if (exact.isEmpty) continue;
+        return exact.firstWhere((id) => id.endsWith('SN') || id.endsWith('FR'), orElse: () => exact.first);
+      }
+    } catch (_) {}
+    return _lang == 'ar' ? 'ar_SA' : 'fr_FR';
   }
 
   void _toggleVoice() {
@@ -415,7 +516,7 @@ class _NaamScreenState extends State<NaamScreen> {
             onSubmitted: (_) => _send(),
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              hintText: 'naam_hint'.tr,
+              hintText: _listening ? 'naam_mic_listening'.tr : 'naam_hint'.tr,
               counterText: '',
               isDense: true,
               filled: true,
@@ -426,12 +527,24 @@ class _NaamScreenState extends State<NaamScreen> {
           ),
         ),
         const SizedBox(width: 6),
-        IconButton.filled(
-          style: IconButton.styleFrom(backgroundColor: _green, disabledBackgroundColor: _green.withValues(alpha: 0.35)),
-          onPressed: _busy || _input.text.trim().isEmpty || (_cfg != null && !enabled) ? null : () => _send(),
-          icon: const Icon(Icons.send_rounded, color: Colors.white),
-          tooltip: 'naam_send'.tr,
-        ),
+        // The mic replaces send while the box is empty, as in WhatsApp.
+        if (enabled && (_listening || _input.text.trim().isEmpty))
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: _listening ? const Color(0xFFC0392B) : _green,
+              disabledBackgroundColor: _green.withValues(alpha: 0.35),
+            ),
+            onPressed: _busy ? null : _toggleMic,
+            icon: Icon(_listening ? Icons.stop_rounded : Icons.mic_rounded, color: _listening ? Colors.white : const Color(0xFFF2D27A)),
+            tooltip: _listening ? 'naam_mic_stop'.tr : 'naam_mic_talk'.tr,
+          )
+        else
+          IconButton.filled(
+            style: IconButton.styleFrom(backgroundColor: _green, disabledBackgroundColor: _green.withValues(alpha: 0.35)),
+            onPressed: _busy || _input.text.trim().isEmpty || (_cfg != null && !enabled) ? null : () => _send(),
+            icon: const Icon(Icons.send_rounded, color: Colors.white),
+            tooltip: 'naam_send'.tr,
+          ),
       ]),
     );
   }

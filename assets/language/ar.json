@@ -2004,5 +2004,11 @@
   "naam_listen": "استمع",
   "naam_stop": "إيقاف",
   "naam_voice_off": "إيقاف صوت نعم",
-  "naam_voice_on": "تشغيل صوت نعم"
+  "naam_voice_on": "تشغيل صوت نعم",
+  "naam_mic_talk": "تحدث إلى نعم",
+  "naam_mic_stop": "إيقاف الاستماع",
+  "naam_mic_listening": "أنا أستمع… تحدث الآن",
+  "naam_mic_unavailable": "الميكروفون غير متاح. اكتب رسالتك.",
+  "naam_mic_no_speech": "لم أسمع شيئًا. حاول مرة أخرى.",
+  "naam_mic_not_understood": "لم أفهم. حاول مرة أخرى أو اكتب رسالتك."
 }

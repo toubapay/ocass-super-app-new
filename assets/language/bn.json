@@ -1980,5 +1980,11 @@
   "naam_listen": "Listen",
   "naam_stop": "Stop",
   "naam_voice_off": "Turn off Naam's voice",
-  "naam_voice_on": "Turn on Naam's voice"
+  "naam_voice_on": "Turn on Naam's voice",
+  "naam_mic_talk": "Talk to Naam",
+  "naam_mic_stop": "Stop listening",
+  "naam_mic_listening": "Listening… speak now",
+  "naam_mic_unavailable": "The microphone isn't available. Type your message.",
+  "naam_mic_no_speech": "I didn't hear anything. Try again.",
+  "naam_mic_not_understood": "I didn't understand. Try again or type your message."
 }
