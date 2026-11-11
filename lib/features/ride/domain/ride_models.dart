@@ -103,6 +103,13 @@ class RideDriver {
   final String plate;
   final double? lat;
   final double? lng;
+  final double heading;
+  /// gold | silver | blue, and its French label.
+  final String tier;
+  final String tierLabel;
+  final int ratingCount;
+  final int totalKm;
+  final DateTime? memberSince;
 
   RideDriver.fromJson(Map<String, dynamic> j)
       : name = (j['name'] ?? '').toString(),
@@ -114,9 +121,76 @@ class RideDriver {
         color = (j['color'] ?? '').toString(),
         plate = (j['plate'] ?? '').toString(),
         lat = _dn(j['lat']),
-        lng = _dn(j['lng']);
+        lng = _dn(j['lng']),
+        heading = _d(j['heading']),
+        tier = (_m(j['tier'])['key'] ?? 'blue').toString(),
+        tierLabel = (_m(j['tier'])['label'] ?? 'Bleu').toString(),
+        ratingCount = _i(j['rating_count']),
+        totalKm = _i(j['total_km']),
+        memberSince = DateTime.tryParse('${j['member_since']}');
 
   LatLng? get latLng => lat == null || lng == null ? null : LatLng(lat!, lng!);
+}
+
+/// What the rider sees while the ride is on: minutes until the driver
+/// reaches the pick-up (with the driver's route), the waiting time once
+/// arrived, or the arrival time at the destination.
+class RideLive {
+  /// to_pickup | waiting | to_destination
+  final String phase;
+  final int? etaMin;
+  final DateTime? etaAt;
+  final double distanceKm;
+  final String? route;
+  final int waitedSeconds;
+  final int freeWaitingMinutes;
+  final bool paidWaiting;
+  final double waitingFeePerMinute;
+  final DateTime receivedAt;
+
+  RideLive.fromJson(Map<String, dynamic> j)
+      : phase = (j['phase'] ?? '').toString(),
+        etaMin = j['eta_min'] == null ? null : _i(j['eta_min']),
+        etaAt = DateTime.tryParse('${j['eta_at']}')?.toLocal(),
+        distanceKm = _d(j['distance_km']),
+        route = j['route']?.toString(),
+        waitedSeconds = _i(j['waited_seconds']),
+        freeWaitingMinutes = _i(j['free_waiting_minutes']),
+        paidWaiting = j['paid_waiting'] == true,
+        waitingFeePerMinute = _d(j['waiting_fee_per_minute']),
+        receivedAt = DateTime.now();
+}
+
+/// A free car around the pick-up, for the map (position and heading only).
+class NearbyCar {
+  final LatLng position;
+  final double heading;
+  NearbyCar.fromJson(Map<String, dynamic> j)
+      : position = LatLng(_d(j['lat']), _d(j['lng'])),
+        heading = _d(j['heading']);
+}
+
+class NearbyCars {
+  final List<NearbyCar> cars;
+  final int? etaMin;
+  NearbyCars.fromJson(Map<String, dynamic> j)
+      : cars = (j['cars'] as List? ?? []).map((c) => NearbyCar.fromJson(_m(c))).toList(),
+        etaMin = j['eta_min'] == null ? null : _i(j['eta_min']);
+}
+
+/// A chat message of the ride (from: rider | driver).
+class RideMessage {
+  final int id;
+  final String from;
+  final String text;
+  final DateTime? at;
+  final bool read;
+  RideMessage.fromJson(Map<String, dynamic> j)
+      : id = _i(j['id']),
+        from = (j['from'] ?? '').toString(),
+        text = (j['text'] ?? '').toString(),
+        at = DateTime.tryParse('${j['at']}')?.toLocal(),
+        read = j['read'] == true;
 }
 
 class RideTrip {
@@ -141,6 +215,9 @@ class RideTrip {
   final int? riderRating;
   final DateTime? createdAt;
   final DateTime? acceptedAt;
+  final RideLive? live;
+  final int unreadMessages;
+  final bool chatOpen;
 
   RideTrip.fromJson(Map<String, dynamic> j)
       : id = _i(j['id']),
@@ -161,7 +238,10 @@ class RideTrip {
         driver = j['driver'] is Map ? RideDriver.fromJson(_m(j['driver'])) : null,
         riderRating = j['rider_rating'] == null ? null : _i(j['rider_rating']),
         createdAt = DateTime.tryParse('${j['created_at']}')?.toLocal(),
-        acceptedAt = DateTime.tryParse('${j['accepted_at']}')?.toLocal();
+        acceptedAt = DateTime.tryParse('${j['accepted_at']}')?.toLocal(),
+        live = j['live'] is Map ? RideLive.fromJson(_m(j['live'])) : null,
+        unreadMessages = _i(j['unread_messages']),
+        chatOpen = j['chat_open'] == true;
 
   bool get isActive => active.contains(status);
   double get fare => finalFare ?? estimatedFare;

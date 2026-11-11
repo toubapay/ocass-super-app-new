@@ -51,6 +51,8 @@ class AppConstants {
   static const String rideEstimateUri = '/api/v1/customer/taxi/estimate';
   static const String rideTripsUri = '/api/v1/customer/taxi/trips';
   static const String rideCurrentUri = '/api/v1/customer/taxi/trips/current';
+  static const String rideNearbyUri = '/api/v1/customer/taxi/nearby';
+  static const String featuredStoresUri = '/api/v1/featured-stores';
   static const String insurancePaymentCallbackPath = '/insurance-payment-callback';
   // ────────────────────────────────────────────────────────────────────────────
 

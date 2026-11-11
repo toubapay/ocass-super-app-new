@@ -41,6 +41,17 @@ class RideRepository {
   Future<Response> rate(int id, int rating, String comment) =>
       _api.postData('${AppConstants.rideTripsUri}/$id/rate', {'rating': rating, if (comment.isNotEmpty) 'comment': comment}, handleError: false);
 
+  /// Free cars around a point (as in Yango), with the waiting time.
+  Future<Response> nearby(double lat, double lng, {int? categoryId}) => _api.getData(
+        AppConstants.rideNearbyUri,
+        query: {'lat': '$lat', 'lng': '$lng', if (categoryId != null) 'category_id': '$categoryId'},
+        handleError: false,
+      );
+
+  Future<Response> messages(int id) => _api.getData('${AppConstants.rideTripsUri}/$id/messages', handleError: false);
+
+  Future<Response> sendMessage(int id, String text) => _api.postData('${AppConstants.rideTripsUri}/$id/messages', {'text': text}, handleError: false);
+
   Future<Response> history() => _api.getData(AppConstants.rideTripsUri, query: {'limit': '20', 'offset': '1'}, handleError: false);
 
   Future<List<PlaceSuggestion>> searchPlaces(String text) async {

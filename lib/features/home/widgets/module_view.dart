@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:demandium/feature/bottomNav/view/bottom_nav_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sixam_mart/features/home/widgets/featured_stores_section.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -955,6 +956,8 @@ class _ModuleViewState extends State<ModuleView> {
                   },
                 ),
                 isLoggedIn ? const PromoCodeBannerView() : const SizedBox(),
+                // Boutiques à la une (chosen in the admin), as Glovo's "Top brands".
+                const FeaturedStoresSection(),
                 const PopularStoreView(isPopular: false, isFeatured: true),
                 const SizedBox(height: 30),
                 // const HeaderWidget(),
