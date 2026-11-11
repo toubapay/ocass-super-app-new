@@ -36,6 +36,43 @@ class RideController extends GetxController {
   Timer? _poll;
   int _lookup = 0;
 
+  /// Free cars around the pick-up, shown on the map before booking and
+  /// while searching (refreshed every 8 s).
+  NearbyCars? nearby;
+  Timer? _nearbyTimer;
+
+  bool get _wantsNearby =>
+      pickup != null && (step == RideStep.home || step == RideStep.mapPick || step == RideStep.options || (step == RideStep.ride && trip?.status == 'searching'));
+
+  void _syncNearby() {
+    if (_wantsNearby) {
+      if (_nearbyTimer == null) {
+        _loadNearby();
+        _nearbyTimer = Timer.periodic(const Duration(seconds: 8), (_) => _loadNearby());
+      }
+    } else {
+      _nearbyTimer?.cancel();
+      _nearbyTimer = null;
+    }
+  }
+
+  Future<void> _loadNearby() async {
+    final at = step == RideStep.ride ? trip?.pickup : pickup;
+    if (at == null) return;
+    final cat = step == RideStep.options || step == RideStep.ride ? (trip?.category?.id ?? categoryId) : null;
+    final r = await _repo.nearby(at.lat, at.lng, categoryId: cat);
+    if (r.statusCode == 200 && r.body is Map) {
+      nearby = NearbyCars.fromJson(Map<String, dynamic>.from(r.body));
+      super.update();
+    }
+  }
+
+  @override
+  void update([List<Object>? ids, bool condition = true]) {
+    _syncNearby();
+    super.update(ids, condition);
+  }
+
   RideOption? get selected => estimate?.options.firstWhereOrNull((o) => o.category.id == categoryId);
 
   /// Up to four recent destinations, for one-tap re-ordering.
@@ -65,6 +102,10 @@ class RideController extends GetxController {
     final cur = await _repo.current();
     if (cur.statusCode == 200 && cur.body is Map && cur.body['trip'] is Map) {
       _setTrip(RideTrip.fromJson(Map<String, dynamic>.from(cur.body['trip'])));
+      step = RideStep.ride;
+    } else if (cur.statusCode == 200 && cur.body is Map && cur.body['to_rate'] is Map) {
+      // A finished ride not rated yet: ask for the rating first.
+      _setTrip(RideTrip.fromJson(Map<String, dynamic>.from(cur.body['to_rate'])));
       step = RideStep.ride;
     } else {
       step = RideStep.home;
@@ -293,9 +334,25 @@ class RideController extends GetxController {
     }
   }
 
+  Future<List<RideMessage>?> messages(int tripId) async {
+    final r = await _repo.messages(tripId);
+    if (r.statusCode == 200 && r.body is Map && r.body['messages'] is List) {
+      return (r.body['messages'] as List).map((m) => RideMessage.fromJson(Map<String, dynamic>.from(m))).toList();
+    }
+    return null;
+  }
+
+  /// Sends a chat message; returns it, or the error to show.
+  Future<(RideMessage?, String?)> sendMessage(int tripId, String text) async {
+    final r = await _repo.sendMessage(tripId, text);
+    if ((r.statusCode == 200 || r.statusCode == 201) && r.body is Map) return (RideMessage.fromJson(Map<String, dynamic>.from(r.body)), null);
+    return (null, _error(r));
+  }
+
   @override
   void onClose() {
     _poll?.cancel();
+    _nearbyTimer?.cancel();
     super.onClose();
   }
 }

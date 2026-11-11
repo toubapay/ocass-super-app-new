@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -5,6 +7,7 @@ import 'package:sixam_mart/common/widgets/custom_button.dart';
 import 'package:sixam_mart/common/widgets/custom_image.dart';
 import 'package:sixam_mart/features/ride/controllers/ride_controller.dart';
 import 'package:sixam_mart/features/ride/domain/ride_models.dart';
+import 'package:sixam_mart/features/ride/screens/ride_chat_screen.dart';
 import 'package:sixam_mart/features/ride/screens/ride_search_screen.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/service_icon_helper.dart';
@@ -16,6 +19,92 @@ const _soft = Color(0xFFF4F4F5);
 const _ink = Color(0xFF1C1C1E);
 
 String _money(double v) => PriceConverter.convertPrice(v, forDM: true);
+
+String _clock(DateTime? t) => t == null ? '' : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+String _mmss(int sec) => '${sec ~/ 60}:${(sec % 60).toString().padLeft(2, '0')}';
+
+/// How long the driver has been driving with Noor: "12 jours", "8 mois", "2 ans".
+String drivingFor(DateTime? since) {
+  if (since == null) return '—';
+  final days = DateTime.now().difference(since).inDays.clamp(1, 100000);
+  if (days < 31) return '$days ${(days == 1 ? 'ride_day' : 'ride_days').tr}';
+  final months = (days / 30.4).floor();
+  if (months < 12) return '$months ${'ride_months'.tr}';
+  final years = months ~/ 12;
+  return '$years ${(years == 1 ? 'ride_year' : 'ride_years').tr}';
+}
+
+/// Where the ride is, as in Yango: search → on the way → arrived → riding → there.
+class _RideProgress extends StatelessWidget {
+  final String status;
+  const _RideProgress({required this.status});
+
+  static const _steps = ['searching', 'accepted', 'arrived', 'in_progress', 'completed'];
+  static const _labels = ['ride_step_search', 'ride_step_coming', 'ride_step_arrived', 'ride_step_riding', 'ride_step_there'];
+
+  @override
+  Widget build(BuildContext context) {
+    final at = _steps.indexOf(status);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(children: [
+        for (var i = 0; i < _steps.length; i++)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: i < _steps.length - 1 ? 4 : 0),
+              child: Column(children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: i == at
+                      ? const LinearProgressIndicator(minHeight: 4, color: _yellow, backgroundColor: _ink)
+                      : Container(height: 4, color: i < at ? _ink : const Color(0xFFE4E4E7)),
+                ),
+                const SizedBox(height: 5),
+                Text(_labels[i].tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 10.5, color: i == at ? _ink : const Color(0xFF8E8E93), fontWeight: i == at ? FontWeight.w700 : FontWeight.w400)),
+              ]),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+/// Big black box with the countdown, the waiting timer or the arrival time.
+class _EtaHead extends StatelessWidget {
+  final String big;
+  final String title;
+  final String sub;
+  final bool alert;
+  const _EtaHead({required this.big, required this.title, required this.sub, this.alert = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(children: [
+        Container(
+          constraints: const BoxConstraints(minWidth: 78),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(color: _ink, borderRadius: BorderRadius.circular(14)),
+          child: Text(big,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: alert ? const Color(0xFFFF6B5B) : _yellow, fontSize: 22, fontWeight: FontWeight.w800, fontFeatures: const [FontFeature.tabularFigures()])),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: robotoBold.copyWith(fontSize: 18)),
+            const SizedBox(height: 2),
+            Text(sub, style: robotoRegular.copyWith(color: Colors.black54, fontSize: 13)),
+          ]),
+        ),
+      ]),
+    );
+  }
+}
 
 /// The bottom sheet under the map, one layout per step of the ride.
 class RideSheet extends StatelessWidget {
@@ -327,11 +416,30 @@ class _RideStatusSheet extends StatefulWidget {
 class _RideStatusSheetState extends State<_RideStatusSheet> {
   int _stars = 5;
   final _comment = TextEditingController();
+  final _tags = <String>{};
+  static const _tagKeys = ['ride_tag_safe', 'ride_tag_on_time', 'ride_tag_clean', 'ride_tag_friendly', 'ride_tag_route'];
+  // Ticks every second while the driver waits, for the waiting timer.
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && widget.trip.status == 'arrived') setState(() {});
+    });
+  }
 
   @override
   void dispose() {
+    _tick?.cancel();
     _comment.dispose();
     super.dispose();
+  }
+
+  int get _waited {
+    final l = widget.trip.live;
+    if (l == null) return 0;
+    return l.waitedSeconds + DateTime.now().difference(l.receivedAt).inSeconds;
   }
 
   Future<void> _confirmCancel() async {
@@ -355,6 +463,7 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
     switch (t.status) {
       case 'searching':
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          const _RideProgress(status: 'searching'),
           Row(children: [
             const _Pulse(),
             const SizedBox(width: 16),
@@ -415,6 +524,7 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
           if (t.riderRating != null)
             Text('ride_thanks_rating'.tr, textAlign: TextAlign.center, style: robotoRegular.copyWith(color: Colors.black54))
           else ...[
+            if (t.driver != null) ...[_DriverCard(trip: t), const SizedBox(height: 12)],
             Text('${'ride_rate_question'.tr} ${t.driver?.name ?? ''} ?', textAlign: TextAlign.center, style: robotoBold),
             const SizedBox(height: 6),
             Row(
@@ -425,13 +535,28 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
                     icon: Icon(i < _stars ? Icons.star_rounded : Icons.star_outline_rounded, color: _yellow),
                   )),
             ),
+            Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [
+              for (final k in _tagKeys)
+                FilterChip(
+                  label: Text(k.tr),
+                  selected: _tags.contains(k),
+                  showCheckmark: false,
+                  selectedColor: _ink,
+                  labelStyle: TextStyle(color: _tags.contains(k) ? _yellow : _ink, fontWeight: FontWeight.w600),
+                  shape: const StadiumBorder(side: BorderSide(color: Color(0xFFD4D4D8))),
+                  backgroundColor: Colors.white,
+                  onSelected: (on) => setState(() => on ? _tags.add(k) : _tags.remove(k)),
+                ),
+            ]),
+            const SizedBox(height: 10),
             TextField(
               controller: _comment,
               maxLength: 300,
+              maxLines: 2,
               decoration: InputDecoration(hintText: 'ride_comment_hint'.tr, counterText: '', border: OutlineInputBorder(borderRadius: BorderRadius.circular(14))),
             ),
             const SizedBox(height: 10),
-            CustomButton(buttonText: 'ride_send_rating'.tr, isLoading: c.busy, onPressed: () => c.rate(_stars, _comment.text.trim())),
+            CustomButton(buttonText: 'ride_send_rating'.tr, isLoading: c.busy, onPressed: () => c.rate(_stars, [_tagKeys.where(_tags.contains).map((k) => k.tr).join(', '), _comment.text.trim()].where((x) => x.isNotEmpty).join(' · '))),
           ],
           const SizedBox(height: 10),
           OutlinedButton(onPressed: c.newRide, child: Text('ride_new_ride'.tr)),
@@ -444,12 +569,40 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
               'in_progress': t.destination?.short ?? '',
             }[t.status] ??
             '';
+        final live = t.live;
+        final freeLeft = ((live?.freeWaitingMinutes ?? 0) * 60 - _waited).clamp(0, 1 << 30);
+        Widget head;
+        if (t.status == 'accepted' && live?.etaMin != null) {
+          head = _EtaHead(
+            big: live!.etaMin! <= 0 ? 'ride_driver_arriving'.tr : '${live.etaMin} min',
+            title: title,
+            sub: live.etaMin! > 0 ? '${'ride_arrival_at'.tr} ${_clock(live.etaAt)} · ${live.distanceKm.toStringAsFixed(2).replaceAll('.', ',')} km' : sub,
+          );
+        } else if (t.status == 'arrived') {
+          head = _EtaHead(
+            big: _mmss(_waited),
+            alert: live?.paidWaiting == true,
+            title: title,
+            sub: freeLeft > 0
+                ? '${'ride_free_wait_left'.tr} ${_mmss(freeLeft)}'
+                : (live?.waitingFeePerMinute ?? 0) > 0
+                    ? '${'ride_paid_wait'.tr} ${_money(live!.waitingFeePerMinute)} / min'
+                    : sub,
+          );
+        } else if (t.status == 'in_progress' && live?.etaMin != null) {
+          head = _EtaHead(big: _clock(live!.etaAt), title: title, sub: '${'ride_arrival_in'.tr} ${live.etaMin! < 1 ? 1 : live.etaMin} min · $sub');
+        } else {
+          head = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(title, style: robotoBold.copyWith(fontSize: 20)),
+            const SizedBox(height: 4),
+            Text(sub, style: robotoRegular.copyWith(color: Colors.black54)),
+            const SizedBox(height: 12),
+          ]);
+        }
         return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(title, style: robotoBold.copyWith(fontSize: 20)),
-          const SizedBox(height: 4),
-          Text(sub, style: robotoRegular.copyWith(color: Colors.black54)),
-          const SizedBox(height: 12),
-          if (t.driver != null) _DriverCard(trip: t),
+          _RideProgress(status: t.status),
+          head,
+          if (t.driver != null) _DriverCard(trip: t, onChat: t.chatOpen ? () => Get.to(() => RideChatScreen(trip: t)) : null),
           const SizedBox(height: 12),
           Row(children: [
             Icon(t.paymentMethod == 'wallet' ? Icons.account_balance_wallet_outlined : Icons.payments_outlined, size: 20),
@@ -475,41 +628,84 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
       );
 }
 
+const _tierColors = {
+  'gold': [Color(0xFFF7D774), Color(0xFFC9971C), Color(0xFF3D2A00)],
+  'silver': [Color(0xFFEEF1F4), Color(0xFFA9B2BC), Color(0xFF2B3138)],
+  'blue': [Color(0xFFE3EFFF), Color(0xFF4C8EF0), Color(0xFF1557B0)],
+};
+
+/// The driver: level (gold, silver, blue), rating and reviews, rides, km
+/// driven, how long they have been driving; chat and call buttons.
 class _DriverCard extends StatelessWidget {
   final RideTrip trip;
-  const _DriverCard({required this.trip});
+  final VoidCallback? onChat;
+  const _DriverCard({required this.trip, this.onChat});
+
+  Widget _stat(Widget value, String label) => Expanded(
+        child: Column(children: [
+          value,
+          const SizedBox(height: 1),
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10.5, color: Color(0xFF8E8E93))),
+        ]),
+      );
 
   @override
   Widget build(BuildContext context) {
     final d = trip.driver!;
+    final tier = _tierColors[d.tier] ?? _tierColors['blue']!;
+    final tierLabel = {'gold': 'ride_tier_gold', 'silver': 'ride_tier_silver', 'blue': 'ride_tier_blue'}[d.tier] ?? 'ride_tier_blue';
+    const bold = TextStyle(fontWeight: FontWeight.w800, fontSize: 14);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: _soft, borderRadius: BorderRadius.circular(18)),
       child: Column(children: [
         Row(children: [
-          ClipOval(
-            child: SizedBox(
-              width: 48,
-              height: 48,
-              child: d.imageUrl != null && d.imageUrl!.isNotEmpty
-                  ? CustomImage(image: d.imageUrl!, fit: BoxFit.cover)
-                  : Container(
-                      color: _ink,
-                      alignment: Alignment.center,
-                      child: Text(d.name.isEmpty ? '?' : d.name[0], style: robotoBold.copyWith(color: _yellow, fontSize: 20)),
-                    ),
+          Container(
+            padding: const EdgeInsets.all(2.5),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: tier[1]),
+            child: ClipOval(
+              child: SizedBox(
+                width: 46,
+                height: 46,
+                child: d.imageUrl != null && d.imageUrl!.isNotEmpty
+                    ? CustomImage(image: d.imageUrl!, fit: BoxFit.cover)
+                    : Container(
+                        color: _ink,
+                        alignment: Alignment.center,
+                        child: Text(d.name.isEmpty ? '?' : d.name[0], style: robotoBold.copyWith(color: _yellow, fontSize: 20)),
+                      ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(d.name, style: robotoBold.copyWith(fontSize: 16)),
-              Row(children: [
-                const Icon(Icons.star_rounded, size: 16, color: _yellow),
-                Text(' ${d.rating.toStringAsFixed(1)} · ${d.totalTrips} ${'ride_trips'.tr}', style: robotoRegular.copyWith(color: Colors.black54, fontSize: 13)),
-              ]),
+              const SizedBox(height: 3),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(gradient: LinearGradient(colors: [tier[0], d.tier == 'blue' ? tier[0] : tier[1]]), borderRadius: BorderRadius.circular(99)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.workspace_premium, size: 13, color: tier[2]),
+                  const SizedBox(width: 3),
+                  Text('${'ride_driver_level'.tr} ${tierLabel.tr}', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: tier[2])),
+                ]),
+              ),
             ]),
           ),
+          if (onChat != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Badge(
+                isLabelVisible: trip.unreadMessages > 0,
+                label: Text('${trip.unreadMessages}'),
+                child: Material(
+                  color: _ink,
+                  shape: const CircleBorder(),
+                  child: IconButton(tooltip: 'ride_chat_driver'.tr, icon: const Icon(Icons.chat_bubble_outline, color: Colors.white), onPressed: onChat),
+                ),
+              ),
+            ),
           if (d.phone != null && d.phone!.isNotEmpty)
             Material(
               color: const Color(0xFF16A34A),
@@ -521,6 +717,23 @@ class _DriverCard extends StatelessWidget {
               ),
             ),
         ]),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+          child: Row(children: [
+            _stat(
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.star_rounded, size: 15, color: _yellow),
+                Text(' ${d.rating.toStringAsFixed(1).replaceAll('.', ',')}', style: bold),
+              ]),
+              '${d.ratingCount} ${'ride_reviews'.tr}',
+            ),
+            _stat(Text('${d.totalTrips}', style: bold), 'ride_trips'.tr),
+            _stat(Text('${d.totalKm}', style: bold), 'ride_km_driven'.tr),
+            _stat(Text(drivingFor(d.memberSince), style: bold), 'ride_driving_for'.tr),
+          ]),
+        ),
         const SizedBox(height: 10),
         Row(children: [
           Expanded(child: Text('${d.color} · ${d.vehicle}', style: robotoMedium)),

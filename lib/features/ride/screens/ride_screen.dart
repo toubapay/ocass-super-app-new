@@ -6,6 +6,7 @@ import 'package:sixam_mart/features/auth/controllers/auth_controller.dart';
 import 'package:sixam_mart/features/ride/controllers/ride_controller.dart';
 import 'package:sixam_mart/features/ride/domain/ride_models.dart';
 import 'package:sixam_mart/features/ride/screens/ride_search_screen.dart';
+import 'package:sixam_mart/features/ride/widgets/ride_map_icons.dart';
 import 'package:sixam_mart/features/ride/widgets/ride_sheets.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/dimensions.dart';
@@ -20,10 +21,46 @@ class RideScreen extends StatefulWidget {
   State<RideScreen> createState() => _RideScreenState();
 }
 
-class _RideScreenState extends State<RideScreen> {
+class _RideScreenState extends State<RideScreen> with SingleTickerProviderStateMixin {
   GoogleMapController? _map;
   LatLng? _center;
   String _framed = '';
+
+  // The driver's car glides from one position to the next (as in Yango).
+  late final AnimationController _glide = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
+    ..addListener(() => setState(() {}));
+  LatLng? _from;
+  LatLng? _to;
+  String? _bubble;
+
+  LatLng? get _shownDriver {
+    final from = _from, to = _to;
+    if (to == null) return null;
+    if (from == null) return to;
+    final k = Curves.easeInOut.transform(_glide.value);
+    return LatLng(from.latitude + (to.latitude - from.latitude) * k, from.longitude + (to.longitude - from.longitude) * k);
+  }
+
+  void _followDriver(LatLng? next) {
+    if (next == null) {
+      _from = _to = null;
+      return;
+    }
+    if (_to == null) {
+      _to = next;
+      return;
+    }
+    if (next == _to) return;
+    _from = _shownDriver;
+    _to = next;
+    _glide.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _glide.dispose();
+    super.dispose();
+  }
 
   RideController get _c => Get.find<RideController>();
 
@@ -31,6 +68,10 @@ class _RideScreenState extends State<RideScreen> {
   void initState() {
     super.initState();
     if (Get.find<AuthController>().isLoggedIn()) _c.load();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await RideMapIcons.load(MediaQuery.of(context).devicePixelRatio);
+      if (mounted) setState(() {});
+    });
   }
 
   bool get _picking => _c.step == RideStep.home || _c.step == RideStep.mapPick;
@@ -64,8 +105,8 @@ class _RideScreenState extends State<RideScreen> {
       case RideStep.options:
         return 'opt|${_c.estimate?.polyline?.length}|${_c.destination?.lat}';
       case RideStep.ride:
-        final d = t?.driver?.latLng;
-        return 'ride|${t?.id}|${t?.status}|${d == null ? '' : '${d.latitude.toStringAsFixed(3)},${d.longitude.toStringAsFixed(3)}'}';
+        // Reframe on a new stage, not on every move of the car.
+        return 'ride|${t?.id}|${t?.status}|${t?.driver?.latLng != null}';
       default:
         return _framed;
     }
@@ -86,11 +127,13 @@ class _RideScreenState extends State<RideScreen> {
     } else if (_c.step == RideStep.options) {
       pts = [if (_c.pickup != null) _c.pickup!.latLng, if (_c.destination != null) _c.destination!.latLng, ...decodePolyline(_c.estimate?.polyline)];
     } else {
+      // While the driver comes: only the car and the pick-up (as in Yango).
+      final coming = t?.status == 'accepted' || t?.status == 'arrived';
       pts = [
         if (t?.pickup != null) t!.pickup!.latLng,
-        if (t?.destination != null) t!.destination!.latLng,
+        if (!coming && t?.destination != null) t!.destination!.latLng,
         if (t?.driver?.latLng != null) t!.driver!.latLng!,
-        ...decodePolyline(t?.polyline),
+        ...decodePolyline(coming ? t?.live?.route : (t?.live?.route ?? t?.polyline)),
       ];
     }
     if (pts.isEmpty) return;
@@ -112,22 +155,71 @@ class _RideScreenState extends State<RideScreen> {
     }
   }
 
+  /// The label above the pick-up: "3 min" while the driver comes, "Ici" once arrived.
+  String? _pickupLabel(RideTrip? t) {
+    if (t == null) return null;
+    if (t.status == 'arrived') return 'ride_here'.tr;
+    final eta = t.live?.etaMin;
+    if (t.status == 'accepted' && eta != null) return eta <= 0 ? 'ride_driver_arriving'.tr : '$eta min';
+    return null;
+  }
+
   Set<Marker> _markers() {
-    if (_picking) return {};
+    final cars = _c.nearby?.cars ?? const <NearbyCar>[];
+    final showCars = _c.step != RideStep.ride || _c.trip?.status == 'searching';
+    final free = RideMapIcons.freeCar;
+    final carMarkers = {
+      if (showCars && free != null)
+        for (final (i, car) in cars.take(15).indexed)
+          Marker(markerId: MarkerId('car$i'), position: car.position, icon: free, rotation: car.heading, flat: true, anchor: const Offset(0.5, 0.5), zIndexInt: 1),
+    };
+    if (_picking) return carMarkers;
     final t = _c.step == RideStep.ride ? _c.trip : null;
+    final coming = t?.status == 'accepted' || t?.status == 'arrived';
     final from = t?.pickup ?? _c.pickup;
-    final to = t?.destination ?? _c.destination;
-    final driver = t?.driver?.latLng;
+    final to = coming ? null : (t?.destination ?? _c.destination);
+    _followDriver(t?.driver?.latLng);
+    final driver = _shownDriver;
+    final label = _pickupLabel(t);
+    if (label != _bubble) {
+      _bubble = label;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (label != null) _map?.showMarkerInfoWindow(const MarkerId('pickup'));
+      });
+    }
     return {
-      if (from != null) Marker(markerId: const MarkerId('pickup'), position: from.latLng, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)),
+      ...carMarkers,
+      if (from != null)
+        Marker(
+          markerId: const MarkerId('pickup'),
+          position: from.latLng,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          infoWindow: label == null ? InfoWindow.noText : InfoWindow(title: label),
+        ),
       if (to != null) Marker(markerId: const MarkerId('destination'), position: to.latLng, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)),
-      if (driver != null) Marker(markerId: const MarkerId('driver'), position: driver, zIndexInt: 3, icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow)),
+      if (driver != null)
+        Marker(
+          markerId: const MarkerId('driver'),
+          position: driver,
+          zIndexInt: 3,
+          flat: true,
+          anchor: const Offset(0.5, 0.5),
+          rotation: t?.driver?.heading ?? 0,
+          icon: RideMapIcons.driverCar ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        ),
     };
   }
 
   Set<Polyline> _polylines() {
     if (_picking) return {};
-    final encoded = _c.step == RideStep.ride ? _c.trip?.polyline : _c.estimate?.polyline;
+    final t = _c.trip;
+    String? encoded;
+    if (_c.step == RideStep.ride) {
+      // The driver's route to the pick-up, nothing while waiting, then the ride.
+      encoded = t?.status == 'arrived' ? null : (t?.status == 'accepted' || t?.status == 'in_progress' ? (t?.live?.route ?? t?.polyline) : t?.polyline);
+    } else {
+      encoded = _c.estimate?.polyline;
+    }
     final pts = decodePolyline(encoded);
     if (pts.isEmpty) return {};
     return {Polyline(polylineId: const PolylineId('route'), points: pts, color: const Color(0xFF1C1C1E), width: 5)};
@@ -206,11 +298,22 @@ class _RideScreenState extends State<RideScreen> {
                 ),
                 // Fixed centre pin: the map centre is the chosen point.
                 if (_picking)
-                  const IgnorePointer(
+                  IgnorePointer(
                     child: Center(
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: 44),
-                        child: Icon(Icons.location_on, size: 48, color: Color(0xFF1C1C1E), shadows: [Shadow(blurRadius: 6, color: Colors.black38)]),
+                        // The pin's tip stays on the map centre, with or without the label.
+                        padding: EdgeInsets.only(bottom: c.step == RideStep.home && c.nearby?.etaMin != null ? 70 : 44),
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          // "3 min": waiting time for the nearest free car.
+                          if (c.step == RideStep.home && c.nearby?.etaMin != null)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFF1C1C1E), borderRadius: BorderRadius.circular(9)),
+                              child: Text('${c.nearby!.etaMin} min', style: const TextStyle(color: Color(0xFFF5B301), fontWeight: FontWeight.w800, fontSize: 12.5)),
+                            ),
+                          const Icon(Icons.location_on, size: 48, color: Color(0xFF1C1C1E), shadows: [Shadow(blurRadius: 6, color: Colors.black38)]),
+                        ]),
                       ),
                     ),
                   ),
