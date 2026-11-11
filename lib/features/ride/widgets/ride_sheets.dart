@@ -23,15 +23,11 @@ String _money(double v) => PriceConverter.convertPrice(v, forDM: true);
 String _clock(DateTime? t) => t == null ? '' : '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 String _mmss(int sec) => '${sec ~/ 60}:${(sec % 60).toString().padLeft(2, '0')}';
 
-/// How long the driver has been driving with Noor: "12 jours", "8 mois", "2 ans".
-String drivingFor(DateTime? since) {
+/// When the driver joined Noor, e.g. "nov. 2026".
+String memberSince(DateTime? since) {
   if (since == null) return '—';
-  final days = DateTime.now().difference(since).inDays.clamp(1, 100000);
-  if (days < 31) return '$days ${(days == 1 ? 'ride_day' : 'ride_days').tr}';
-  final months = (days / 30.4).floor();
-  if (months < 12) return '$months ${'ride_months'.tr}';
-  final years = months ~/ 12;
-  return '$years ${(years == 1 ? 'ride_year' : 'ride_years').tr}';
+  const months = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  return '${months[since.month - 1]} ${since.year}';
 }
 
 /// Where the ride is, as in Yango: search → on the way → arrived → riding → there.
@@ -731,7 +727,7 @@ class _DriverCard extends StatelessWidget {
             ),
             _stat(Text('${d.totalTrips}', style: bold), 'ride_trips'.tr),
             _stat(Text('${d.totalKm}', style: bold), 'ride_km_driven'.tr),
-            _stat(Text(drivingFor(d.memberSince), style: bold), 'ride_driving_for'.tr),
+            _stat(Text(memberSince(d.memberSince), style: bold), 'ride_member_since'.tr),
           ]),
         ),
         const SizedBox(height: 10),

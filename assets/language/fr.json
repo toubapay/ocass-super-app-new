@@ -2825,5 +2825,6 @@
   "ride_tag_friendly": "Sympathique",
   "ride_tag_route": "Bon itinéraire",
   "featured_open": "Ouvert",
-  "featured_schedule": "Programmer"
+  "featured_schedule": "Programmer",
+  "ride_member_since": "membre depuis"
 }
