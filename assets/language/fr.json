@@ -2823,5 +2823,7 @@
   "ride_tag_on_time": "Ponctuel",
   "ride_tag_clean": "Voiture propre",
   "ride_tag_friendly": "Sympathique",
-  "ride_tag_route": "Bon itinéraire"
+  "ride_tag_route": "Bon itinéraire",
+  "featured_open": "Ouvert",
+  "featured_schedule": "Programmer"
 }

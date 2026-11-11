@@ -2048,5 +2048,7 @@
   "ride_tag_on_time": "دقيق في المواعيد",
   "ride_tag_clean": "سيارة نظيفة",
   "ride_tag_friendly": "لطيف",
-  "ride_tag_route": "مسار جيد"
+  "ride_tag_route": "مسار جيد",
+  "featured_open": "مفتوح",
+  "featured_schedule": "جدولة"
 }

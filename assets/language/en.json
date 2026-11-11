@@ -2823,5 +2823,7 @@
   "ride_tag_on_time": "On time",
   "ride_tag_clean": "Clean car",
   "ride_tag_friendly": "Friendly",
-  "ride_tag_route": "Good route"
+  "ride_tag_route": "Good route",
+  "featured_open": "Open",
+  "featured_schedule": "Schedule"
 }
