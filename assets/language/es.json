@@ -2026,5 +2026,6 @@
   "ride_tag_friendly": "Friendly",
   "ride_tag_route": "Good route",
   "featured_open": "Open",
-  "featured_schedule": "Schedule"
+  "featured_schedule": "Schedule",
+  "ride_member_since": "member since"
 }
