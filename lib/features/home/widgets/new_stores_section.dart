@@ -103,7 +103,7 @@ class _NewStoresSectionState extends State<NewStoresSection> {
           ]),
         ),
         SizedBox(
-          height: cardWidth + 66,
+          height: cardWidth * 0.75 + 66,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -126,7 +126,7 @@ class _NewStoresSectionState extends State<NewStoresSection> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(
             width: size,
-            height: size,
+            height: size * 0.75,
             child: Stack(fit: StackFit.expand, children: [
               Container(
                 decoration: const BoxDecoration(
@@ -134,7 +134,7 @@ class _NewStoresSectionState extends State<NewStoresSection> {
                 ),
                 alignment: Alignment.center,
                 child: Text(s.name.isEmpty ? '?' : s.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: _gold)),
+                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: _gold)),
               ),
               if (s.image != null && s.image!.isNotEmpty) CustomImage(image: s.image!, fit: BoxFit.cover),
               Positioned(
