@@ -25,6 +25,7 @@ import 'package:sixam_mart/features/address/domain/models/address_model.dart';
 import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart';
 import 'package:sixam_mart/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:sixam_mart/features/home/widgets/popular_store_view.dart';
+import 'package:sixam_mart/features/home/widgets/new_stores_section.dart';
 import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view.dart';
 import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view1.dart';
 import 'package:sixam_mart/features/home/widgets/views/promotional_banner_view.dart';
@@ -417,13 +418,20 @@ class _ModuleViewState extends State<ModuleView> {
                     final balance =
                         profileController.userInfoModel?.walletBalance ?? 0;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: WalletCard(
-                        title: "OcassWallet",
-                        balance: "$balance",
+                    return Column(mainAxisSize: MainAxisSize.min, children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: WalletCard(
+                          title: "OcassWallet",
+                          balance: "$balance",
+                        ),
                       ),
-                    );
+                      // Curved line separating the wallet card from the services (as in Toubapay).
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 4, 16, 6),
+                        child: SizedBox(height: 16, width: double.infinity, child: CustomPaint(painter: _WalletCurvePainter())),
+                      ),
+                    ]);
                   },
                 ),
 
@@ -959,6 +967,8 @@ class _ModuleViewState extends State<ModuleView> {
                 // Boutiques à la une (chosen in the admin), as Glovo's "Top brands".
                 const FeaturedStoresSection(),
                 const PopularStoreView(isPopular: false, isFeatured: true),
+                // The six newest boutiques (on/off in the admin).
+                const NewStoresSection(),
                 const SizedBox(height: 30),
                 // const HeaderWidget(),
                 const SizedBox(height: 50),
@@ -1137,4 +1147,25 @@ class TopCropper extends CustomClipper<Rect> {
   bool shouldReclip(TopCropper oldClipper) {
     return oldClipper.cropHeight != cropHeight;
   }
+}
+
+/// The gold arc under the wallet card: higher in the middle, lower at both ends.
+class _WalletCurvePainter extends CustomPainter {
+  const _WalletCurvePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF9A7209)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    final path = Path()
+      ..moveTo(1, size.height - 2)
+      ..quadraticBezierTo(size.width / 2, -size.height + 2, size.width - 1, size.height - 2);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

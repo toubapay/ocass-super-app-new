@@ -2051,5 +2051,11 @@
   "ride_tag_route": "مسار جيد",
   "featured_open": "مفتوح",
   "featured_schedule": "جدولة",
-  "ride_member_since": "عضو منذ"
+  "ride_member_since": "عضو منذ",
+  "new_stores_badge": "جديد",
+  "new_stores_grocery": "سوبرماركت",
+  "new_stores_food": "مطعم",
+  "new_stores_pharmacy": "صيدلية",
+  "new_stores_shop": "متجر",
+  "new_stores_closed": "مغلق"
 }

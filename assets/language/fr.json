@@ -2826,5 +2826,11 @@
   "ride_tag_route": "Bon itinéraire",
   "featured_open": "Ouvert",
   "featured_schedule": "Programmer",
-  "ride_member_since": "membre depuis"
+  "ride_member_since": "membre depuis",
+  "new_stores_badge": "Nouveau",
+  "new_stores_grocery": "Supermarché",
+  "new_stores_food": "Restaurant",
+  "new_stores_pharmacy": "Pharmacie",
+  "new_stores_shop": "Boutique",
+  "new_stores_closed": "Fermé"
 }
