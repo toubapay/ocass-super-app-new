@@ -2027,5 +2027,11 @@
   "ride_tag_route": "Good route",
   "featured_open": "Open",
   "featured_schedule": "Schedule",
-  "ride_member_since": "member since"
+  "ride_member_since": "member since",
+  "new_stores_badge": "New",
+  "new_stores_grocery": "Supermarket",
+  "new_stores_food": "Restaurant",
+  "new_stores_pharmacy": "Pharmacy",
+  "new_stores_shop": "Shop",
+  "new_stores_closed": "Closed"
 }

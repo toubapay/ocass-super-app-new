@@ -25,6 +25,7 @@ import 'package:sixam_mart/features/address/domain/models/address_model.dart';
 import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart';
 import 'package:sixam_mart/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:sixam_mart/features/home/widgets/popular_store_view.dart';
+import 'package:sixam_mart/features/home/widgets/new_stores_section.dart';
 import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view.dart';
 import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view1.dart';
 import 'package:sixam_mart/features/home/widgets/views/promotional_banner_view.dart';
@@ -959,6 +960,8 @@ class _ModuleViewState extends State<ModuleView> {
                 // Boutiques à la une (chosen in the admin), as Glovo's "Top brands".
                 const FeaturedStoresSection(),
                 const PopularStoreView(isPopular: false, isFeatured: true),
+                // The six newest boutiques (on/off in the admin).
+                const NewStoresSection(),
                 const SizedBox(height: 30),
                 // const HeaderWidget(),
                 const SizedBox(height: 50),
