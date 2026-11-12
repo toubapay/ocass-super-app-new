@@ -2832,5 +2832,7 @@
   "new_stores_food": "Restaurant",
   "new_stores_pharmacy": "Pharmacy",
   "new_stores_shop": "Shop",
-  "new_stores_closed": "Closed"
+  "new_stores_closed": "Closed",
+  "home_brands_one": "{0} product",
+  "home_brands_many": "{0} products"
 }

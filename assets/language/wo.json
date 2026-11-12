@@ -1624,5 +1624,7 @@
   "new_stores_food": "Restoraŋ",
   "new_stores_pharmacy": "Farmasi",
   "new_stores_shop": "Bitig",
-  "new_stores_closed": "Tëj na"
+  "new_stores_closed": "Tëj na",
+  "home_brands_one": "{0} produit",
+  "home_brands_many": "{0} produit yi"
 }
