@@ -418,13 +418,20 @@ class _ModuleViewState extends State<ModuleView> {
                     final balance =
                         profileController.userInfoModel?.walletBalance ?? 0;
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: WalletCard(
-                        title: "OcassWallet",
-                        balance: "$balance",
+                    return Column(mainAxisSize: MainAxisSize.min, children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: WalletCard(
+                          title: "OcassWallet",
+                          balance: "$balance",
+                        ),
                       ),
-                    );
+                      // Curved line separating the wallet card from the services (as in Toubapay).
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 4, 16, 6),
+                        child: SizedBox(height: 16, width: double.infinity, child: CustomPaint(painter: _WalletCurvePainter())),
+                      ),
+                    ]);
                   },
                 ),
 
@@ -1140,4 +1147,25 @@ class TopCropper extends CustomClipper<Rect> {
   bool shouldReclip(TopCropper oldClipper) {
     return oldClipper.cropHeight != cropHeight;
   }
+}
+
+/// The gold arc under the wallet card: higher in the middle, lower at both ends.
+class _WalletCurvePainter extends CustomPainter {
+  const _WalletCurvePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF9A7209)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+    final path = Path()
+      ..moveTo(1, size.height - 2)
+      ..quadraticBezierTo(size.width / 2, -size.height + 2, size.width - 1, size.height - 2);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
