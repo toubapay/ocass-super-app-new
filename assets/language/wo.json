@@ -1626,5 +1626,8 @@
   "new_stores_shop": "Bitig",
   "new_stores_closed": "Tëj na",
   "home_brands_one": "{0} produit",
-  "home_brands_many": "{0} produit yi"
+  "home_brands_many": "{0} produit yi",
+  "ride_less_than_minute": "< 1 min",
+  "ride_eta_to_pickup": "Ci {0} · dina agsi ci {1}",
+  "ride_eta_to_destination": "Agsi ci {0} min · {1} des na"
 }

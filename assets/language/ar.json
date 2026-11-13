@@ -2059,5 +2059,8 @@
   "new_stores_shop": "متجر",
   "new_stores_closed": "مغلق",
   "home_brands_one": "{0} منتج",
-  "home_brands_many": "{0} منتجات"
+  "home_brands_many": "{0} منتجات",
+  "ride_less_than_minute": "أقل من دقيقة",
+  "ride_eta_to_pickup": "على بعد {0} · يصل حوالي {1}",
+  "ride_eta_to_destination": "الوصول خلال {0} د · متبقٍ {1}"
 }

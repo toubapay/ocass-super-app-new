@@ -2834,5 +2834,8 @@
   "new_stores_shop": "Boutique",
   "new_stores_closed": "Fermé",
   "home_brands_one": "{0} produit",
-  "home_brands_many": "{0} produits"
+  "home_brands_many": "{0} produits",
+  "ride_less_than_minute": "< 1 min",
+  "ride_eta_to_pickup": "À {0} · arrivée vers {1}",
+  "ride_eta_to_destination": "Arrivée dans {0} min · {1} restants"
 }
