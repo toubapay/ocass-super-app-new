@@ -69,12 +69,19 @@ class _RideProgress extends StatelessWidget {
 }
 
 /// Big black box with the countdown, the waiting timer or the arrival time.
+/// Distance as riders read it: metres under 1 km, then kilometres ("1,2 km").
+String _dist(double km) => km < 1
+    ? '${((km * 1000) / 10).round() * 10 < 10 ? 10 : ((km * 1000) / 10).round() * 10} m'
+    : '${km.toStringAsFixed(1).replaceAll('.', ',')} km';
+
 class _EtaHead extends StatelessWidget {
   final String big;
   final String title;
   final String sub;
   final bool alert;
-  const _EtaHead({required this.big, required this.title, required this.sub, this.alert = false});
+  /// Bold line under the title: distance and arrival time ("À 1,2 km · arrivée vers 22:51").
+  final String? line;
+  const _EtaHead({required this.big, required this.title, required this.sub, this.alert = false, this.line});
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +100,10 @@ class _EtaHead extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, style: robotoBold.copyWith(fontSize: 18)),
+            if (line != null) ...[
+              const SizedBox(height: 2),
+              Text(line!, style: robotoBold.copyWith(fontSize: 15)),
+            ],
             const SizedBox(height: 2),
             Text(sub, style: robotoRegular.copyWith(color: Colors.black54, fontSize: 13)),
           ]),
@@ -570,9 +581,10 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
         Widget head;
         if (t.status == 'accepted' && live?.etaMin != null) {
           head = _EtaHead(
-            big: live!.etaMin! <= 0 ? 'ride_driver_arriving'.tr : '${live.etaMin} min',
+            big: live!.etaMin! <= 0 ? 'ride_less_than_minute'.tr : '${live.etaMin} min',
             title: title,
-            sub: live.etaMin! > 0 ? '${'ride_arrival_at'.tr} ${_clock(live.etaAt)} · ${live.distanceKm.toStringAsFixed(2).replaceAll('.', ',')} km' : sub,
+            line: 'ride_eta_to_pickup'.tr.replaceAll('{0}', _dist(live.distanceKm)).replaceAll('{1}', _clock(live.etaAt)),
+            sub: sub,
           );
         } else if (t.status == 'arrived') {
           head = _EtaHead(
@@ -586,7 +598,12 @@ class _RideStatusSheetState extends State<_RideStatusSheet> {
                     : sub,
           );
         } else if (t.status == 'in_progress' && live?.etaMin != null) {
-          head = _EtaHead(big: _clock(live!.etaAt), title: title, sub: '${'ride_arrival_in'.tr} ${live.etaMin! < 1 ? 1 : live.etaMin} min · $sub');
+          head = _EtaHead(
+            big: _clock(live!.etaAt),
+            title: title,
+            line: 'ride_eta_to_destination'.tr.replaceAll('{0}', '${live.etaMin! < 1 ? 1 : live.etaMin}').replaceAll('{1}', _dist(live.distanceKm)),
+            sub: sub,
+          );
         } else {
           head = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             Text(title, style: robotoBold.copyWith(fontSize: 20)),
