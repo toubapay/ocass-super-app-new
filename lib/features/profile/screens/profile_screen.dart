@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/auth/pin_auth.dart';
 import 'package:demandium/feature/auth/controller/auth_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixam_mart/features/cart/controllers/cart_controller.dart';
@@ -334,6 +335,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               height: isLoggedIn
                                   ? Dimensions.paddingSizeSmall
                                   : 0),
+                          // Noor: sign-in PIN (number + 4 digits, no SMS).
+                          if (isLoggedIn) ...[
+                            ProfileButtonWidget(
+                              icon: Icons.pin_outlined,
+                              title: 'Code PIN de connexion',
+                              onTap: () async {
+                                final has = await PinAuth.hasPin();
+                                showPinSheet(change: has == true);
+                              },
+                            ),
+                            const SizedBox(height: Dimensions.paddingSizeSmall),
+                          ],
                           isLoggedIn &&
                                   Get.find<SplashController>()
                                       .configModel!

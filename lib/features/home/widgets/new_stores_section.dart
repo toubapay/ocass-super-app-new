@@ -91,7 +91,7 @@ class _NewStoresSectionState extends State<NewStoresSection> {
   @override
   Widget build(BuildContext context) {
     if (_stores.isEmpty) return const SizedBox.shrink();
-    final cardWidth = MediaQuery.sizeOf(context).width * 0.44;
+    final cardWidth = MediaQuery.sizeOf(context).width * 0.30;
     return Padding(
       padding: const EdgeInsets.only(top: 6, bottom: 18),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -103,12 +103,12 @@ class _NewStoresSectionState extends State<NewStoresSection> {
           ]),
         ),
         SizedBox(
-          height: cardWidth + 92,
+          height: cardWidth * 0.75 + 66,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: _stores.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
             itemBuilder: (_, i) => SizedBox(width: cardWidth, child: _card(_stores[i], cardWidth)),
           ),
         ),
@@ -119,14 +119,14 @@ class _NewStoresSectionState extends State<NewStoresSection> {
   Widget _card(_NewStore s, double size) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => _open(s),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(
             width: size,
-            height: size,
+            height: size * 0.75,
             child: Stack(fit: StackFit.expand, children: [
               Container(
                 decoration: const BoxDecoration(
@@ -134,32 +134,32 @@ class _NewStoresSectionState extends State<NewStoresSection> {
                 ),
                 alignment: Alignment.center,
                 child: Text(s.name.isEmpty ? '?' : s.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 54, fontWeight: FontWeight.w800, color: _gold)),
+                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: _gold)),
               ),
               if (s.image != null && s.image!.isNotEmpty) CustomImage(image: s.image!, fit: BoxFit.cover),
               Positioned(
-                top: 8,
-                left: 8,
+                top: 6,
+                left: 6,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: _goldInk, borderRadius: BorderRadius.circular(10)),
-                  child: Text('new_stores_badge'.tr, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: _goldInk, borderRadius: BorderRadius.circular(8)),
+                  child: Text('new_stores_badge'.tr, style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w700)),
                 ),
               ),
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+            padding: const EdgeInsets.fromLTRB(9, 7, 9, 0),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 2),
-              Text(_kind(s.moduleType), maxLines: 1, style: const TextStyle(fontSize: 13, color: Color(0xFF6E6E73))),
+              Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 1),
+              Text(_kind(s.moduleType), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: Color(0xFF6E6E73))),
               const SizedBox(height: 2),
               Text(
                 s.open ? ['featured_open'.tr, if (s.deliveryTime != null && s.deliveryTime!.isNotEmpty) s.deliveryTime!].join(' · ') : 'new_stores_closed'.tr,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: s.open ? const Color(0xFF16794A) : const Color(0xFF6E6E73)),
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: s.open ? const Color(0xFF16794A) : const Color(0xFF6E6E73)),
               ),
             ]),
           ),

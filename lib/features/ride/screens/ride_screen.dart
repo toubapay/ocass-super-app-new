@@ -160,7 +160,7 @@ class _RideScreenState extends State<RideScreen> with SingleTickerProviderStateM
     if (t == null) return null;
     if (t.status == 'arrived') return 'ride_here'.tr;
     final eta = t.live?.etaMin;
-    if (t.status == 'accepted' && eta != null) return eta <= 0 ? 'ride_driver_arriving'.tr : '$eta min';
+    if (t.status == 'accepted' && eta != null) return eta <= 0 ? 'ride_less_than_minute'.tr : '$eta min';
     return null;
   }
 
