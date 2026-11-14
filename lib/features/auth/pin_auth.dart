@@ -20,7 +20,6 @@ class PinLoginResult {
 
 class PinAuth {
   static const String _resetKey = 'noor_pin_reset_pending';
-  static const String _snoozeKey = 'noor_pin_prompt_snoozed_at';
 
   static Future<PinLoginResult> login(String phone, String pin) async {
     final api = Get.find<ApiClient>();
@@ -77,31 +76,31 @@ class PinAuth {
     final prefs = await SharedPreferences.getInstance();
     final reset = prefs.getBool(_resetKey) ?? false;
     if (!reset) {
-      final snoozedAt = prefs.getInt(_snoozeKey) ?? 0;
-      if (DateTime.now().millisecondsSinceEpoch - snoozedAt < const Duration(days: 1).inMilliseconds) return;
       final has = await hasPin();
       if (has != false) return;
     }
-    final saved = await showPinSheet(change: false, reset: reset);
-    if (saved) {
-      await prefs.remove(_resetKey);
-    } else {
-      await prefs.setInt(_snoozeKey, DateTime.now().millisecondsSinceEpoch);
-      if (reset) await prefs.remove(_resetKey);
-    }
+    // After the first SMS sign-in (or "Code PIN oublié ?") the PIN is required.
+    final saved = await showPinSheet(change: false, reset: reset, required: true);
+    if (saved) await prefs.remove(_resetKey);
   }
 }
 
 /// Choose, reset or change the 4-digit PIN.
-Future<bool> showPinSheet({bool change = false, bool reset = false}) async {
-  final ok = await Get.bottomSheet<bool>(_PinSheet(change: change, reset: reset), isScrollControlled: true);
+Future<bool> showPinSheet({bool change = false, bool reset = false, bool required = false}) async {
+  final ok = await Get.bottomSheet<bool>(
+    PopScope(canPop: !required, child: _PinSheet(change: change, reset: reset, required: required)),
+    isScrollControlled: true,
+    isDismissible: !required,
+    enableDrag: !required,
+  );
   return ok == true;
 }
 
 class _PinSheet extends StatefulWidget {
   final bool change;
   final bool reset;
-  const _PinSheet({required this.change, required this.reset});
+  final bool required;
+  const _PinSheet({required this.change, required this.reset, this.required = false});
 
   @override
   State<_PinSheet> createState() => _PinSheetState();
@@ -205,7 +204,7 @@ class _PinSheetState extends State<_PinSheet> {
                   : const Text('Enregistrer', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
             ),
           ),
-          if (!widget.change)
+          if (!widget.change && !widget.required)
             TextButton(onPressed: () => Get.back(result: false), child: const Text('Plus tard')),
         ]),
       ),
