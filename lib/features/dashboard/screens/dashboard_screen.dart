@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/auth/pin_auth.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -67,6 +68,8 @@ class DashboardScreenState extends State<DashboardScreen> {
     super.initState();
 
     _isLogin = AuthHelper.isLoggedIn();
+    // Noor: a customer signed in without a PIN (or who forgot it) chooses one.
+    if (_isLogin) Future.delayed(const Duration(seconds: 2), PinAuth.promptIfNeeded);
     _pageIndex = widget.pageIndex;
     _pageController = PageController(initialPage: _pageIndex);
 

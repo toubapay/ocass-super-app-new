@@ -10,6 +10,7 @@ import 'package:sixam_mart/common/models/response_model.dart';
 import 'package:sixam_mart/common/widgets/custom_snackbar.dart';
 import 'package:sixam_mart/features/auth/controllers/auth_controller.dart';
 import 'package:sixam_mart/features/auth/domain/enum/centralize_login_enum.dart';
+import 'package:sixam_mart/features/auth/pin_auth.dart';
 import 'package:sixam_mart/features/auth/screens/new_user_setup_screen.dart';
 import 'package:sixam_mart/features/auth/widgets/sign_in/manual_login_widget.dart';
 import 'package:sixam_mart/features/auth/widgets/sign_in/otp_login_widget.dart';
@@ -50,6 +51,8 @@ class _SignInViewState extends State<SignInView> {
   final TextEditingController _passwordController = TextEditingController();
   String? _countryDialCode;
   GlobalKey<FormState>? _formKeyLogin;
+  final GlobalKey<OtpLoginWidgetState> _otpWidget = GlobalKey<OtpLoginWidgetState>();
+  bool _pinBusy = false;
 
   @override
   void initState() {
@@ -123,6 +126,8 @@ class _SignInViewState extends State<SignInView> {
     switch (centralizeLogin) {
       case CentralizeLoginType.otp:
         return OtpLoginWidget(
+          key: _otpWidget,
+          onPinLogin: (pin) => _pinLogin(authController, pin),
           phoneController: _phoneController,
           phoneFocus: _phoneFocus,
           countryDialCode: _countryDialCode,
@@ -231,6 +236,44 @@ class _SignInViewState extends State<SignInView> {
           },
         );
     }
+  }
+
+  /// Noor: number + 4-digit PIN, no SMS. A number without a PIN goes to the
+  /// SMS code (then the home screen offers to choose a PIN).
+  Future<void> _pinLogin(AuthController authController, String pin) async {
+    if (_pinBusy) return;
+    final String countryDialCode = _countryDialCode ?? authController.countryDialCode;
+    final String phone = _phoneController.text.trim();
+    final PhoneValid phoneValid = await CustomValidator.isPhoneValid(countryDialCode + phone);
+    if (!phoneValid.isValid) {
+      showCustomSnackBar('invalid_phone_number'.tr);
+      return;
+    }
+    _pinBusy = true;
+    final result = await PinAuth.login(phoneValid.phone, pin);
+    _pinBusy = false;
+    if (result.ok) {
+      if (authController.isActiveRememberMe) {
+        authController.saveUserNumberAndPassword(phone, '', countryDialCode);
+      }
+      if (widget.backFromThis) {
+        if (ResponsiveHelper.isDesktop(Get.context) || widget.fromResetPassword) {
+          Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: false));
+        } else {
+          Get.back();
+        }
+      } else {
+        Get.find<LocationController>().navigateToLocationScreen('sign-in', offNamed: true);
+      }
+      return;
+    }
+    if (result.code == 'no_pin') {
+      _otpWidget.currentState?.useSms();
+      showCustomSnackBar('Première connexion : confirme ton numéro avec le code SMS, puis choisis ton code PIN.', isError: false);
+      _otpLogin(authController, countryDialCode, CentralizeLoginType.otp);
+      return;
+    }
+    showCustomSnackBar(result.message ?? 'Connexion impossible. Réessaie.');
   }
 
   void _otpLogin(AuthController authController, String countryDialCode,
