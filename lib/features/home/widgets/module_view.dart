@@ -1,3 +1,4 @@
+import 'package:sixam_mart/helper/thumb_helper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sixam_mart/helper/service_icon_helper.dart';
 import 'dart:developer';
@@ -243,7 +244,7 @@ class _ModuleViewState extends State<ModuleView> {
     // For jpg, png, gif - use CachedNetworkImage
     return ClipRect(
       child: CachedNetworkImage(
-        imageUrl: _bannerUrl!,
+        imageUrl: ThumbHelper.url(_bannerUrl!, logicalWidth: MediaQuery.sizeOf(context).width, pixelRatio: MediaQuery.devicePixelRatioOf(context)),
         fit: BoxFit.fitWidth,
         width: double.infinity,
         alignment: Alignment.topCenter,

@@ -1,3 +1,4 @@
+import 'package:sixam_mart/helper/thumb_helper.dart';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
@@ -609,7 +610,7 @@ class CategoryItemScreenState extends State<CategoryItemScreen>
                                   )
                                       :
                                   Image.network(
-                                    "${catController.subCategoryList![index].imageFullUrl}",
+                                    ThumbHelper.url("${catController.subCategoryList![index].imageFullUrl}", logicalWidth: 30),
                                     height: 30,
                                     width: 30,
                                     // color: index ==
