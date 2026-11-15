@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
 // Lighter Noor gold so it stays readable on dark surfaces.
-ThemeData dark({Color color = const Color(0xFFD4AF37)}) => ThemeData(
+ThemeData dark({Color color = const Color(0xFF18A058)}) => ThemeData(
       fontFamily: AppConstants.fontFamily,
       primaryColor: color,
       secondaryHeaderColor: const Color(0xFFB8860B),

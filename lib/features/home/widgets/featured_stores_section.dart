@@ -9,7 +9,7 @@ import 'package:sixam_mart/features/store/screens/store_screen.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
-const _gold = Color(0xFF9A7209);
+const _gold = Color(0xFFB8901F);
 
 class _FeaturedStore {
   final int id;

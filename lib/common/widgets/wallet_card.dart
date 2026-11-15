@@ -5,6 +5,9 @@ import 'package:sixam_mart/util/images.dart';
 import '../../features/wallet/widgets/add_fund_dialogue_widget.dart';
 import '../../helper/route_helper.dart';
 
+/// White text that stays readable on the gold card.
+const List<Shadow> _onGold = [Shadow(color: Color(0x99281A00), blurRadius: 3, offset: Offset(0, 1))];
+
 class WalletCard extends StatelessWidget {
   final String title;
   final String balance;
@@ -18,23 +21,21 @@ class WalletCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScrollController cardScrollController = ScrollController();
-    final primaryColor = Theme.of(context).primaryColor;
     
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            primaryColor,
-            primaryColor.withOpacity(0.85),
-          ],
+        // Noor dark metallic gold with a soft sheen.
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6E500A), Color(0xFF97731A), Color(0xFFB8901F), Color(0xFFC9A23C), Color(0xFFB8901F), Color(0xFF86650F)],
+          stops: [0, 0.22, 0.42, 0.58, 0.74, 1],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.25),
+            color: const Color(0xFFB8901F).withOpacity(0.35),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -73,8 +74,9 @@ class WalletCard extends StatelessWidget {
                           title.tr,
                           style: const TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white70,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            shadows: _onGold,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -84,6 +86,7 @@ class WalletCard extends StatelessWidget {
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            shadows: _onGold,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -184,8 +187,9 @@ class _WalletActionButton extends StatelessWidget {
             title.tr,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.9),
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              shadows: _onGold,
             ),
           ),
         ],
