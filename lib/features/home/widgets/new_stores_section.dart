@@ -11,7 +11,7 @@ import 'package:sixam_mart/util/app_constants.dart';
 
 const _green = Color(0xFF0E4D3A);
 const _gold = Color(0xFFE2B33C);
-const _goldInk = Color(0xFF9A7209);
+const _goldInk = Color(0xFFB8901F);
 
 class _NewStore {
   final int id;

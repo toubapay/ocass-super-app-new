@@ -2,11 +2,11 @@ import 'package:demandium/theme/custom_theme_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
-// Noor gold, the same brand colour as the web app.
-ThemeData light({Color color = const Color(0xFF9A7209)}) => ThemeData(
+// Noor green, the same brand colour as the web app (gold for the cards and accents).
+ThemeData light({Color color = const Color(0xFF0E4D3A)}) => ThemeData(
       fontFamily: AppConstants.fontFamily,
       primaryColor: color,
-      secondaryHeaderColor: const Color(0xFFD4AF37),
+      secondaryHeaderColor: const Color(0xFFB8901F),
       disabledColor: const Color(0xFF9F9F9F),
       brightness: Brightness.light,
       hintColor: const Color(0xFF9F9F9F),

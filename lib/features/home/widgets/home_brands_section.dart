@@ -7,7 +7,7 @@ import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
-const _gold = Color(0xFF9A7209);
+const _gold = Color(0xFFB8901F);
 
 class _Brand {
   final int id;
