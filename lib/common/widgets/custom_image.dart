@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sixam_mart/helper/thumb_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/util/images.dart';
 
@@ -50,8 +51,11 @@ class CustomImage extends StatelessWidget {
         ),
         child: CachedNetworkImage(
           color: color,
-          imageUrl:
-              kIsWeb ? '${AppConstants.baseUrl}/image-proxy?url=$image' : image,
+          // A small WebP copy sized for the screen (see ThumbHelper); if the
+          // server can't make it, the original below.
+          imageUrl: kIsWeb
+              ? '${AppConstants.baseUrl}/image-proxy?url=$image'
+              : ThumbHelper.url(image, logicalWidth: (width != null && width!.isFinite) ? width : MediaQuery.sizeOf(context).width, pixelRatio: MediaQuery.devicePixelRatioOf(context)),
           height: height,
           width: width,
           fit: effectiveFit,
@@ -73,7 +77,23 @@ class CustomImage extends StatelessWidget {
               ),
             ),
           ),
-          errorWidget: (context, url, error) => Container(
+          errorWidget: (context, url, error) => !kIsWeb && url != image && image.isNotEmpty
+              ? CachedNetworkImage(
+                  color: color,
+                  imageUrl: image,
+                  height: height,
+                  width: width,
+                  fit: effectiveFit,
+                  alignment: alignment,
+                  errorWidget: (context, url, error) => _placeholderBox(),
+                )
+              : _placeholderBox(),
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholderBox() => Container(
             constraints: BoxConstraints(
               maxHeight: height ?? double.infinity,
               maxWidth: width ?? double.infinity,
@@ -89,9 +109,5 @@ class CustomImage extends StatelessWidget {
                 color: placeholderColor ?? color,
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
+          );
 }
