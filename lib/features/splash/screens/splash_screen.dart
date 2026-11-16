@@ -72,7 +72,7 @@ class SplashScreenState extends State<SplashScreen> {
   Future<void> _preloadImages() async {
     await precacheImage(
       const NetworkImage(
-        'https://app.ocass.net/public/assets/landing/module2.jpg',
+        'https://ocass-marketplace.onrender.com/public/assets/landing/module2.jpg',
       ),
       context,
     );
