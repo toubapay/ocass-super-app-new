@@ -42,7 +42,8 @@ class LocalizationController extends GetxController implements GetxService {
       Get.find<SplashController>().getLandingPageData();
     }
 
-    if(Get.find<SplashController>().moduleList == null) {
+    // Always reload the services: their names come in the chosen language.
+    {
       Get.find<SplashController>().getModules(headers: {'Content-Type': 'application/json; charset=UTF-8', AppConstants.localizationKey: Get.find<LocalizationController>().locale.languageCode});
     }
 
