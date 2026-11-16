@@ -968,7 +968,7 @@ class _ModuleViewState extends State<ModuleView> {
                 //   padding: const EdgeInsets.all(8.0),
                 //   child: CachedNetworkImage(
                 //     imageUrl:
-                //         'https://app.ocass.net/public/assets/landing/module2.jpg',
+                //         'https://ocass-marketplace.onrender.com/public/assets/landing/module2.jpg',
                 //     fit: BoxFit.cover,
                 //     width: double.infinity,
                 //     placeholder: (c, s) => const SizedBox(), // almost invisible
