@@ -33,22 +33,28 @@ class DiscountTag extends StatefulWidget {
 
 class _DiscountTagState extends State<DiscountTag>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Color?> _colorAnimation;
+  // A red tag that swings with a shine every few seconds (as on the web app).
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2600),
+  )..repeat();
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500), // blink
-    )..repeat(reverse: true);
+  late final Animation<double> _angle = TweenSequence<double>([
+    TweenSequenceItem(tween: ConstantTween(0), weight: 62),
+    TweenSequenceItem(tween: Tween(begin: 0, end: -0.16), weight: 6),
+    TweenSequenceItem(tween: Tween(begin: -0.16, end: 0.12), weight: 6),
+    TweenSequenceItem(tween: Tween(begin: 0.12, end: -0.07), weight: 6),
+    TweenSequenceItem(tween: Tween(begin: -0.07, end: 0), weight: 6),
+    TweenSequenceItem(tween: ConstantTween(0), weight: 14),
+  ]).animate(CurvedAnimation(parent: _controller, curve: Curves.linear));
 
-    _colorAnimation = ColorTween(
-      begin: const Color(0xFF17E81E), // light green
-      end: const Color(0xFF006006), // dark green
-    ).animate(_controller);
-  }
+  late final Animation<double> _scale = TweenSequence<double>([
+    TweenSequenceItem(tween: ConstantTween(1), weight: 62),
+    TweenSequenceItem(tween: Tween(begin: 1, end: 1.12), weight: 6),
+    TweenSequenceItem(tween: ConstantTween(1.12), weight: 6),
+    TweenSequenceItem(tween: Tween(begin: 1.12, end: 1), weight: 12),
+    TweenSequenceItem(tween: ConstantTween(1), weight: 14),
+  ]).animate(_controller);
 
   @override
   void dispose() {
@@ -82,49 +88,62 @@ class _DiscountTagState extends State<DiscountTag>
       left: widget.inLeft ? (floating ? Dimensions.paddingSizeSmall : 0) : null,
       right: widget.inLeft ? null : 0,
       child: AnimatedBuilder(
-        animation: _colorAnimation,
+        animation: _controller,
         builder: (context, child) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: _colorAnimation.value,
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2))
-              ],
-              borderRadius: taxi
-                  ? const BorderRadius.only(
-                      topLeft: Radius.circular(Dimensions.radiusDefault),
-                      bottomRight: Radius.circular(Dimensions.radiusDefault),
-                    )
-                  : BorderRadius.horizontal(
-                      right: Radius.circular(floating
-                          ? Dimensions.radiusLarge
-                          : Dimensions.radiusSmall),
-                      left: Radius.circular(floating
-                          ? Dimensions.radiusLarge
-                          : Dimensions.radiusSmall),
-                    ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.local_offer, color: Colors.white, size: 14),
-                const SizedBox(width: 4),
-                Text(
-                  text,
-                  style: robotoMedium.copyWith(
-                    color: Colors.white,
-                    fontSize: widget.fontSize ??
-                        (ResponsiveHelper.isMobile(context) ? 10 : 12),
-                  ),
+          final still = MediaQuery.of(context).disableAnimations;
+          final t = still ? 0.0 : _controller.value;
+          // Shine: a light band sweeping across between 40% and 60% of the loop.
+          final shine = ((t - 0.4) / 0.2).clamp(0.0, 1.0);
+          return Transform.rotate(
+            angle: still ? 0 : _angle.value,
+            alignment: Alignment.centerLeft,
+            child: Transform.scale(
+              scale: still ? 1 : _scale.value,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFFE11D48), Color(0xFFBE123C)]),
+                  boxShadow: [BoxShadow(color: const Color(0xFFBE123C).withValues(alpha: 0.35), blurRadius: 6, offset: const Offset(0, 2))],
+                  borderRadius: taxi
+                      ? const BorderRadius.only(
+                          topLeft: Radius.circular(Dimensions.radiusDefault),
+                          bottomRight: Radius.circular(Dimensions.radiusDefault),
+                        )
+                      : BorderRadius.horizontal(
+                          right: Radius.circular(floating ? Dimensions.radiusLarge : Dimensions.radiusSmall),
+                          left: const Radius.circular(Dimensions.radiusSmall),
+                        ),
                 ),
-              ],
+                foregroundDecoration: shine > 0 && shine < 1
+                    ? BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment(-3 + 5 * shine, 0),
+                          end: Alignment(-1 + 5 * shine, 0),
+                          colors: [Colors.white.withValues(alpha: 0), Colors.white.withValues(alpha: 0.7), Colors.white.withValues(alpha: 0)],
+                        ),
+                      )
+                    : null,
+                child: child,
+              ),
             ),
           );
         },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.local_offer, color: Colors.white, size: 14),
+            const SizedBox(width: 4),
+            Text(
+              text,
+              style: robotoMedium.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: widget.fontSize ?? (ResponsiveHelper.isMobile(context) ? 10 : 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
