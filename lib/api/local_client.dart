@@ -6,11 +6,17 @@ import 'package:sixam_mart/common/enums/data_source_enum.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:sixam_mart/helper/db_helper.dart';
 import 'package:sixam_mart/local/cache_response.dart';
+import 'package:sixam_mart/util/app_constants.dart';
 
 class LocalClient {
 
   static Future<String?> organize(DataSourceEnum source, String cacheId, String? responseBody, Map<String, String>? header) async {
     SharedPreferences sharedPreferences = Get.find();
+    // Answers come in the app's language (service names, banners,
+    // categories…): keep one copy per language, or switching language shows
+    // the names saved in the previous one.
+    final String language = sharedPreferences.getString(AppConstants.languageCode) ?? '';
+    if (language.isNotEmpty) cacheId = '$cacheId#lang=$language';
     switch(source) {
       case DataSourceEnum.client:
         try{
