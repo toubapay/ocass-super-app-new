@@ -10,6 +10,7 @@ import 'package:demandium/feature/bottomNav/view/bottom_nav_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sixam_mart/features/home/widgets/featured_stores_section.dart';
+import 'package:sixam_mart/features/home/widgets/offer_banner_section.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -781,8 +782,17 @@ class _ModuleViewState extends State<ModuleView> {
                                 ],
                               ));
 
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              // The services stand out on a warm gold area that ends in a
+                              // wave (ServicesWave below), as in Glovo.
+                              return Container(
+                                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [Color(0xFFF6E2A4), Color(0xFFF1D27A)],
+                                  ),
+                                ),
                                 child: Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
@@ -790,12 +800,11 @@ class _ModuleViewState extends State<ModuleView> {
                                     borderRadius: BorderRadius.circular(24),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
+                                        color: const Color(0xFF6E500A).withValues(alpha: 0.18),
                                         blurRadius: 16,
-                                        offset: const Offset(0, 8),
+                                        offset: const Offset(0, 6),
                                       ),
                                     ],
-                                    border: Border.all(color: Colors.grey.shade100),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -806,7 +815,7 @@ class _ModuleViewState extends State<ModuleView> {
                                             width: 4,
                                             height: 16,
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context).primaryColor,
+                                              color: const Color(0xFF0E4D3A),
                                               borderRadius: BorderRadius.circular(2),
                                             ),
                                           ),
@@ -816,7 +825,7 @@ class _ModuleViewState extends State<ModuleView> {
                                             style: robotoBold.copyWith(
                                               fontSize: Dimensions.fontSizeLarge,
                                               fontWeight: FontWeight.w700,
-                                              color: Colors.black87,
+                                              color: const Color(0xFF0E4D3A),
                                             ),
                                           ),
                                         ],
@@ -854,6 +863,10 @@ class _ModuleViewState extends State<ModuleView> {
                     : ModuleShimmer(
                         isEnabled: widget.splashController.moduleList == null,
                       ),
+                if ((widget.splashController.moduleList ?? const []).isNotEmpty)
+                  ServicesWave(top: const Color(0xFFF1D27A), bottom: Theme.of(context).scaffoldBackgroundColor),
+                // "Offres du moment" with the animated gift (texts set in the admin).
+                const OfferBannerSection(),
                 // Boutiques à la une, right after the services: the stores picked
                 // in the admin plus every store switched to "Featured" there.
                 const FeaturedStoresSection(),

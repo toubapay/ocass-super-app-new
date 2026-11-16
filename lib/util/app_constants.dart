@@ -55,6 +55,7 @@ class AppConstants {
   static const String featuredStoresUri = '/api/v1/featured-stores';
   static const String newStoresUri = '/api/v1/new-stores';
   static const String homeBrandsUri = '/api/v1/home-brands';
+  static const String offerBannerUri = '/api/v1/offer-banner';
   static const String insurancePaymentCallbackPath = '/insurance-payment-callback';
   // ────────────────────────────────────────────────────────────────────────────
 
