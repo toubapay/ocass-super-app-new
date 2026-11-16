@@ -15,7 +15,6 @@ class _Brand {
   final String? logo;
   final int? moduleId;
   final int count;
-  final String? label = null;
 
   _Brand.fromJson(Map<String, dynamic> j)
       : id = (j['id'] as num).toInt(),
@@ -25,9 +24,10 @@ class _Brand {
         count = (j['items_count'] as num?)?.toInt() ?? 0;
 }
 
-/// "Marques" on the home screen: the brands with the most products on sale,
-/// as cards in a three-row grid scrolling sideways (same layout as "Boutiques
-/// à la une"). Switched on/off in the admin (Admin > Boutiques à la une).
+/// "Marques" on the home screen: 25 brands (most products on sale first) in
+/// two rows of three cards scrolling sideways, with "Voir tout ›" to every
+/// brand, three per row. Switched on/off in the admin (Admin > Boutiques à
+/// la une).
 class HomeBrandsSection extends StatefulWidget {
   const HomeBrandsSection({super.key});
 
@@ -71,104 +71,174 @@ class _HomeBrandsSectionState extends State<HomeBrandsSection> {
   @override
   Widget build(BuildContext context) {
     if (_brands.isEmpty) return const SizedBox.shrink();
-    final rows = _brands.length >= 3 ? 3 : _brands.length;
-    final columns = (_brands.length / rows).ceil();
-    final width = MediaQuery.sizeOf(context).width;
-    final cardWidth = width * 0.78;
-    const cardHeight = 88.0;
-    return Padding(
-      padding: const EdgeInsets.only(top: 6, bottom: 18),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(_title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.3)),
-            if (_subtitle.isNotEmpty) Text(_subtitle, style: const TextStyle(fontSize: 14, color: Color(0xFF6E6E73))),
-          ]),
-        ),
-        SizedBox(
-          height: rows * cardHeight + (rows - 1) * 10,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: columns,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (_, col) => SizedBox(
-              width: cardWidth,
-              child: Column(children: [
-                for (var row = 0; row < rows; row++)
-                  if (col * rows + row < _brands.length) ...[
-                    if (row > 0) const SizedBox(height: 10),
-                    SizedBox(height: cardHeight, child: _card(_brands[col * rows + row])),
-                  ],
-              ]),
-            ),
-          ),
-        ),
-      ]),
-    );
-  }
-
-  Widget _card(_Brand s) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => _open(s),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFECECF0)),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
-          ),
-          child: Stack(children: [
-            Row(children: [
-              Container(
-                width: 62,
-                height: 62,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F4F5),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFECECF0)),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(fit: StackFit.expand, children: [
-                  Center(child: Text(s.name.isEmpty ? '?' : s.name[0], style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: _gold))),
-                  if (s.logo != null && s.logo!.isNotEmpty) CustomImage(image: s.logo!, fit: BoxFit.cover),
-                ]),
-              ),
-              const SizedBox(width: 14),
+    return LayoutBuilder(builder: (context, box) {
+      const gap = 10.0;
+      final cardWidth = (box.maxWidth - 32 - 2 * gap) / 3;
+      final rows = _brands.length > 3 ? 2 : 1;
+      final columns = (_brands.length / rows).ceil();
+      return Padding(
+        padding: const EdgeInsets.only(top: 18, bottom: 18),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 8, 12),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Padding(
-                    padding: EdgeInsets.only(right: s.label != null ? 54 : 0),
-                    child: Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    (s.count == 1 ? 'home_brands_one' : 'home_brands_many').tr.replaceAll('{0}', '${s.count}'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14, color: Color(0xFF6E6E73)),
-                  ),
-                ]),
+                child: Container(
+                  padding: const EdgeInsets.only(left: 10),
+                  decoration: const BoxDecoration(border: Border(left: BorderSide(color: _gold, width: 4))),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(_title, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800, height: 1.15)),
+                    if (_subtitle.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 3),
+                        child: Text(_subtitle, style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280))),
+                      ),
+                  ]),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Get.to(() => _BrandsAllScreen(title: _title, onOpen: _open)),
+                child: Text('${'view_all'.tr.capitalizeFirst} ›', style: const TextStyle(color: _green, fontWeight: FontWeight.w700)),
               ),
             ]),
-            if (s.label != null)
-              Positioned(
-                top: 0,
-                right: 0,
+          ),
+          SizedBox(
+            height: rows * _BrandCard.height + (rows - 1) * gap,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: columns,
+              separatorBuilder: (_, __) => const SizedBox(width: gap),
+              itemBuilder: (_, col) => SizedBox(
+                width: cardWidth,
+                child: Column(children: [
+                  for (var row = 0; row < rows; row++)
+                    if (col * rows + row < _brands.length) ...[
+                      if (row > 0) const SizedBox(height: gap),
+                      SizedBox(height: _BrandCard.height, child: _BrandCard(brand: _brands[col * rows + row], onTap: () => _open(_brands[col * rows + row]))),
+                    ],
+                ]),
+              ),
+            ),
+          ),
+        ]),
+      );
+    });
+  }
+}
+
+const _green = Color(0xFF0E4D3A);
+
+/// One brand: its logo on a light gold tile, name and number of products.
+class _BrandCard extends StatelessWidget {
+  static const height = 136.0;
+  final _Brand brand;
+  final VoidCallback onTap;
+  const _BrandCard({required this.brand, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final s = brand;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: _green.withValues(alpha: 0.10), blurRadius: 10, offset: const Offset(0, 2))],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+            child: Column(children: [
+              Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(color: _gold, borderRadius: BorderRadius.circular(99)),
-                  child: Text(s.label!, style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w800)),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFFFBF6E6), Color(0xFFF3EAD0)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFEFE3BF)),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(fit: StackFit.expand, children: [
+                    Center(child: Text(s.name.isEmpty ? '?' : s.name[0].toUpperCase(), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: _gold))),
+                    if (s.logo != null && s.logo!.isNotEmpty)
+                      Padding(padding: const EdgeInsets.all(8), child: CustomImage(image: s.logo!, fit: BoxFit.contain)),
+                  ]),
                 ),
               ),
-          ]),
+              const SizedBox(height: 6),
+              Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 2),
+              Text(
+                s.count > 0 ? (s.count == 1 ? 'home_brands_one' : 'home_brands_many').tr.replaceAll('{0}', '${s.count}') : 'home_brands_discover'.tr,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B7280)),
+              ),
+            ]),
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// "Voir tout": every brand, three per row.
+class _BrandsAllScreen extends StatefulWidget {
+  final String title;
+  final void Function(_Brand) onOpen;
+  const _BrandsAllScreen({required this.title, required this.onOpen});
+
+  @override
+  State<_BrandsAllScreen> createState() => _BrandsAllScreenState();
+}
+
+class _BrandsAllScreenState extends State<_BrandsAllScreen> {
+  List<_Brand>? _brands;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final r = await Get.find<ApiClient>().getData('${AppConstants.homeBrandsUri}?all=1', handleError: false);
+    if (!mounted) return;
+    setState(() {
+      _brands = r.statusCode == 200 && r.body is Map
+          ? ((r.body['brands'] as List?) ?? []).whereType<Map>().map((s) => _Brand.fromJson(Map<String, dynamic>.from(s))).toList()
+          : [];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final brands = _brands;
+    return Scaffold(
+      backgroundColor: const Color(0xFFF3F4F4),
+      appBar: AppBar(
+        title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+        backgroundColor: _green,
+        foregroundColor: Colors.white,
+      ),
+      body: brands == null
+          ? const Center(child: CircularProgressIndicator())
+          : GridView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+              itemCount: brands.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                mainAxisExtent: _BrandCard.height,
+              ),
+              itemBuilder: (_, i) => _BrandCard(brand: brands[i], onTap: () => widget.onOpen(brands[i])),
+            ),
     );
   }
 }
