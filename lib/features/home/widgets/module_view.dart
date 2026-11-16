@@ -25,7 +25,6 @@ import 'package:sixam_mart/features/address/controllers/address_controller.dart'
 import 'package:sixam_mart/features/address/domain/models/address_model.dart';
 import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart';
 import 'package:sixam_mart/features/home/widgets/components/review_item_card_widget.dart';
-import 'package:sixam_mart/features/home/widgets/popular_store_view.dart';
 import 'package:sixam_mart/features/home/widgets/new_stores_section.dart';
 import 'package:sixam_mart/features/home/widgets/home_brands_section.dart';
 import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view.dart';
@@ -855,6 +854,9 @@ class _ModuleViewState extends State<ModuleView> {
                     : ModuleShimmer(
                         isEnabled: widget.splashController.moduleList == null,
                       ),
+                // Boutiques à la une, right after the services: the stores picked
+                // in the admin plus every store switched to "Featured" there.
+                const FeaturedStoresSection(),
 
                 GetBuilder<AddressController>(
                   builder: (locationController) {
@@ -966,9 +968,6 @@ class _ModuleViewState extends State<ModuleView> {
                   },
                 ),
                 isLoggedIn ? const PromoCodeBannerView() : const SizedBox(),
-                // Boutiques à la une (chosen in the admin), as Glovo's "Top brands".
-                const FeaturedStoresSection(),
-                const PopularStoreView(isPopular: false, isFeatured: true),
                 // The six newest boutiques (on/off in the admin).
                 const NewStoresSection(),
                 // The brands with the most products (on/off in the admin).
