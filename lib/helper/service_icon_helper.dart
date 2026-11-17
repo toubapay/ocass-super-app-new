@@ -11,6 +11,7 @@ class ServiceIcons {
   static const String parcel = '$_dir/parcel.svg';
   static const String car = '$_dir/car.svg';
   static const String insurance = '$_dir/insurance.svg';
+  static const String listing = '$_dir/listing.svg';
   static const String money = '$_dir/money.svg';
   static const String airtime = '$_dir/airtime.svg';
   static const String bill = '$_dir/bill.svg';

@@ -5,6 +5,7 @@ import 'package:sixam_mart/features/bill_payment/domain/models/bill_payment_hist
 import 'package:sixam_mart/features/bill_payment/screens/bill_payment_detail_screen.dart';
 import 'package:sixam_mart/features/bill_payment/screens/bill_payment_screen.dart';
 import 'package:sixam_mart/features/insurance/screens/insurance_screen.dart';
+import 'package:sixam_mart/features/listing/screens/listing_home_screen.dart';
 import 'package:sixam_mart/features/naam/screens/naam_screen.dart';
 import 'package:sixam_mart/features/mobile_money/controllers/mobile_money_controller.dart';
 import 'package:sixam_mart/features/mobile_money/screens/mobile_money_screen.dart';
@@ -171,6 +172,7 @@ class RouteHelper {
   static const String billPayment       = '/bill-payment';
   static const String billPaymentDetail = '/bill-payment-detail';
   static const String insurance = '/insurance';
+  static const String listing = '/annonces';
   static const String mobileMoney = '/mobile-money';
   static const String ride = '/ride';
   static const String naam = '/naam';
@@ -419,6 +421,7 @@ class RouteHelper {
   static String getAirtimeRoute() => airtime;
   static String getBillPaymentRoute() => billPayment;
   static String getBillPaymentDetailRoute() => billPaymentDetail;
+  static String getListingRoute() => listing;
   static String getInsuranceRoute({bool policies = false}) => '$insurance?tab=${policies ? 1 : 0}';
   static String getMobileMoneyRoute() => mobileMoney;
   static String getNaamRoute() => naam;
@@ -993,6 +996,7 @@ class RouteHelper {
           return getRoute(const RideScreen());
         }),
     GetPage(name: naam, page: () => getRoute(const NaamScreen())),
+    GetPage(name: listing, page: () => getRoute(const ListingHomeScreen())),
     GetPage(
         name: insurance,
         page: () => getRoute(InsuranceScreen(initialTab: Get.parameters['tab'] == '1' ? 1 : 0))),

@@ -57,6 +57,12 @@ class AppConstants {
   static const String homeBrandsUri = '/api/v1/home-brands';
   static const String offerBannerUri = '/api/v1/offer-banner';
   static const String insurancePaymentCallbackPath = '/insurance-payment-callback';
+
+  // Noor Annonces (classified listings). Seller routes use the customer's own
+  // token (/listing/user/...); buyers chat with a random id kept on the phone.
+  static const String listingUri = '/api/v1/listing';
+  static const String listingSellerUri = '/api/v1/listing/user';
+  static const String listingPaymentCallbackPath = '/listing/paiement';
   // ────────────────────────────────────────────────────────────────────────────
 
   static const String baseUrl = 'https://ocass-marketplace.onrender.com';
