@@ -50,7 +50,6 @@ import '../../banner/controllers/banner_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
 import 'banner_view.dart';
 import 'module_page_last.dart';
-import 'package:eClassify/main.dart';
 
 class ModuleView extends StatefulWidget {
   final SplashController splashController;
@@ -677,32 +676,12 @@ class _ModuleViewState extends State<ModuleView> {
                                 ],
                               ));
 
-                              // ──── LISTING TILE ────
+                              // ──── NOOR ANNONCES TILE (buy and sell between people and shops) ────
                               tiles.add(Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CustomInkWell(
-                                    onTap: () async {
-                                      SharedPreferences prefs = Get.find();
-                                      log('entering listing with user model ${Get.find<ProfileController>().userInfoModel?.phone}');
-                                      if (Get.find<ProfileController>().userInfoModel != null) {
-                                        prefs.setString(
-                                            'listingName',
-                                            ((Get.find<ProfileController>().userInfoModel!.fName) ?? '') +
-                                                " " +
-                                                (Get.find<ProfileController>().userInfoModel!.lName ?? ''));
-                                        prefs.setString(
-                                            'listingEmail',
-                                            Get.find<ProfileController>().userInfoModel!.email ?? '');
-                                        prefs.setString(
-                                            'listingNumber',
-                                            Get.find<ProfileController>().userInfoModel!.phone ?? '');
-                                      } else {
-                                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                                        prefs.remove('listingNumber');
-                                      }
-                                      Get.offAll(EclassyApp());
-                                    },
+                                    onTap: () => Get.toNamed(RouteHelper.getListingRoute()),
                                     radius: Dimensions.radiusExtraLarge,
                                     child: Container(
                                       width: 72,
@@ -711,19 +690,14 @@ class _ModuleViewState extends State<ModuleView> {
                                       decoration: const BoxDecoration(
                                         color: Colors.transparent,
                                       ),
-                                      child: Image.asset(
-                                        'assets/image/listing.jpeg',
-                                        width: 64,
-                                        height: 64,
-                                        fit: BoxFit.contain,
-                                      ),
+                                      child: SvgPicture.asset(ServiceIcons.listing, width: 64, height: 64),
                                     ),
                                   ),
                                   const SizedBox(height: 8),
                                   SizedBox(
                                     width: 76,
                                     child: Text(
-                                      'Listing'.tr,
+                                      'lst_title_short'.tr,
                                       textAlign: TextAlign.center,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
