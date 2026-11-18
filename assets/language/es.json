@@ -2155,5 +2155,6 @@
   "lst_no_purchase_chat": "You have not written to any seller yet.",
   "lst_you": "You",
   "lst_seller": "Seller",
-  "lst_write_message": "Write your message…"
+  "lst_write_message": "Write your message…",
+  "lst_all_listings": "All listings"
 }
