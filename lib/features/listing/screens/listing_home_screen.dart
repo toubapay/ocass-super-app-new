@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/common/widgets/custom_image.dart';
 import 'package:sixam_mart/features/listing/listing_api.dart';
 import 'package:sixam_mart/features/listing/screens/listing_detail_screen.dart';
 import 'package:sixam_mart/features/listing/screens/listing_messages_screen.dart';
@@ -215,6 +216,7 @@ class ListingBrowseState extends State<ListingBrowse> {
   String _q = '';
   final _search = TextEditingController();
   List<ListingItem>? _items;
+  List<ListingItem> _featured = [];
   int _total = 0;
   String? _error;
   bool _more = false;
@@ -237,7 +239,9 @@ class ListingBrowseState extends State<ListingBrowse> {
     super.dispose();
   }
 
-  Map<String, dynamic> _query(int offset) => {
+  // The grid never shows boosted listings: they have their own row on top.
+  Map<String, dynamic> _query(int offset, {bool featured = false}) => {
+        'featured': featured ? 1 : 0,
         'sort': _sort,
         'category': _category,
         'q': _q,
@@ -260,9 +264,12 @@ class ListingBrowseState extends State<ListingBrowse> {
         return;
       }
     }
-    final r = await ListingApi.items(_query(0));
+    final results = await Future.wait([ListingApi.items(_query(0)), ListingApi.items({..._query(0, featured: true), 'limit': 12})]);
+    final r = results[0];
+    final f = results[1];
     if (!mounted) return;
     setState(() {
+      _featured = f.statusCode == 200 && f.body is Map ? [for (final j in f.body['items'] ?? []) ListingItem.fromJson(j)] : [];
       if (r.statusCode == 200 && r.body is Map) {
         _items = [for (final j in r.body['items'] ?? []) ListingItem.fromJson(j)];
         _total = r.body['total'] ?? 0;
@@ -376,11 +383,22 @@ class ListingBrowseState extends State<ListingBrowse> {
             ]),
           ),
         ),
+        if (_featured.isNotEmpty && _error == null)
+          SliverToBoxAdapter(
+            child: _FeaturedRow(items: _featured, onTap: (it) => Get.to(() => ListingDetailScreen(id: it.id, config: widget.config))),
+          ),
+        if (_featured.isNotEmpty && (_items?.isNotEmpty ?? false))
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+              child: Text('lst_all_listings'.tr, style: robotoBold.copyWith(fontSize: 15)),
+            ),
+          ),
         if (_error != null)
           SliverToBoxAdapter(child: ListingEmpty(emoji: '📍', text: _error!))
         else if (_items == null)
           const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator(color: LColors.green))))
-        else if (_items!.isEmpty)
+        else if (_items!.isEmpty && _featured.isEmpty)
           SliverToBoxAdapter(child: ListingEmpty(emoji: '🔎', text: _sort == 'nearby' ? 'lst_none_nearby'.tr : 'lst_none'.tr))
         else
           SliverPadding(
@@ -430,4 +448,103 @@ class ListingBrowseState extends State<ListingBrowse> {
           ]),
         ),
       );
+}
+
+/// "À la une": the paid, boosted listings, apart at the top with big photos.
+class _FeaturedRow extends StatelessWidget {
+  final List<ListingItem> items;
+  final ValueChanged<ListingItem> onTap;
+  const _FeaturedRow({required this.items, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = (MediaQuery.of(context).size.width * 0.64).clamp(200.0, 260.0);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(top: 14, bottom: 16),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [LColors.cream, Color(0x00FBF3DC)]),
+        border: Border(top: BorderSide(color: Color(0xFFF0E2B6))),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+          child: Row(children: [
+            const Icon(Icons.star_rounded, color: LColors.goldDark, size: 20),
+            const SizedBox(width: 4),
+            Text('lst_featured'.tr, style: robotoBold.copyWith(fontSize: 17, color: LColors.goldDark)),
+            const Spacer(),
+            Text('lst_count'.trParams({'n': '${items.length}'}), style: robotoMedium.copyWith(fontSize: 12, color: LColors.muted)),
+          ]),
+        ),
+        SizedBox(
+          height: width * 3 / 4 + 62,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, i) => _FeaturedCard(item: items[i], width: width, onTap: () => onTap(items[i])),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _FeaturedCard extends StatelessWidget {
+  final ListingItem item;
+  final double width;
+  final VoidCallback onTap;
+  const _FeaturedCard({required this.item, required this.width, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final where = listingKm(item.distanceKm) ?? item.city ?? item.category?.name ?? '';
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [LColors.goldDark, LColors.goldLight, LColors.goldDark]),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [BoxShadow(color: LColors.goldDark.withValues(alpha: 0.18), blurRadius: 14, offset: const Offset(0, 6))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            color: Colors.white,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Stack(fit: StackFit.expand, children: [
+                  Container(color: const Color(0xFFF3ECD8)),
+                  if (item.image != null) CustomImage(image: item.image!, fit: BoxFit.cover),
+                  Positioned(left: 8, top: 8, child: ListingPill(text: '★ ${'lst_featured'.tr}', gold: true)),
+                  Positioned(
+                    left: 8,
+                    bottom: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(color: LColors.greenDark.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(10)),
+                      child: Text(listingMoney(item.price), style: robotoBold.copyWith(color: Colors.white, fontSize: 15)),
+                    ),
+                  ),
+                ]),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: robotoBold.copyWith(fontSize: 14)),
+                  if (where.isNotEmpty)
+                    Text('📍 $where', maxLines: 1, overflow: TextOverflow.ellipsis, style: robotoRegular.copyWith(fontSize: 11.5, color: LColors.muted)),
+                ]),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
 }
