@@ -22,6 +22,7 @@ import 'package:sixam_mart/features/search/widgets/search_field_widget.dart';
 import 'package:sixam_mart/features/search/widgets/search_result_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/helper/store_label_helper.dart';
 import 'package:sixam_mart/features/store/widgets/bottom_cart_widget.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -158,7 +159,7 @@ class SearchScreenState extends State<SearchScreen> with TickerProviderStateMixi
                                   indicatorSize: TabBarIndicatorSize.tab,
                                   tabs: [
                                     Tab(text: 'item'.tr),
-                                    Tab(text: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : 'stores'.tr),
+                                    Tab(text: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText! ? 'restaurants'.tr : storesLabel()),
                                   ],
                                 ),
                               ),

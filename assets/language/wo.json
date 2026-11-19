@@ -1747,5 +1747,20 @@
   "lst_you": "Yow",
   "lst_seller": "Jaaykat",
   "lst_write_message": "Bindal sa bataaxal…",
-  "lst_all_listings": "Yéene yépp"
+  "lst_all_listings": "Yéene yépp",
+  "pay_mm_title": "Naka nga bëgg fey ?",
+  "pay_mm_wave_number": "Sa nimero Wave",
+  "pay_mm_om_number": "Sa nimero Orange Money",
+  "pay_mm_pay_wave": "Fey ak Wave",
+  "pay_mm_pay_om": "Fey ak Orange Money",
+  "pay_mm_hint": "Appli bi dina ubbiku : dëggal fey bi, te nga dellu ci Noor. Ngérte bi dina feeñ moom kepp.",
+  "pay_mm_other": "Beneen anam (kart, Free Money…)",
+  "pay_mm_unavailable": "Wave / Orange Money tontuwul léegi. Jéemal beneen anamu fey.",
+  "pay_mm_waiting_title": "Fey bi ngi dox",
+  "pay_mm_waiting_text": "Dëggal fey bi ci Wave walla Orange Money, te nga dellu ci Noor. Ngérte bi dina feeñ fii moom kepp.",
+  "pay_mm_check_now": "Fey naa, seetal léegi",
+  "pay_mm_checking": "Mi ngi seet…",
+  "pay_mm_cancel": "Neenal",
+  "pharmacies": "Farmasi yi",
+  "shops_label": "Bitik yi"
 }

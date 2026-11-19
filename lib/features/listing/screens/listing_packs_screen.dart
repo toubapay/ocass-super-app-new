@@ -9,6 +9,7 @@ import 'package:sixam_mart/features/listing/listing_api.dart';
 import 'package:sixam_mart/features/listing/widgets/listing_ui.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/util/styles.dart';
+import 'package:sixam_mart/features/payment/widgets/paydunya_softpay.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Packages and one extra listing, paid with the Noor wallet or PayDunya
@@ -200,6 +201,15 @@ Future<void> listingCheckout(String url) async {
     await launchUrl(Uri.parse(url), webOnlyWindowName: '_blank');
     return;
   }
+  // Wave / Orange Money first, straight in their own app.
+  final result = await payWithMobileMoney(link: url, check: () async {
+    final r = await ListingApi.payments();
+    if (r.statusCode != 200 || r.body is! Map) return 'pending';
+    final list = (r.body['payments'] ?? []) as List;
+    final status = list.isEmpty ? '' : '${list.first['status']}';
+    return status == 'paid' || status == 'failed' ? status : 'pending';
+  });
+  if (result != 'hosted') return;
   final browser = _ListingCheckoutBrowser();
   await browser.openUrlRequest(
     urlRequest: URLRequest(url: WebUri(url)),

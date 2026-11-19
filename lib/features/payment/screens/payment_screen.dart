@@ -14,6 +14,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:sixam_mart/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:sixam_mart/features/wallet/widgets/fund_payment_dialog_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sixam_mart/api/api_client.dart';
+import 'package:sixam_mart/features/payment/widgets/paydunya_softpay.dart';
 
 class PaymentScreen extends StatefulWidget {
   final OrderModel orderModel;
@@ -73,6 +75,24 @@ class PaymentScreenState extends State<PaymentScreen> {
       }
     }
 
+    // PayDunya: Wave / Orange Money first, straight in their own app.
+    if (_isPaydunya) {
+      final DateTime started = DateTime.now();
+      final String? result = await payWithMobileMoney(link: selectedUrl, check: () => _status(started));
+      if (result == 'paid' || result == 'failed') {
+        Get.find<OrderController>().paymentRedirect(
+          url: '${AppConstants.baseUrl}/${result == 'paid' ? 'payment-success' : 'payment-fail'}', canRedirect: true, onClose: () {},
+          addFundUrl: widget.addFundUrl, orderID: widget.orderModel.id.toString(), contactNumber: widget.contactNumber, storeId: widget.storeId,
+          subscriptionUrl: widget.subscriptionUrl, createAccount: widget.createAccount, guestId: widget.guestId,
+        );
+        return;
+      }
+      if (result == null) {
+        _exitApp();
+        return;
+      }
+    }
+
     browser = MyInAppBrowser(
       orderID: widget.orderModel.id.toString(), orderType: widget.orderModel.orderType,
       orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: _maximumCodOrderAmount,
@@ -109,6 +129,29 @@ class PaymentScreenState extends State<PaymentScreen> {
       ),
     );
 
+  }
+
+  bool get _forOrder => (widget.addFundUrl == null || widget.addFundUrl!.isEmpty) && (widget.subscriptionUrl == null || widget.subscriptionUrl!.isEmpty);
+
+  /// Order and wallet top-up payments through PayDunya (not subscriptions).
+  bool get _isPaydunya => _forOrder ? widget.paymentMethod == 'paydunya' : selectedUrl.contains('payment/paydunya/pay');
+
+  /// 'paid' | 'failed' | 'pending' for the payment started at [since].
+  Future<String> _status(DateTime since) async {
+    if (_forOrder) {
+      await Get.find<OrderController>().timerTrackOrder(widget.orderModel.id.toString(), contactNumber: widget.contactNumber);
+      final order = Get.find<OrderController>().trackModel;
+      if (order?.paymentStatus == 'paid') return 'paid';
+      if (order?.orderStatus == 'failed') return 'failed';
+      return 'pending';
+    }
+    // Wallet top-up: an "add_fund" line appears once PayDunya confirms.
+    final r = await Get.find<ApiClient>().getData('${AppConstants.walletTransactionUri}?offset=1&limit=10&type=all', handleError: false);
+    final body = r.body;
+    final List list = body is Map ? (body['data'] ?? []) as List : body is List ? body : [];
+    final after = since.subtract(const Duration(minutes: 1));
+    final paid = list.any((t) => t is Map && t['transaction_type'] == 'add_fund' && (DateTime.tryParse('${t['created_at']}')?.isAfter(after) ?? false));
+    return paid ? 'paid' : 'pending';
   }
 
   @override

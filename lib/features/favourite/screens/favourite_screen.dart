@@ -11,6 +11,7 @@ import 'package:sixam_mart/common/widgets/not_logged_in_screen.dart';
 import 'package:sixam_mart/features/favourite/widgets/fav_item_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/helper/store_label_helper.dart';
 
 class FavouriteScreen extends StatefulWidget {
   const FavouriteScreen({super.key});
@@ -65,7 +66,7 @@ class FavouriteScreenState extends State<FavouriteScreen> with SingleTickerProvi
               tabs: [
                 Tab(text: 'item'.tr),
                 Tab(text: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                    ? 'restaurants'.tr : 'stores'.tr),
+                    ? 'restaurants'.tr : storesLabel()),
               ],
             ),
           ),

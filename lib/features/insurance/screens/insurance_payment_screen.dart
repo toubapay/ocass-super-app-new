@@ -6,6 +6,8 @@ import 'package:sixam_mart/common/widgets/custom_app_bar.dart';
 import 'package:sixam_mart/features/insurance/screens/insurance_policy_screen.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:sixam_mart/api/api_client.dart';
+import 'package:sixam_mart/features/payment/widgets/paydunya_softpay.dart';
 
 /// Opens the PayDunya checkout for a policy, then shows that policy once
 /// PayDunya sends the customer back to the callback URL.
@@ -32,6 +34,12 @@ class _InsurancePaymentScreenState extends State<InsurancePaymentScreen> {
       await launchUrl(Uri.parse(widget.paymentUrl), webOnlyWindowName: '_self');
       return;
     }
+    // Wave / Orange Money first, straight in their own app.
+    final result = await payWithMobileMoney(link: widget.paymentUrl, check: _status);
+    if (result != 'hosted') {
+      _finish();
+      return;
+    }
     _browser = _InsuranceCheckoutBrowser(onFinished: _finish);
     await _browser!.openUrlRequest(
       urlRequest: URLRequest(url: WebUri(widget.paymentUrl)),
@@ -40,6 +48,14 @@ class _InsurancePaymentScreenState extends State<InsurancePaymentScreen> {
         browserSettings: InAppBrowserSettings(hideUrlBar: true, hideToolbarTop: GetPlatform.isAndroid),
       ),
     );
+  }
+
+  Future<String> _status() async {
+    final r = await Get.find<ApiClient>().getData('${AppConstants.insurancePoliciesUri}/${widget.policyId}', handleError: false);
+    final body = r.body;
+    final status = body is Map ? '${(body['policy'] ?? {})['status'] ?? ''}' : '';
+    if (status == 'payment_failed') return 'failed';
+    return status.isNotEmpty && status != 'pending_payment' ? 'paid' : 'pending';
   }
 
   /// Whatever the flag, the policy screen shows the real status from the backend.

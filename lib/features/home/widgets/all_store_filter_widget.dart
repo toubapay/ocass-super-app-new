@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/helper/store_label_helper.dart';
 import 'package:sixam_mart/features/home/widgets/filter_view.dart';
 import 'package:sixam_mart/features/home/widgets/store_filter_button_widget.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
@@ -42,7 +43,7 @@ class AllStoreFilterWidget extends StatelessWidget {
                               .module!
                               .showRestaurantText!
                               ? 'restaurants'.tr
-                              : 'stores'.tr,
+                              : storesLabel(),
                           style: robotoBold.copyWith(
                             fontSize: Dimensions.fontSizeLarge,
                           ),
@@ -75,7 +76,7 @@ class AllStoreFilterWidget extends StatelessWidget {
                             .module!
                             .showRestaurantText!
                             ? 'restaurants'.tr
-                            : 'stores'.tr,
+                            : storesLabel(),
                         style: robotoBold.copyWith(
                           fontSize: Dimensions.fontSizeLarge,
                         ),
