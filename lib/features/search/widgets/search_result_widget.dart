@@ -7,6 +7,7 @@ import 'package:sixam_mart/features/search/widgets/filter_widget.dart';
 import 'package:sixam_mart/features/search/widgets/item_view_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/helper/store_label_helper.dart';
 
 class SearchResultWidget extends StatefulWidget {
   final String searchText;
@@ -94,7 +95,7 @@ class SearchResultWidgetState extends State<SearchResultWidget> with TickerProvi
           tabs: [
             Tab(text: 'item'.tr),
             Tab(text: Get.find<SplashController>().configModel!.moduleConfig!.module!.showRestaurantText!
-                ? 'restaurants'.tr : 'stores'.tr),
+                ? 'restaurants'.tr : storesLabel()),
           ],
         ),
       )),

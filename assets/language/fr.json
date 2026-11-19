@@ -2955,5 +2955,20 @@
   "lst_you": "Toi",
   "lst_seller": "Vendeur",
   "lst_write_message": "Écris ton message…",
-  "lst_all_listings": "Toutes les annonces"
+  "lst_all_listings": "Toutes les annonces",
+  "pay_mm_title": "Comment veux-tu payer ?",
+  "pay_mm_wave_number": "Ton numéro Wave",
+  "pay_mm_om_number": "Ton numéro Orange Money",
+  "pay_mm_pay_wave": "Payer avec Wave",
+  "pay_mm_pay_om": "Payer avec Orange Money",
+  "pay_mm_hint": "L’app s’ouvre : valide le paiement, puis reviens dans Noor. Le résultat s’affiche tout seul.",
+  "pay_mm_other": "Autre moyen (carte, Free Money…)",
+  "pay_mm_unavailable": "Wave / Orange Money ne répond pas pour le moment. Essaie un autre moyen de paiement.",
+  "pay_mm_waiting_title": "Paiement en cours",
+  "pay_mm_waiting_text": "Valide le paiement dans Wave ou Orange Money, puis reviens dans Noor. Le résultat s’affiche ici tout seul.",
+  "pay_mm_check_now": "J’ai payé, vérifier maintenant",
+  "pay_mm_checking": "Vérification…",
+  "pay_mm_cancel": "Annuler",
+  "pharmacies": "Pharmacies",
+  "shops_label": "Boutiques"
 }

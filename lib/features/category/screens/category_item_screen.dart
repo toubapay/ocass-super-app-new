@@ -20,6 +20,7 @@ import 'package:sixam_mart/common/widgets/veg_filter_widget.dart';
 import 'package:sixam_mart/common/widgets/web_menu_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sixam_mart/helper/store_label_helper.dart';
 import '../../../util/images.dart';
 import '../../cart/controllers/cart_controller.dart';
 
@@ -427,7 +428,7 @@ class CategoryItemScreenState extends State<CategoryItemScreen>
                                       .module!
                                       .showRestaurantText!
                                       ? 'restaurants'.tr
-                                      : 'stores'.tr,
+                                      : storesLabel(),
                                 ),
                               ),
                             ],
@@ -752,7 +753,7 @@ class CategoryItemScreenState extends State<CategoryItemScreen>
                                       .module!
                                       .showRestaurantText!
                                       ? 'restaurants'.tr
-                                      : 'stores'.tr,
+                                      : storesLabel(),
                                 ),
                               ),
                             ),

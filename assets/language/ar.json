@@ -2180,5 +2180,20 @@
   "lst_you": "أنت",
   "lst_seller": "البائع",
   "lst_write_message": "اكتب رسالتك…",
-  "lst_all_listings": "كل الإعلانات"
+  "lst_all_listings": "كل الإعلانات",
+  "pay_mm_title": "كيف تريد أن تدفع؟",
+  "pay_mm_wave_number": "رقمك في Wave",
+  "pay_mm_om_number": "رقمك في Orange Money",
+  "pay_mm_pay_wave": "ادفع عبر Wave",
+  "pay_mm_pay_om": "ادفع عبر Orange Money",
+  "pay_mm_hint": "سيفتح التطبيق: أكّد الدفع ثم عد إلى نور. ستظهر النتيجة تلقائيًا.",
+  "pay_mm_other": "وسيلة أخرى (بطاقة، Free Money…)",
+  "pay_mm_unavailable": "Wave / Orange Money لا يستجيب حاليًا. جرّب وسيلة دفع أخرى.",
+  "pay_mm_waiting_title": "الدفع قيد التنفيذ",
+  "pay_mm_waiting_text": "أكّد الدفع في Wave أو Orange Money ثم عد إلى نور. ستظهر النتيجة هنا تلقائيًا.",
+  "pay_mm_check_now": "لقد دفعت، تحقّق الآن",
+  "pay_mm_checking": "جارٍ التحقق…",
+  "pay_mm_cancel": "إلغاء",
+  "pharmacies": "الصيدليات",
+  "shops_label": "المتاجر"
 }

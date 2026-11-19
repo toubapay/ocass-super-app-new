@@ -38,6 +38,8 @@ class AppConstants {
   static const String insuranceQuoteRequestUri = '/api/v1/customer/insurance/quote-requests';
   static const String insurancePurchaseUri = '/api/v1/customer/insurance/quotes';
   static const String insurancePoliciesUri = '/api/v1/customer/insurance/policies';
+  // Wave / Orange Money opened straight from the app (PayDunya SOFTPAY).
+  static const String softpayUri = '/api/v1/payment/softpay';
   // PayDunya sends the customer back here when the payment ends (?flag=success|fail|cancel).
   // ── Ocass Money (wallet-to-wallet transfers) ───────────────────
   static const String mobileMoneyConfigUri = '/api/v1/customer/mobile-money/config';

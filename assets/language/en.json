@@ -2955,5 +2955,20 @@
   "lst_you": "You",
   "lst_seller": "Seller",
   "lst_write_message": "Write your message…",
-  "lst_all_listings": "All listings"
+  "lst_all_listings": "All listings",
+  "pay_mm_title": "How do you want to pay?",
+  "pay_mm_wave_number": "Your Wave number",
+  "pay_mm_om_number": "Your Orange Money number",
+  "pay_mm_pay_wave": "Pay with Wave",
+  "pay_mm_pay_om": "Pay with Orange Money",
+  "pay_mm_hint": "The app opens: confirm the payment, then come back to Noor. The result shows up on its own.",
+  "pay_mm_other": "Another method (card, Free Money…)",
+  "pay_mm_unavailable": "Wave / Orange Money is not responding right now. Try another payment method.",
+  "pay_mm_waiting_title": "Payment in progress",
+  "pay_mm_waiting_text": "Confirm the payment in Wave or Orange Money, then come back to Noor. The result shows up here on its own.",
+  "pay_mm_check_now": "I paid, check now",
+  "pay_mm_checking": "Checking…",
+  "pay_mm_cancel": "Cancel",
+  "pharmacies": "Pharmacies",
+  "shops_label": "Shops"
 }
