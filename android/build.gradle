@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         // ✅ Android Gradle Plugin
-        classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath 'com.android.tools.build:gradle:8.13.0'
         // ✅ Kotlin Plugin (latest stable)
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0'
         // ✅ Google Services
@@ -40,14 +40,18 @@ subprojects {
                     namespace project.group
                 }
 
+                // Old plugins (flutter_facebook_auth…) still compile against
+                // android-31, which today's androidx libraries refuse.
+                compileSdkVersion 36
+
                 compileOptions {
                     sourceCompatibility JavaVersion.VERSION_17
                     targetCompatibility JavaVersion.VERSION_17
                 }
 
                 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-                    kotlinOptions {
-                        jvmTarget = "17"
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
                     }
                 }
 

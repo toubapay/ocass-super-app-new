@@ -20,7 +20,7 @@ workflows:
     instance_type: linux_x2
     max_build_duration: 60
     environment:
-      flutter: stable
+      flutter: 3.38.10
       android_signing:
         - noor_upload_key
       groups:
@@ -53,7 +53,7 @@ workflows:
     integrations:
       app_store_connect: Noor App Store Connect
     environment:
-      flutter: stable
+      flutter: 3.38.10
       xcode: latest
       cocoapods: default
       ios_signing:
