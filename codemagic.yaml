@@ -1,0 +1,76 @@
+# Builds Noor for the stores on Codemagic (codemagic.io), without a Mac.
+#
+# One-time setup in Codemagic (Team settings / app settings), nothing secret here:
+#  - Code signing identities > Android keystores: upload the upload keystore
+#    (noor-upload.jks) with the reference name "noor_upload_key".
+#  - Integrations > App Store Connect: add an API key named "Noor App Store Connect"
+#    (App Store Connect > Users and Access > Integrations > Keys, role App Manager).
+#  - Environment variables, group "google_play": GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+#    = the JSON key of a Google Play service account (Play Console > API access),
+#    marked "Secure".
+#  - Firebase: the iOS app com.ocass.orders must be registered in the Firebase project
+#    and its GoogleService-Info.plist added to ios/Runner before the first iOS build.
+#
+# The version and build number come from pubspec.yaml (version: x.y.z+N):
+# raise N before each new upload, the stores refuse a number already sent.
+
+workflows:
+  android-release:
+    name: Noor Android (Play Store, internal test)
+    instance_type: linux_x2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      android_signing:
+        - noor_upload_key
+      groups:
+        - google_play
+    scripts:
+      - name: Signing key for Gradle (android/key.properties, never committed)
+        script: |
+          cat > android/key.properties <<PROPS
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=$CM_KEYSTORE_PATH
+          PROPS
+      - name: Packages
+        script: flutter pub get
+      - name: Build the App Bundle
+        script: flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+
+  ios-release:
+    name: Noor iOS (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+    integrations:
+      app_store_connect: Noor App Store Connect
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ocass.orders
+    scripts:
+      - name: Packages
+        script: flutter pub get
+      - name: CocoaPods
+        script: cd ios && pod install --repo-update
+      - name: Signing profiles
+        script: xcode-project use-profiles
+      - name: Build the IPA
+        script: flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
