@@ -40,6 +40,10 @@ subprojects {
                     namespace project.group
                 }
 
+                // Old plugins (flutter_facebook_auth…) still compile against
+                // android-31, which today's androidx libraries refuse.
+                compileSdkVersion 36
+
                 compileOptions {
                     sourceCompatibility JavaVersion.VERSION_17
                     targetCompatibility JavaVersion.VERSION_17
