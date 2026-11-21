@@ -427,7 +427,7 @@ class _ModuleViewState extends State<ModuleView> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: WalletCard(
-                          title: "OcassWallet",
+                          title: "Wallet",
                           balance: "$balance",
                         ),
                       ),

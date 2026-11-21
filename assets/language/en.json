@@ -2995,5 +2995,11 @@
   "noor_all": "All",
   "noor_offers": "Current offers",
   "noor_flash_sale": "Flash sale",
-  "noor_campaigns": "Campaigns"
+  "noor_campaigns": "Campaigns",
+  "Home": "Home",
+  "Cart": "Cart",
+  "Promo": "Promo",
+  "Orders": "Orders",
+  "Trips": "Trips",
+  "Chat": "Chat"
 }

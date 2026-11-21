@@ -2995,5 +2995,11 @@
   "noor_all": "Tout",
   "noor_offers": "Offres du moment",
   "noor_flash_sale": "Vente flash",
-  "noor_campaigns": "Campagnes"
+  "noor_campaigns": "Campagnes",
+  "Home": "Accueil",
+  "Cart": "Panier",
+  "Promo": "Promo",
+  "Orders": "Commandes",
+  "Trips": "Trajets",
+  "Chat": "Messages"
 }

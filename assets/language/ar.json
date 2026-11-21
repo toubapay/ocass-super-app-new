@@ -2220,5 +2220,11 @@
   "noor_all": "الكل",
   "noor_offers": "عروض اللحظة",
   "noor_flash_sale": "تخفيضات فلاش",
-  "noor_campaigns": "الحملات"
+  "noor_campaigns": "الحملات",
+  "Home": "الرئيسية",
+  "Cart": "السلة",
+  "Promo": "عروض",
+  "Orders": "الطلبات",
+  "Trips": "الرحلات",
+  "Chat": "الرسائل"
 }
