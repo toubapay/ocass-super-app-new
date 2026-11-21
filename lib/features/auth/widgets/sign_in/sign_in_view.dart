@@ -297,24 +297,28 @@ class _SignInViewState extends State<SignInView> {
                 alreadyInApp: widget.backFromThis)
             .then((response) async {
           if (response.isSuccess) {
-            log('trying to send otp for verification screen from main');
-            ServiceAuthController serviceAuthController =
-                Get.find<ServiceAuthController>();
-            demandium_response.ResponseModel responseModel =
-                await serviceAuthController
-                    .sendOtpForVerificationScreenFromMain(
-                        identity: numberWithCountryCode,
-                        identityType: 'phone',
-                        checkUser: 0);
-            log('response model from send otp for verification screen from main: ${responseModel.content?['otp']}');
-
-            if (responseModel.isSuccess ?? false) {
-              _processOtpSuccessSetup(
-                  response, authController, phone, countryDialCode,
-                  serviceOtp: responseModel.content?['otp']?.toString());
-            } else {
-              showCustomSnackBar(responseModel.message ?? 'otp_send_failed'.tr);
+            // Noor has sent the SMS: open the code screen now. The services
+            // module (service.ocass.net) also wants its own code; asking it
+            // is optional, so a slow or unreachable services server never
+            // stops the customer from signing in to Noor.
+            String? serviceOtp;
+            try {
+              final demandium_response.ResponseModel responseModel =
+                  await Get.find<ServiceAuthController>()
+                      .sendOtpForVerificationScreenFromMain(
+                          identity: numberWithCountryCode,
+                          identityType: 'phone',
+                          checkUser: 0)
+                      .timeout(const Duration(seconds: 8));
+              if (responseModel.isSuccess ?? false) {
+                serviceOtp = responseModel.content?['otp']?.toString();
+              }
+            } catch (e) {
+              log('services OTP skipped: $e');
             }
+            _processOtpSuccessSetup(
+                response, authController, phone, countryDialCode,
+                serviceOtp: serviceOtp);
           } else {
             showCustomSnackBar(response.message);
           }
