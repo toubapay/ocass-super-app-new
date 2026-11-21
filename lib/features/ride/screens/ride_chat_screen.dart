@@ -85,7 +85,7 @@ class _RideChatScreenState extends State<RideChatScreen> {
         titleSpacing: 0,
         title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(d?.name ?? 'ride_your_driver'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
-          Text([d?.color, d?.vehicle, d?.plate].where((x) => x != null && x.isNotEmpty).join(' · '), style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          Text([d?.color, d?.vehicle, d?.plate].where((x) => x != null && x.isNotEmpty).join(' · '), style: const TextStyle(fontSize: 12, color: Colors.white70)),
         ]),
         actions: [
           if (d?.phone != null && d!.phone!.isNotEmpty)

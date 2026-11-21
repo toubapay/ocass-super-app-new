@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
-import 'package:sixam_mart/util/dimensions.dart';
 
 import '../../../util/styles.dart';
 import '../../cart/controllers/cart_controller.dart';
@@ -20,106 +19,93 @@ class CustomCurvedNavBar extends StatelessWidget {
     this.cartCount = 0, // 👈 default
   });
 
+  /// A floating pill as the web app's bottom bar (.bottom-nav): detached
+  /// from the screen edges, the active tab in a grey capsule, green.
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
+    const muted = Color(0xFF6B6B70);
+    final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
-      height: 65,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: List.generate(items.length, (index) {
-          final item = items[index];
-          final isSelected = currentIndex == index;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
+      child: Container(
+        height: 66,
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.97),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.14), blurRadius: 30, offset: const Offset(0, 10)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 6, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Row(
+          children: List.generate(items.length, (index) {
+            final item = items[index];
+            final isSelected = currentIndex == index;
+            final color = isSelected ? primaryColor : muted;
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onTap(index),
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                children: [
-
-                  /// 🔹 TOP INDICATOR
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    height: 4,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: isSelected ? primaryColor : Colors.transparent,
-                      boxShadow: isSelected
-                          ? [
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: const Offset(0, 5),
-                        ),
-                      ]
-                          : [],
-                    ),
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onTap(index),
+                behavior: HitTestBehavior.opaque,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFFEFEFF0) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-
-                  const SizedBox(height: 6),
-
-                  /// 🔹 ICON + BADGE
-                  Stack(
-                    clipBehavior: Clip.none,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildIcon(
-                        item.iconPath,
-                        isSelected
-                            ? primaryColor
-                            : Colors.grey.shade700,
-                        item.iconSize,
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          _buildIcon(item.iconPath, color, 22),
+                          // Cart count (the cart is the second tab).
+                          if (index == 1 && cartCount > 0)
+                            Positioned(
+                              top: -7, right: -9,
+                              child: Container(
+                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: const Color(0xFFB8901F),
+                                  border: Border.all(color: Colors.white, width: 1.5),
+                                ),
+                                child: GetBuilder<CartController>(builder: (cartController) {
+                                  return Text(
+                                    cartController.cartList.length.toString(),
+                                    style: robotoBold.copyWith(color: Colors.white, fontSize: 9),
+                                  );
+                                }),
+                              ),
+                            ),
+                        ],
                       ),
-
-                      /// 🔴 CART COUNT BADGE (ONLY index == 1)
-                      if (index == 1 && cartCount > 0)
-                        Positioned(
-                          top: -10, right: -5,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.red),
-                            child: GetBuilder<CartController>(builder: (cartController) {
-                              return Text(
-                                cartController.cartList.length.toString(),
-                                style: robotoMedium.copyWith(color: Colors.white, fontSize: 8),
-                              );
-                            }),
-                          ),
+                      const SizedBox(height: 3),
+                      Text(
+                        item.label,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 11.5,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ],
                   ),
-
-                  const SizedBox(height: 4),
-
-                  /// 🔹 LABEL
-                  Text(
-                    item.label,
-                    style: TextStyle(
-                      color:
-                      isSelected ? primaryColor : Colors.grey.shade700,
-                      fontSize: Dimensions.fontSizeSmall,
-                      fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ],
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

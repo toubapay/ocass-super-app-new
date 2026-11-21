@@ -20,18 +20,21 @@ class CustomButton extends StatelessWidget {
   final bool isBorder;
   final Color? iconColor;
   const CustomButton({super.key, this.onPressed, required this.buttonText, this.transparent = false, this.margin, this.width, this.height,
-    this.fontSize, this.radius = 10, this.icon, this.color, this.textColor, this.isLoading = false, this.isBold = true, this.isBorder = false, this.iconColor});
+    this.fontSize, this.radius = 18, this.icon, this.color, this.textColor, this.isLoading = false, this.isBold = true, this.isBorder = false, this.iconColor});
 
   @override
   Widget build(BuildContext context) {
     final ButtonStyle flatButtonStyle = TextButton.styleFrom(
-      backgroundColor: onPressed == null ? Color(0xff93A2AE) : transparent
+      backgroundColor: onPressed == null ? (color ?? Theme.of(context).primaryColor).withValues(alpha: 0.5) : transparent
           ? Colors.transparent : color ?? Theme.of(context).primaryColor,
+      // The web app's .btn-primary: a soft shadow under filled buttons.
+      elevation: transparent || onPressed == null ? 0 : 3,
+      shadowColor: (color ?? Theme.of(context).primaryColor).withValues(alpha: 0.35),
       minimumSize: Size(width != null ? width! : Dimensions.webMaxWidth, height != null ? height! : 50),
       padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radius),
-        side: isBorder ? BorderSide(color: Theme.of(context).disabledColor.withValues(alpha: 0.5)) : BorderSide.none,
+        side: isBorder ? BorderSide(color: transparent ? Theme.of(context).primaryColor : Theme.of(context).disabledColor.withValues(alpha: 0.5), width: transparent ? 2 : 1) : BorderSide.none,
       ),
     );
 
