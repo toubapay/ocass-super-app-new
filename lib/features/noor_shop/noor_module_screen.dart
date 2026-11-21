@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/common/models/module_model.dart';
-import 'package:sixam_mart/common/widgets/cart_widget.dart';
 import 'package:sixam_mart/common/widgets/custom_image.dart';
 import 'package:sixam_mart/features/item/domain/models/basic_campaign_model.dart';
 import 'package:sixam_mart/features/item/domain/models/item_model.dart';
@@ -13,16 +11,16 @@ import 'package:sixam_mart/features/noor_shop/noor_shop_widgets.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/features/store/domain/models/store_model.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
-import 'package:sixam_mart/helper/service_icon_helper.dart';
 
 /// Inside a shop module (Supermarché, Restaurants, Pharmacie, Boutique), as
-/// the web app's /boutique page:
-/// - the other modules at the top, to jump from one to another;
-/// - tabs: Produits, Boutiques (Restaurants, Pharmacies...), Populaires,
-///   Nouveautés, Marques;
-/// - in Produits, the categories as round pictures, then the module home:
-///   Populaires, Nouveautés, the offers (flash sale, campaigns), then one
-///   row per category. A category opens its products.
+/// the web app's /boutique page (marcheocass/src/pages/Shop.jsx):
+/// - green header with the module name, then the search box;
+/// - the shop modules as chips (the current one in gold);
+/// - two tabs: Produits, and Boutiques / Restaurants / Pharmacies / Magasins;
+/// - in Produits, the round icons Tout, Populaires, Nouveautés then the
+///   categories; "Tout" is the module home: Populaires, Nouveautés, the
+///   offers (flash sale, offers, campaigns, brands), then one row per
+///   category, each with its title and "Tout voir" above the products.
 class NoorModuleScreen extends StatelessWidget {
   const NoorModuleScreen({super.key});
 
@@ -31,13 +29,10 @@ class NoorModuleScreen extends StatelessWidget {
     return GetBuilder<SplashController>(builder: (splash) {
       final module = splash.module;
       if (module == null) return const SizedBox.shrink();
-      // A fresh state (tab, category, lists) for each module.
       return _ModuleBody(key: ValueKey('noor-module-${module.id}'), module: module);
     });
   }
 }
-
-enum _Tab { products, stores, popular, news, brands }
 
 class _ModuleBody extends StatefulWidget {
   final ModuleModel module;
@@ -48,17 +43,16 @@ class _ModuleBody extends StatefulWidget {
 }
 
 class _ModuleBodyState extends State<_ModuleBody> {
-  _Tab _tab = _Tab.products;
-  // null = the module home; otherwise the id of the category shown.
-  int? _categoryId;
+  bool _storesTab = false;
+  // 'home' (the module home), 'popular', 'new' or a category id.
+  String _rayon = 'home';
   List<Map<String, dynamic>> _categories = [];
   int _reload = 0;
 
-  // Lists of the other tabs and of an opened category.
   List<Item>? _items;
   List<Store>? _stores;
-  List<Map<String, dynamic>>? _brands;
   String? _error;
+  final _scroll = ScrollController();
 
   int get _moduleId => widget.module.id!;
 
@@ -68,6 +62,12 @@ class _ModuleBodyState extends State<_ModuleBody> {
     _loadCategories();
   }
 
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadCategories() async {
     try {
       final c = await NoorCatalog.categories(_moduleId);
@@ -75,6 +75,7 @@ class _ModuleBodyState extends State<_ModuleBody> {
     } catch (_) {}
   }
 
+  /// What the sellers of the module are called (as storeWords in Shop.jsx).
   ({String tab, String none}) get _storeWords {
     switch (widget.module.moduleType) {
       case 'food':
@@ -92,150 +93,114 @@ class _ModuleBodyState extends State<_ModuleBody> {
     setState(() {
       _items = null;
       _stores = null;
-      _brands = null;
       _error = null;
     });
     try {
-      switch (_tab) {
-        case _Tab.products:
-          if (_categoryId != null) _items = await NoorCatalog.categoryItems(_moduleId, _categoryId!);
-          break;
-        case _Tab.stores:
-          _stores = await NoorCatalog.stores(_moduleId);
-          break;
-        case _Tab.popular:
-          _items = await NoorCatalog.popular(_moduleId, limit: 30);
-          break;
-        case _Tab.news:
-          _items = await NoorCatalog.newArrivals(_moduleId, limit: 30);
-          break;
-        case _Tab.brands:
-          _brands = await NoorCatalog.brands(_moduleId);
-          break;
+      if (_storesTab) {
+        _stores = await NoorCatalog.stores(_moduleId);
+      } else if (_rayon == 'popular') {
+        _items = await NoorCatalog.popular(_moduleId, limit: 30);
+      } else if (_rayon == 'new') {
+        _items = await NoorCatalog.newArrivals(_moduleId, limit: 30);
+      } else if (_rayon != 'home') {
+        _items = await NoorCatalog.categoryItems(_moduleId, int.parse(_rayon));
       }
-    } catch (e) {
+    } catch (_) {
       _error = 'noor_load_error'.tr;
       _items ??= [];
       _stores ??= [];
-      _brands ??= [];
     }
     if (mounted) setState(() {});
   }
 
-  void _pickTab(_Tab t) {
-    if (t == _tab && t != _Tab.products) return;
+  void _pickTab(bool stores) {
+    if (stores == _storesTab) return;
     setState(() {
-      _tab = t;
-      _categoryId = null;
+      _storesTab = stores;
+      _rayon = 'home';
     });
-    if (t != _Tab.products) _loadList();
+    if (stores) _loadList();
   }
 
-  void _pickCategory(int? id) {
+  void _pick(String rayon) {
     setState(() {
-      _tab = _Tab.products;
-      _categoryId = id;
+      _storesTab = false;
+      _rayon = rayon;
     });
-    if (id != null) _loadList();
+    if (rayon != 'home') _loadList();
+    if (_scroll.hasClients) _scroll.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
   }
 
   Future<void> _refresh() async {
     await _loadCategories();
     setState(() => _reload++);
-    if (_tab != _Tab.products || _categoryId != null) await _loadList();
+    if (_storesTab || _rayon != 'home') await _loadList();
   }
 
   @override
   Widget build(BuildContext context) {
     final words = _storeWords;
-    final tabs = <(_Tab, String)>[
-      (_Tab.products, 'noor_products'.tr),
-      (_Tab.stores, words.tab),
-      (_Tab.popular, 'noor_popular'.tr),
-      (_Tab.news, 'noor_new'.tr),
-      (_Tab.brands, 'noor_brands'.tr),
-    ];
     return Container(
       color: NoorShopColors.bg,
-      child: RefreshIndicator(
-        color: NoorShopColors.green,
-        onRefresh: _refresh,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(child: _Header(module: widget.module)),
-            SliverToBoxAdapter(child: _ModuleNav(current: widget.module)),
-            SliverPersistentHeader(pinned: true, delegate: _TabsDelegate(tabs: tabs, current: _tab, onPick: _pickTab)),
-            if (_tab == _Tab.products) SliverToBoxAdapter(child: _CategoryIcons(categories: _categories, active: _categoryId, onPick: _pickCategory)),
-            SliverToBoxAdapter(child: _content(words.none)),
-            const SliverToBoxAdapter(child: SizedBox(height: 110)),
-          ],
+      child: Column(children: [
+        _Header(module: widget.module),
+        Expanded(
+          child: RefreshIndicator(
+            color: NoorShopColors.green,
+            onRefresh: _refresh,
+            child: CustomScrollView(
+              controller: _scroll,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    const _SearchBox(),
+                    _ModuleChips(current: widget.module),
+                    _Segmented(
+                      labels: ['noor_products'.tr, words.tab],
+                      index: _storesTab ? 1 : 0,
+                      onPick: (i) => _pickTab(i == 1),
+                    ),
+                    if (!_storesTab) _CategoryIcons(categories: _categories, active: _rayon, onPick: _pick),
+                  ]),
+                ),
+                SliverToBoxAdapter(child: _content(words.none, words.tab)),
+                const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              ],
+            ),
+          ),
         ),
-      ),
+      ]),
     );
   }
 
-  Widget _content(String noStore) {
-    if (_tab == _Tab.products && _categoryId == null) {
-      return _ModuleHome(
-        key: ValueKey('home-$_reload'),
-        moduleId: _moduleId,
-        categories: _categories,
-        onSeeAll: (key) {
-          if (key == 'popular') {
-            _pickTab(_Tab.popular);
-          } else if (key == 'new') {
-            _pickTab(_Tab.news);
-          } else if (key == 'brands') {
-            _pickTab(_Tab.brands);
-          } else {
-            _pickCategory(int.tryParse(key));
-          }
-        },
-      );
+  Widget _content(String noStore, String storesTitle) {
+    if (!_storesTab && _rayon == 'home') {
+      return _ModuleHome(key: ValueKey('home-$_reload'), moduleId: _moduleId, categories: _categories, onSeeAll: _pick);
     }
+    final String title = _storesTab
+        ? storesTitle
+        : _rayon == 'popular'
+            ? 'noor_popular'.tr
+            : _rayon == 'new'
+                ? 'noor_new'.tr
+                : '${_categories.firstWhereOrNull((c) => '${c['id']}' == _rayon)?['name'] ?? ''}';
 
-    String title;
-    switch (_tab) {
-      case _Tab.popular:
-        title = 'noor_popular'.tr;
-        break;
-      case _Tab.news:
-        title = 'noor_new'.tr;
-        break;
-      case _Tab.stores:
-        title = _storeWords.tab;
-        break;
-      case _Tab.brands:
-        title = 'noor_brands'.tr;
-        break;
-      case _Tab.products:
-        title = '${_categories.firstWhereOrNull((c) => c['id'] == _categoryId)?['name'] ?? ''}';
-    }
-
-    Widget body;
-    if (_tab == _Tab.stores) {
-      body = _stores == null
-          ? const NoorLoading()
-          : _stores!.isEmpty
-              ? NoorEmpty(title: noStore, text: 'noor_nothing_here'.tr)
-              : Column(children: [for (final s in _stores!) NoorStoreCard(store: s)]);
-    } else if (_tab == _Tab.brands) {
-      body = _brands == null
-          ? const NoorLoading()
-          : _brands!.isEmpty
-              ? NoorEmpty(title: 'noor_no_brand'.tr)
-              : _BrandGrid(brands: _brands!);
-    } else {
-      body = _items == null
-          ? const NoorLoading()
-          : _items!.isEmpty
-              ? NoorEmpty(title: 'noor_no_product'.tr, text: 'noor_nothing_here'.tr)
-              : NoorProductGrid(items: _items!);
-    }
+    final Widget body = _storesTab
+        ? (_stores == null
+            ? const NoorLoading()
+            : _stores!.isEmpty
+                ? NoorEmpty(title: noStore, text: 'noor_nothing_here'.tr)
+                : Column(children: [for (final s in _stores!) NoorStoreCard(store: s)]))
+        : (_items == null
+            ? const NoorLoading()
+            : _items!.isEmpty
+                ? NoorEmpty(title: 'noor_no_product'.tr, text: 'noor_nothing_here'.tr)
+                : NoorProductGrid(items: _items!));
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      NoorSectionHead(title: title),
+      if (!_storesTab) NoorSectionHead(title: title),
+      if (_storesTab) const SizedBox(height: 4),
       if (_error != null)
         Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(_error!, style: const TextStyle(color: Color(0xFFC62828)))),
       body,
@@ -243,7 +208,7 @@ class _ModuleBodyState extends State<_ModuleBody> {
   }
 }
 
-/// Green header: back to the home screen, module name, cart, search box.
+/// Green page header (.page-header): back to the home screen, module name.
 class _Header extends StatelessWidget {
   final ModuleModel module;
   const _Header({required this.module});
@@ -251,10 +216,13 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: NoorShopColors.green,
-      padding: EdgeInsets.fromLTRB(6, MediaQuery.paddingOf(context).top > 0 ? 4 : 8, 10, 14),
-      child: Column(children: [
-        Row(children: [
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(colors: [Color(0xFF0B3D2E), NoorShopColors.green, Color(0xFF136B50)], stops: [0, 0.55, 1]),
+      ),
+      padding: const EdgeInsets.fromLTRB(4, 6, 16, 6),
+      child: SizedBox(
+        height: 52,
+        child: Row(children: [
           IconButton(
             tooltip: 'noor_home'.tr,
             onPressed: () => Get.find<SplashController>().removeModule(),
@@ -262,81 +230,107 @@ class _Header extends StatelessWidget {
           ),
           Expanded(
             child: Text(module.moduleName ?? '', maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
-          ),
-          IconButton(
-            onPressed: () => Get.toNamed(RouteHelper.getCartRoute()),
-            icon: const CartWidget(color: Colors.white, size: 24),
+                style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500)),
           ),
         ]),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(10, 4, 0, 0),
-          child: Material(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Row(children: [
-                  const Icon(Icons.search, color: NoorShopColors.muted),
-                  const SizedBox(width: 8),
-                  Text('noor_search_product'.tr, style: const TextStyle(color: NoorShopColors.muted, fontSize: 15)),
-                ]),
-              ),
-            ),
-          ),
-        ),
-      ]),
+      ),
     );
   }
 }
 
-/// The shop modules at the top of each module: one tap to change module.
-class _ModuleNav extends StatelessWidget {
-  final ModuleModel current;
-  const _ModuleNav({required this.current});
+/// White search box on the grey page (.search-box): opens the search screen.
+class _SearchBox extends StatelessWidget {
+  const _SearchBox();
 
   @override
   Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => Get.toNamed(RouteHelper.getSearchRoute()),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Row(children: [
+              const Icon(Icons.search, color: NoorShopColors.muted),
+              const SizedBox(width: 8),
+              Text('noor_search_product'.tr, style: const TextStyle(color: NoorShopColors.muted, fontSize: 16)),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The shop modules as chips (.chips): the current one in gold, scrolled
+/// into view when the module opens.
+class _ModuleChips extends StatefulWidget {
+  final ModuleModel current;
+  const _ModuleChips({required this.current});
+
+  @override
+  State<_ModuleChips> createState() => _ModuleChipsState();
+}
+
+class _ModuleChipsState extends State<_ModuleChips> {
+  final _list = ScrollController();
+  final _activeKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chip = _activeKey.currentContext?.findRenderObject() as RenderBox?;
+      final list = context.findRenderObject() as RenderBox?;
+      if (chip == null || list == null || !_list.hasClients) return;
+      final x = chip.localToGlobal(Offset.zero, ancestor: list).dx;
+      final target = (_list.offset + x - 16).clamp(0.0, _list.position.maxScrollExtent);
+      _list.jumpTo(target);
+    });
+  }
+
+  @override
+  void dispose() {
+    _list.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final current = widget.current;
     final splash = Get.find<SplashController>();
     final all = splash.moduleList ?? const <ModuleModel>[];
     final shops = [for (int i = 0; i < all.length; i++) if (isNoorShopModule(all[i])) (i, all[i])];
-    if (shops.length < 2) return const SizedBox.shrink();
-    return Container(
-      color: Colors.white,
-      height: 96,
+    if (shops.length < 2) return const SizedBox(height: 4);
+    return SizedBox(
+      height: 50,
       child: ListView.separated(
+        controller: _list,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         itemCount: shops.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 6),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, k) {
           final (index, m) = shops[k];
           final on = m.id == current.id;
-          final icon = ServiceIcons.forModule(m);
-          return InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: on ? null : () => splash.switchModule(index, true),
-            child: Container(
-              width: 82,
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              decoration: BoxDecoration(
-                color: on ? const Color(0xFFEAF3EF) : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: on ? NoorShopColors.green : Colors.transparent, width: 1.5),
-              ),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: icon != null ? SvgPicture.asset(icon) : CustomImage(image: m.iconFullUrl ?? '', fit: BoxFit.contain),
+          return Material(
+            key: on ? _activeKey : null,
+            color: on ? NoorShopColors.gold : Colors.white,
+            shape: StadiumBorder(side: BorderSide(color: on ? NoorShopColors.gold : NoorShopColors.line)),
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: on ? null : () => splash.switchModule(index, true),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Center(
+                  child: Text(m.moduleName ?? '',
+                      style: TextStyle(fontSize: 15.5, fontWeight: on ? FontWeight.w700 : FontWeight.w500, color: on ? const Color(0xFF2A1D00) : Colors.black87)),
                 ),
-                const SizedBox(height: 3),
-                Text(m.moduleName ?? '', maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, fontWeight: on ? FontWeight.w800 : FontWeight.w600, color: on ? NoorShopColors.green : Colors.black87)),
-              ]),
+              ),
             ),
           );
         },
@@ -345,84 +339,84 @@ class _ModuleNav extends StatelessWidget {
   }
 }
 
-class _TabsDelegate extends SliverPersistentHeaderDelegate {
-  final List<(_Tab, String)> tabs;
-  final _Tab current;
-  final void Function(_Tab) onPick;
-  _TabsDelegate({required this.tabs, required this.current, required this.onPick});
+/// Two-part switch (.segmented): white active part, green text, gold line.
+class _Segmented extends StatelessWidget {
+  final List<String> labels;
+  final int index;
+  final void Function(int) onPick;
+  const _Segmented({required this.labels, required this.index, required this.onPick});
 
   @override
-  double get minExtent => 52;
-  @override
-  double get maxExtent => 52;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      child: Column(children: [
-        Expanded(
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            children: [
-              for (final (t, label) in tabs)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: ChoiceChip(
-                    label: Text(label),
-                    selected: t == current,
-                    showCheckmark: false,
-                    onSelected: (_) => onPick(t),
-                    selectedColor: NoorShopColors.green,
-                    backgroundColor: const Color(0xFFF1F4F3),
-                    side: BorderSide.none,
-                    shape: const StadiumBorder(),
-                    labelStyle: TextStyle(fontWeight: FontWeight.w700, color: t == current ? Colors.white : Colors.black87),
-                  ),
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(color: const Color(0xFFE9E9EC), borderRadius: BorderRadius.circular(14)),
+      child: Row(children: [
+        for (int i = 0; i < labels.length; i++)
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onPick(i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(vertical: 11),
+                decoration: BoxDecoration(
+                  color: i == index ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(11),
+                  border: i == index ? const Border(bottom: BorderSide(color: NoorShopColors.gold, width: 3)) : null,
+                  boxShadow: i == index ? [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 3, offset: const Offset(0, 1))] : null,
                 ),
-            ],
+                alignment: Alignment.center,
+                child: Text(labels[i], maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: i == index ? NoorShopColors.green : const Color(0xFF555555))),
+              ),
+            ),
           ),
-        ),
-        const Divider(height: 1, color: NoorShopColors.line),
       ]),
     );
   }
-
-  @override
-  bool shouldRebuild(_TabsDelegate old) => old.current != current || old.tabs.length != tabs.length || old.tabs.first.$2 != tabs.first.$2;
 }
 
-/// The categories as small round pictures scrolling sideways ("Tout" first),
-/// as CategoryIcons in the web app.
+/// Round icons scrolling sideways (CategoryIcons in the web app): Tout,
+/// Populaires, Nouveautés, then the module's categories.
 class _CategoryIcons extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
-  final int? active;
-  final void Function(int?) onPick;
+  final String active;
+  final void Function(String) onPick;
   const _CategoryIcons({required this.categories, required this.active, required this.onPick});
 
-  Widget _tile({required bool on, required Widget icon, required String label, required VoidCallback onTap}) {
+  static const _goldSoft = Color(0xFFF8EDCC);
+  static const _goldDark = Color(0xFF6E500A);
+
+  Widget _tile({required String key, required Widget icon, required String label, bool soft = false}) {
+    final on = active == key;
     return InkWell(
-      onTap: onTap,
+      onTap: () => onPick(key),
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(
-        width: 74,
+        width: 82,
         child: Column(children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: on ? NoorShopColors.green : NoorShopColors.line, width: on ? 2.2 : 1),
+          AnimatedScale(
+            scale: on ? 1.04 : 1,
+            duration: const Duration(milliseconds: 150),
+            child: Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: soft ? _goldSoft : Colors.white,
+                border: Border.all(color: on ? NoorShopColors.gold : Colors.transparent, width: 2.5),
+                boxShadow: soft ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2))],
+              ),
+              clipBehavior: Clip.antiAlias,
+              alignment: Alignment.center,
+              child: icon,
             ),
-            clipBehavior: Clip.antiAlias,
-            alignment: Alignment.center,
-            child: icon,
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 6),
           Text(label, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 11.5, height: 1.15, fontWeight: on ? FontWeight.w800 : FontWeight.w600, color: on ? NoorShopColors.green : Colors.black87)),
+              style: TextStyle(fontSize: 12.5, height: 1.2, fontWeight: on ? FontWeight.w700 : FontWeight.w400, color: on ? _goldDark : Colors.black87)),
         ]),
       ),
     );
@@ -430,23 +424,24 @@ class _CategoryIcons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (categories.isEmpty) return const SizedBox(height: 6);
     return SizedBox(
-      height: 112,
+      height: 124,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(10, 12, 10, 0),
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
         children: [
-          _tile(on: active == null, icon: const Icon(Icons.grid_view_rounded, color: NoorShopColors.green), label: 'noor_all'.tr, onTap: () => onPick(null)),
+          _tile(key: 'home', icon: const Icon(Icons.grid_view_outlined, color: _goldDark, size: 26), label: 'noor_all'.tr),
+          _tile(key: 'popular', icon: const Icon(Icons.local_fire_department_outlined, color: _goldDark, size: 26), label: 'noor_popular'.tr),
+          _tile(key: 'new', icon: const Icon(Icons.auto_awesome_outlined, color: _goldDark, size: 26), label: 'noor_new'.tr),
           for (final c in categories)
             _tile(
-              on: active == c['id'],
+              key: '${c['id']}',
+              soft: true,
               icon: '${c['image_full_url'] ?? ''}'.isNotEmpty
-                  ? CustomImage(image: '${c['image_full_url']}', width: 58, height: 58, fit: BoxFit.cover)
+                  ? CustomImage(image: '${c['image_full_url']}', width: 62, height: 62, fit: BoxFit.cover)
                   : Text('${c['name'] ?? '?'}'.characters.first.toUpperCase(),
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: NoorShopColors.gold)),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _goldDark)),
               label: '${c['name'] ?? ''}',
-              onTap: () => onPick(c['id'] is int ? c['id'] : int.tryParse('${c['id']}')),
             ),
         ],
       ),
@@ -454,24 +449,23 @@ class _CategoryIcons extends StatelessWidget {
   }
 }
 
-/// The module home, as in the web app: Populaires, Nouveautés, the offers,
-/// then one row per category.
+/// The module home, as in the web app: Populaires, Nouveautés, the offers
+/// (flash sale, offers, campaigns, brands), then one row per category.
 class _ModuleHome extends StatelessWidget {
   final int moduleId;
   final List<Map<String, dynamic>> categories;
-  final void Function(String key) onSeeAll;
+  final void Function(String rayon) onSeeAll;
   const _ModuleHome({super.key, required this.moduleId, required this.categories, required this.onSeeAll});
 
   @override
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      NoorBannerSlider(moduleId: moduleId),
       NoorProductRow(title: 'noor_popular'.tr, load: () => NoorCatalog.popular(moduleId), onSeeAll: () => onSeeAll('popular')),
       NoorProductRow(title: 'noor_new'.tr, load: () => NoorCatalog.newArrivals(moduleId), onSeeAll: () => onSeeAll('new')),
       _FlashSaleRow(moduleId: moduleId),
       NoorProductRow(title: 'noor_offers'.tr, load: () => NoorCatalog.itemCampaigns(moduleId), campaign: true),
       _CampaignRow(moduleId: moduleId),
-      _BrandRow(moduleId: moduleId, onSeeAll: () => onSeeAll('brands')),
+      _BrandRow(moduleId: moduleId),
       for (final c in categories)
         NoorProductRow(
           key: ValueKey('cat-${c['id']}'),
@@ -596,8 +590,7 @@ class _CampaignRowState extends State<_CampaignRow> {
 
 class _BrandRow extends StatefulWidget {
   final int moduleId;
-  final VoidCallback onSeeAll;
-  const _BrandRow({required this.moduleId, required this.onSeeAll});
+  const _BrandRow({required this.moduleId});
 
   @override
   State<_BrandRow> createState() => _BrandRowState();
@@ -618,7 +611,7 @@ class _BrandRowState extends State<_BrandRow> {
   Widget build(BuildContext context) {
     if (_brands.isEmpty) return const SizedBox.shrink();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      NoorSectionHead(title: 'noor_brands'.tr, onSeeAll: widget.onSeeAll),
+      NoorSectionHead(title: 'noor_brands'.tr),
       SizedBox(
         height: 104,
         child: ListView.separated(
@@ -662,23 +655,6 @@ class _BrandTile extends StatelessWidget {
           Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
         ]),
       ),
-    );
-  }
-}
-
-class _BrandGrid extends StatelessWidget {
-  final List<Map<String, dynamic>> brands;
-  const _BrandGrid({required this.brands});
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-      itemCount: brands.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 12, crossAxisSpacing: 10, childAspectRatio: 0.85),
-      itemBuilder: (_, i) => _BrandTile(brand: brands[i], size: 78),
     );
   }
 }

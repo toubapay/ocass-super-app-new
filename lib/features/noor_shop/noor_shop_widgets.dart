@@ -137,7 +137,7 @@ class NoorSectionHead extends StatelessWidget {
         if (onSeeAll != null)
           TextButton(
             onPressed: onSeeAll,
-            child: Text('noor_see_all'.tr, style: const TextStyle(color: NoorShopColors.gold, fontWeight: FontWeight.w700)),
+            child: Text('noor_see_all'.tr, style: const TextStyle(color: NoorShopColors.green, fontSize: 16, fontWeight: FontWeight.w700)),
           ),
       ]),
     );
