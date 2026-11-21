@@ -32,6 +32,8 @@ import 'package:sixam_mart/features/item/controllers/campaign_controller.dart';
 import 'package:sixam_mart/features/item/controllers/item_controller.dart';
 import 'package:sixam_mart/features/item/domain/models/item_model.dart';
 import 'package:sixam_mart/features/location/controllers/location_controller.dart';
+import 'package:sixam_mart/features/noor_shop/noor_catalog.dart';
+import 'package:sixam_mart/features/noor_shop/noor_module_screen.dart';
 import 'package:sixam_mart/features/notification/controllers/notification_controller.dart';
 import 'package:sixam_mart/features/parcel/controllers/parcel_controller.dart';
 import 'package:sixam_mart/features/parcel/screens/parcel_category_screen.dart';
@@ -290,6 +292,13 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           body: isParcel
               ? const ParcelCategoryScreen()
+              // Shop modules (Supermarché, Restaurants, Pharmacie, Boutique)
+              // are organised as in the Noor web app.
+              : (isNoorShopModule(splashController.module) && !ResponsiveHelper.isDesktop(context))
+              ? Container(
+                  color: NoorShopColors.green,
+                  child: const SafeArea(bottom: false, child: NoorModuleScreen()),
+                )
               : SafeArea(
                   child: RefreshIndicator(
                     onRefresh: () async {
