@@ -170,7 +170,7 @@ class NoorProductCard extends StatelessWidget {
             AspectRatio(
               aspectRatio: 1,
               child: Stack(fit: StackFit.expand, children: [
-                CustomImage(image: item.imageFullUrl ?? '', fit: BoxFit.cover),
+                (item.imageFullUrl ?? '').isEmpty ? NoorInitialTile(name: item.name) : CustomImage(image: item.imageFullUrl!, fit: BoxFit.cover),
                 if (flash || hasDiscount)
                   Positioned(
                     top: 8,
@@ -362,4 +362,32 @@ class NoorLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator(color: NoorShopColors.green)));
+}
+
+/// A product without picture: a Noor tile with the name's initial (as in
+/// the web app) rather than an empty or broken picture.
+class NoorInitialTile extends StatelessWidget {
+  final String? name;
+  final double fontSize;
+  const NoorInitialTile({super.key, this.name, this.fontSize = 44});
+
+  @override
+  Widget build(BuildContext context) {
+    final n = (name ?? '').trim();
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFF8EDCC), Color(0xFFF3E6BF), Color(0xFFE4F1EA)],
+          stops: [0, 0.45, 1],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: n.isEmpty
+          ? const Icon(Icons.shopping_bag_outlined, color: NoorShopColors.gold, size: 36)
+          : Text(n.characters.first.toUpperCase(),
+              style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w800, color: NoorShopColors.gold.withValues(alpha: 0.85))),
+    );
+  }
 }
