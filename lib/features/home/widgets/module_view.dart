@@ -1,3 +1,5 @@
+import 'package:sixam_mart/features/noor_shop/noor_catalog.dart';
+import 'package:sixam_mart/features/noor_shop/noor_shop_widgets.dart';
 import 'package:sixam_mart/helper/thumb_helper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sixam_mart/helper/service_icon_helper.dart';
@@ -28,7 +30,6 @@ import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart'
 import 'package:sixam_mart/features/home/widgets/components/review_item_card_widget.dart';
 import 'package:sixam_mart/features/home/widgets/new_stores_section.dart';
 import 'package:sixam_mart/features/home/widgets/home_brands_section.dart';
-import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view.dart';
 import 'package:sixam_mart/features/home/widgets/views/promo_code_banner_view1.dart';
 import 'package:sixam_mart/features/home/widgets/views/promotional_banner_view.dart';
 import 'package:sixam_mart/features/item/controllers/item_controller.dart';
@@ -46,9 +47,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../common/widgets/wallet_card.dart';
 import '../../../util/app_constants.dart';
-import '../../banner/controllers/banner_controller.dart';
 import '../../profile/controllers/profile_controller.dart';
-import 'banner_view.dart';
 import 'module_page_last.dart';
 
 class ModuleView extends StatefulWidget {
@@ -410,7 +409,12 @@ class _ModuleViewState extends State<ModuleView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildBannerWidget(),
+                // The slides of the web app: the first shop module's banners
+                // (the admin's module picture while they load or if none).
+                Builder(builder: (context) {
+                  final shop = (widget.splashController.moduleList ?? const <ModuleModel>[]).firstWhereOrNull(isNoorShopModule);
+                  return shop == null ? _buildBannerWidget() : NoorBannerSlider(key: ValueKey('home-slides-${shop.id}'), moduleId: shop.id!);
+                }),
                 const SizedBox(height: 10),
 
 
@@ -423,7 +427,7 @@ class _ModuleViewState extends State<ModuleView> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: WalletCard(
-                          title: "OcassWallet",
+                          title: "Wallet",
                           balance: "$balance",
                         ),
                       ),
@@ -844,6 +848,19 @@ class _ModuleViewState extends State<ModuleView> {
                 // Boutiques à la une, right after the services: the stores picked
                 // in the admin plus every store switched to "Featured" there.
                 const FeaturedStoresSection(),
+                // Populaires of the first shop module, as in the web app.
+                Builder(builder: (context) {
+                  final modules = widget.splashController.moduleList ?? const <ModuleModel>[];
+                  final shopIndex = modules.indexWhere(isNoorShopModule);
+                  if (shopIndex < 0) return const SizedBox.shrink();
+                  final shop = modules[shopIndex];
+                  return NoorProductRow(
+                    key: ValueKey('home-popular-${shop.id}'),
+                    title: 'noor_popular'.tr,
+                    load: () => NoorCatalog.popular(shop.id!),
+                    onSeeAll: () => widget.splashController.switchModule(shopIndex, true),
+                  );
+                }),
 
                 GetBuilder<AddressController>(
                   builder: (locationController) {
@@ -949,12 +966,6 @@ class _ModuleViewState extends State<ModuleView> {
                 //   ),
                 // ),
 
-                GetBuilder<BannerController>(
-                  builder: (bannerController) {
-                    return const BannerView(isFeatured: true);
-                  },
-                ),
-                isLoggedIn ? const PromoCodeBannerView() : const SizedBox(),
                 // The six newest boutiques (on/off in the admin).
                 const NewStoresSection(),
                 // The brands with the most products (on/off in the admin).

@@ -194,7 +194,7 @@ class DashboardScreenState extends State<DashboardScreen> {
                         NavBarItem(iconPath: Images.cart, label: 'Cart'.tr),
                         NavBarItem(iconPath: Images.promo, label: 'Promo'.tr),
                         NavBarItem(
-                            iconPath: Images.discount,
+                            iconPath: Images.orders,
                             label: isTaxi ? 'Trips'.tr : 'Orders'.tr),
                         NavBarItem(iconPath: Images.chatSvg, label: 'Chat'.tr),
                       ],

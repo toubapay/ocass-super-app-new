@@ -17,7 +17,7 @@ class ParcelAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Theme.of(context).cardColor,
+      backgroundColor: Theme.of(context).primaryColor,
       shape: Border(
         bottom: BorderSide(
         width: .4,
@@ -25,8 +25,8 @@ class ParcelAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
       ),
       elevation: 0,
       leading: (backButton! && Navigator.canPop(context)) ? IconButton(
-        icon: const Icon(Icons.arrow_back_ios),
-        color: Theme.of(context).textTheme.bodyLarge!.color,
+        icon: const Icon(Icons.arrow_back_rounded),
+        color: Colors.white,
         onPressed: () => Navigator.pop(context),
       ) : null,
       leadingWidth: (backButton! && Navigator.canPop(context)) ? 56 : 0,
@@ -35,7 +35,7 @@ class ParcelAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
           return Row(children: [
             (splashController.module != null && splashController.configModel!.module == null && splashController.moduleList != null && splashController.moduleList!.length != 1) ? InkWell(
               onTap: () => splashController.removeModule(),
-              child: Image.asset(Images.moduleIcon, height: 25, width: 25, color: Theme.of(context).textTheme.bodyLarge!.color),
+              child: Image.asset(Images.moduleIcon, height: 25, width: 25, color: Colors.white),
             ) : const SizedBox(),
             SizedBox(width: (splashController.module != null && splashController.configModel!.module
                 == null && splashController.moduleList != null && splashController.moduleList!.length != 1) ? Dimensions.paddingSizeSmall : 0),
@@ -51,7 +51,7 @@ class ParcelAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
                     Text(
                       AddressHelper.getUserAddressFromSharedPref()!.addressType!.tr,
                       style: robotoMedium.copyWith(
-                        color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeDefault,
+                        color: Colors.white, fontSize: Dimensions.fontSizeDefault,
                       ),
                       maxLines: 1, overflow: TextOverflow.ellipsis,
                     ),
@@ -61,13 +61,13 @@ class ParcelAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
                         child: Text(
                           AddressHelper.getUserAddressFromSharedPref()!.address!,
                           style: robotoRegular.copyWith(
-                            color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeSmall,
+                            color: Colors.white, fontSize: Dimensions.fontSizeSmall,
                           ),
                           maxLines: 1, overflow: TextOverflow.ellipsis,
                         ),
                       ),
 
-                      Icon(Icons.expand_more, color: Theme.of(context).textTheme.bodyLarge!.color, size: 18),
+                      Icon(Icons.expand_more, color: Colors.white, size: 18),
 
                     ]),
 
@@ -78,10 +78,10 @@ class ParcelAppBarWidget extends StatelessWidget implements PreferredSizeWidget 
             InkWell(
               child: GetBuilder<NotificationController>(builder: (notificationController) {
                 return Stack(children: [
-                  Icon(CupertinoIcons.bell, size: 25, color: Theme.of(context).textTheme.bodyLarge!.color),
+                  Icon(CupertinoIcons.bell, size: 25, color: Colors.white),
                   notificationController.hasNotification ? Positioned(top: 0, right: 0, child: Container(
                     height: 10, width: 10, decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor, shape: BoxShape.circle,
+                    color: const Color(0xFFE53935), shape: BoxShape.circle,
                     border: Border.all(width: 1, color: Theme.of(context).cardColor),
                   ),
                   )) : const SizedBox(),

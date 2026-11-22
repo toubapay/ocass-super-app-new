@@ -19,11 +19,12 @@ class Dimensions {
   static const double paddingSizeExtremeLarge = 30.0;
   static const double paddingSizeExtraOverLarge = 35.0;
 
-  static const double radiusSmall = 5.0;
-  static const double radiusMedium = 8.0;
-  static const double radiusDefault = 10.0;
-  static const double radiusLarge = 15.0;
-  static const double radiusExtraLarge = 20.0;
+  // Rounder corners, as in the Noor web app (cards 22, fields 16, chips pills).
+  static const double radiusSmall = 8.0;
+  static const double radiusMedium = 12.0;
+  static const double radiusDefault = 16.0;
+  static const double radiusLarge = 20.0;
+  static const double radiusExtraLarge = 24.0;
   static const double radiusExtraLarge2 = 40.0;
 
   static const double webMaxWidth = 1170;
