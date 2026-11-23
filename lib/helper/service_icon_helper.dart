@@ -24,6 +24,7 @@ class ServiceIcons {
   static const String taxi = '$_dir/taxi.svg';
   static const String motoTaxi = '$_dir/moto_taxi.svg';
   static const String van = '$_dir/van.svg';
+  static const String bus = '$_dir/bus.svg';
 
   static const Map<String, String> _byType = {
     'grocery': grocery,
@@ -35,6 +36,7 @@ class ServiceIcons {
     'rental': car,
     'mobile_money': money,
     'taxi': taxi,
+    'voyage': bus,
   };
 
   /// Picture for a module: by its type, or by its name for shop modules

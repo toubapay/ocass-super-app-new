@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/voyage/voyage_screens.dart';
 import 'dart:convert';
 import 'package:sixam_mart/features/airtime/controllers/airtime_controller.dart';
 import 'package:sixam_mart/features/bill_payment/controllers/bill_payment_controller.dart';
@@ -175,6 +176,7 @@ class RouteHelper {
   static const String listing = '/annonces';
   static const String mobileMoney = '/mobile-money';
   static const String ride = '/ride';
+  static const String voyage = '/voyage';
   static const String naam = '/naam';
 
   static String getInitialRoute({bool fromSplash = false}) =>
@@ -426,6 +428,7 @@ class RouteHelper {
   static String getMobileMoneyRoute() => mobileMoney;
   static String getNaamRoute() => naam;
   static String getRideRoute() => ride;
+  static String getVoyageRoute() => voyage;
 
   static List<GetPage> routes = [
     GetPage(
@@ -995,6 +998,7 @@ class RouteHelper {
           Get.lazyPut(() => RideController());
           return getRoute(const RideScreen());
         }),
+    GetPage(name: voyage, page: () => getRoute(const VoyageHomeScreen())),
     GetPage(name: naam, page: () => getRoute(const NaamScreen())),
     GetPage(name: listing, page: () => getRoute(const ListingHomeScreen())),
     GetPage(
