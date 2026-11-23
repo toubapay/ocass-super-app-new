@@ -61,6 +61,9 @@ class SplashController extends GetxController implements GetxService {
   ModuleModel? _rideModule;
   ModuleModel? get rideModule => _rideModule;
 
+  ModuleModel? _voyageModule;
+  ModuleModel? get voyageModule => _voyageModule;
+
   int _moduleIndex = 0;
   int get moduleIndex => _moduleIndex;
 
@@ -319,11 +322,14 @@ class SplashController extends GetxController implements GetxService {
       _moduleList = [];
       _mobileMoneyModule = null;
       _rideModule = null;
+      _voyageModule = null;
       for (var module in moduleList) {
         if (module.moduleType == AppConstants.mobileMoney) {
           _mobileMoneyModule = module;
         } else if (module.moduleType == AppConstants.rideHailing) {
           _rideModule = module;
+        } else if (module.moduleType == AppConstants.voyage) {
+          _voyageModule = module;
         } else if (module.moduleType != AppConstants.taxi && GetPlatform.isWeb) {
           _moduleList!.add(module);
         } else if (!GetPlatform.isWeb) {

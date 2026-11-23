@@ -613,6 +613,41 @@ class _ModuleViewState extends State<ModuleView> {
                                 ));
                               }
 
+                              // ──── JE VOYAGE TILE (intercity trips, when active) ────
+                              final voyage = widget.splashController.voyageModule;
+                              if (voyage != null) {
+                                tiles.add(Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CustomInkWell(
+                                      onTap: () => Get.toNamed(RouteHelper.getVoyageRoute()),
+                                      radius: Dimensions.radiusExtraLarge,
+                                      child: Container(
+                                        width: 72,
+                                        height: 72,
+                                        padding: const EdgeInsets.all(4),
+                                        child: SvgPicture.asset(ServiceIcons.bus, width: 64, height: 64),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: 76,
+                                      child: Text(
+                                        voyage.moduleName ?? 'Je Voyage',
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: robotoMedium.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ));
+                              }
+
                               // ──── MOBILE MONEY TILE (shown while the admin keeps the module active) ────
                               final mobileMoney = widget.splashController.mobileMoneyModule;
                               if (mobileMoney != null) {

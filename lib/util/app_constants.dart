@@ -398,6 +398,8 @@ class AppConstants {
   static const String mobileMoney = 'mobile_money';
   // Ride hailing (Noor Taxi). `taxi` above is the rental module's type.
   static const String rideHailing = 'taxi';
+  // Je Voyage: intercity trips posted by Noor Pro drivers.
+  static const String voyage = 'voyage';
 
   static List<LanguageModel> languages = [
     LanguageModel(
