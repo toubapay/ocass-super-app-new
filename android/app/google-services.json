@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "362253661054",
+    "firebase_url": "https://ocass-by-devteam-default-rtdb.firebaseio.com",
     "project_id": "ocass-by-devteam",
     "storage_bucket": "ocass-by-devteam.firebasestorage.app"
   },
@@ -12,7 +13,12 @@
           "package_name": "com.Ocass.express"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
         }
       }
     },
@@ -31,7 +49,12 @@
           "package_name": "com.Ocass.marchand"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
@@ -39,7 +62,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
         }
       }
     },
@@ -50,7 +85,20 @@
           "package_name": "com.Ocass.order"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "362253661054-8nimbpigl2094r5c5t6i44jmcf2t8sgt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Ocass.order",
+            "certificate_hash": "1138844db32629889900b2a353a37cab48ea05d5"
+          }
+        },
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
@@ -58,7 +106,215 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:e15c0ad3221ab88587f92f",
+        "android_client_info": {
+          "package_name": "com.noorapp.express"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362253661054-a81743hgfcdlgjnsa27mvh42u46l60e0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noorapp.express",
+            "certificate_hash": "88a0fe6fe7d9d1f2fb9ea5f12cb4461612a61508"
+          }
+        },
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:12561e0b3b92720187f92f",
+        "android_client_info": {
+          "package_name": "com.noorapp.marchand"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:123828989aab377787f92f",
+        "android_client_info": {
+          "package_name": "com.noorapp.order"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362253661054-k3i7qork643kdf2fdj7mh1kn7afgv1f7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.noorapp.order",
+            "certificate_hash": "88a0fe6fe7d9d1f2fb9ea5f12cb4461612a61508"
+          }
+        },
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:76915243c1ab2dd887f92f",
+        "android_client_info": {
+          "package_name": "com.ocass.provider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:71ca5d75a7a25eb887f92f",
+        "android_client_info": {
+          "package_name": "com.ocass.serviceman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362253661054-3ql18aa1rkgcvc8q7vbv1372ccra8qn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "362253661054-js9p07ru47qco81d4rce2doar0prr0c3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ocass.orders"
+              }
+            }
+          ]
         }
       }
     }
