@@ -136,7 +136,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
 
                               DottedBorder(
                                 options: RoundedRectDottedBorderOptions(
-                                  color: Colors.blueAccent,
+                                  color: const Color(0xFF0E4D3A),
                                   strokeWidth: 1,
                                   strokeCap: StrokeCap.butt,
                                   dashPattern: const [8, 5],
@@ -164,7 +164,7 @@ class _ReferAndEarnScreenState extends State<ReferAndEarnScreen> {
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
-                                        decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular( ResponsiveHelper.isDesktop(context) ? Dimensions.radiusDefault : 50)),
+                                        decoration: BoxDecoration(color: const Color(0xFF0E4D3A), borderRadius: BorderRadius.circular( ResponsiveHelper.isDesktop(context) ? Dimensions.radiusDefault : 50)),
                                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
                                         margin: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
                                         child: Text('copy'.tr, style: robotoMedium.copyWith(color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeDefault)),

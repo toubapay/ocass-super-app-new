@@ -759,13 +759,13 @@ class OrderInfoWidget extends StatelessWidget {
               ]else...[
                 Container(
                   decoration: BoxDecoration(
-                    color: orderController.trackModel?.paymentStatus == 'unpaid' ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
+                    color: orderController.trackModel?.paymentStatus == 'unpaid' ? Colors.red.withValues(alpha: 0.1) : const Color(0xFF0E4D3A).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 2),
                   child: Text(
                     '${orderController.trackModel?.paymentStatus?.tr}',
-                    style: robotoRegular.copyWith(color: orderController.trackModel?.paymentStatus == 'unpaid' ? Colors.red : Colors.green),
+                    style: robotoRegular.copyWith(color: orderController.trackModel?.paymentStatus == 'unpaid' ? Colors.red : const Color(0xFF0E4D3A)),
                   ),
                 )
               ]

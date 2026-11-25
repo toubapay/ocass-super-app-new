@@ -46,7 +46,7 @@ class SplashScreenState extends State<SplashScreen> {
             ? ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar()
             : const SizedBox();
         ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
-          backgroundColor: isConnected ? Colors.green : Colors.red,
+          backgroundColor: isConnected ? const Color(0xFF0E4D3A) : Colors.red,
           duration: Duration(seconds: isConnected ? 3 : 6000),
           content: Text(isConnected ? 'connected'.tr : 'no_connection'.tr,
               textAlign: TextAlign.center),

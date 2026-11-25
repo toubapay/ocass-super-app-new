@@ -199,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   padding: const EdgeInsets.all(
                                       Dimensions.paddingSizeSmall),
                                   child: const Icon(Icons.edit_outlined,
-                                      size: 16, color: Colors.blue),
+                                      size: 16, color: const Color(0xFF0E4D3A)),
                                 ),
                               )
                             : InkWell(
