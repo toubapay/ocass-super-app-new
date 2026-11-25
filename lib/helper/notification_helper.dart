@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/voyage/voyage_screens.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -51,6 +52,9 @@ class NotificationHelper {
             NotificationType.cashback: () => Get.toNamed(RouteHelper.getWalletRoute(fromNotification: true)),
             NotificationType.loyalty_point: () => Get.toNamed(RouteHelper.getLoyaltyRoute(fromNotification: true)),
             NotificationType.general: () => Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true)),
+            NotificationType.taxi: () => Get.toNamed(RouteHelper.getRideRoute()),
+            NotificationType.voyage: () => Get.to(() => const VoyageBookingsScreen()),
+            NotificationType.insurance: () => Get.toNamed(RouteHelper.getInsuranceRoute(policies: true)),
             NotificationType.trip: () => Get.to(()=> TaxiOrderDetailsScreen(tripId: int.parse(payload.orderId.toString()))),
           };
 
@@ -165,6 +169,9 @@ class NotificationHelper {
             NotificationType.cashback: () => Get.toNamed(RouteHelper.getWalletRoute(fromNotification: true)),
             NotificationType.loyalty_point: () => Get.toNamed(RouteHelper.getLoyaltyRoute(fromNotification: true)),
             NotificationType.general: () => Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true)),
+            NotificationType.taxi: () => Get.toNamed(RouteHelper.getRideRoute()),
+            NotificationType.voyage: () => Get.to(() => const VoyageBookingsScreen()),
+            NotificationType.insurance: () => Get.toNamed(RouteHelper.getInsuranceRoute(policies: true)),
             NotificationType.trip: () => Get.to(()=> TaxiOrderDetailsScreen(tripId: int.parse(message.data['order_id']))),
           };
 
@@ -265,7 +272,15 @@ class NotificationHelper {
       case 'otp':
         return NotificationBodyModel(notificationType: NotificationType.otp);
       case 'add_fund':
+      // Noor money transfers (sent / received) land in the wallet.
+      case 'wallet':
         return NotificationBodyModel(notificationType: NotificationType.add_fund);
+      case 'taxi':
+        return NotificationBodyModel(notificationType: NotificationType.taxi);
+      case 'voyage':
+        return NotificationBodyModel(notificationType: NotificationType.voyage);
+      case 'insurance':
+        return NotificationBodyModel(notificationType: NotificationType.insurance);
       case 'block':
         return NotificationBodyModel(notificationType: NotificationType.block);
       case 'unblock':

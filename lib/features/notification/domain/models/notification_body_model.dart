@@ -16,6 +16,10 @@ enum NotificationType{
   //ignore: constant_identifier_names
   loyalty_point,
   trip,
+  // Noor Taxi rides and Je Voyage intercity trips.
+  taxi,
+  voyage,
+  insurance,
 }
 
 class NotificationBodyModel {
@@ -90,6 +94,9 @@ class NotificationBodyModel {
       NotificationType.cashback.toString(): NotificationType.cashback,
       NotificationType.loyalty_point.toString(): NotificationType.loyalty_point,
       NotificationType.trip.toString(): NotificationType.trip,
+      NotificationType.taxi.toString(): NotificationType.taxi,
+      NotificationType.voyage.toString(): NotificationType.voyage,
+      NotificationType.insurance.toString(): NotificationType.insurance,
     };
 
     return enumMap[enumString] ?? NotificationType.general;
