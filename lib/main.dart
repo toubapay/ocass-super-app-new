@@ -59,14 +59,10 @@ Future<void> main() async {
             messagingSenderId: "362253661054",
             appId: "1:362253661054:web:79188a5f991a317887f92f"));
   } else if (GetPlatform.isAndroid) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A",
-        appId: "1:362253661054:android:2ab7d36a370183bf87f92f",
-        messagingSenderId: "362253661054",
-        projectId: "ocass-by-devteam",
-      ),
-    );
+    // Android reads its Firebase app (package, app ID, API key) from
+    // android/app/google-services.json, so a new package name only needs
+    // a new google-services.json.
+    await Firebase.initializeApp();
   } else {
     await Firebase.initializeApp();
   }
