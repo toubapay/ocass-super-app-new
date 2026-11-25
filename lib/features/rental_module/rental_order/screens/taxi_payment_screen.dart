@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/payment/widgets/external_payment_links.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -192,21 +193,8 @@ class MyInAppBrowser extends InAppBrowser {
     }
     if (uri == null) return NavigationActionPolicy.ALLOW;
 
-    final bool isExternal =
-        uri.scheme == 'wave' ||
-            uri.scheme == 'market' ||
-            uri.host == 'play.google.com' ||
-            uri.host == 'apps.apple.com' ||
-            !['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about'].contains(uri.scheme);
-
-    if (isExternal) {
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (_) {
-        try {
-          await launchUrl(uri, mode: LaunchMode.platformDefault);
-        } catch (_) {}
-      }
+    if (isExternalPaymentLink(uri)) {
+      await openExternalPaymentLink(uri);
       return NavigationActionPolicy.CANCEL;
     }
 

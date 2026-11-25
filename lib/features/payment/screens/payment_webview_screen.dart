@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/payment/widgets/external_payment_links.dart';
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,6 @@ import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/common/widgets/custom_app_bar.dart';
 import 'package:sixam_mart/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:sixam_mart/features/wallet/widgets/fund_payment_dialog_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PaymentWebViewScreen extends StatefulWidget {
   final OrderModel orderModel;
@@ -110,21 +110,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               onLoadStart: (controller, url) async {
                 if (url != null) {
                   final Uri uri = Uri.parse(url.toString());
-                  // Handle Wave deep links (wave:// or pay.wave.com) and app store links
-                  if (uri.scheme == 'wave' ||
-                      uri.host == 'pay.wave.com' ||
-                      uri.host == 'play.google.com' ||
-                      uri.host == 'apps.apple.com' ||
-                      uri.scheme == 'market') {
-                    try {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    } catch (_) {
-                      try {
-                        await launchUrl(uri, mode: LaunchMode.platformDefault);
-                      } catch (_) {}
-                    }
-                    return;
-                  }
+                  if (isExternalPaymentLink(uri)) return;
                 }
                 Get.find<OrderController>().paymentRedirect(
                   url: url.toString(), canRedirect: _canRedirect, onClose: (){} ,
@@ -137,21 +123,9 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 });
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
-                Uri uri = navigationAction.request.url!;
-                final bool isExternal =
-                    uri.scheme == 'wave' ||
-                        uri.scheme == 'market' ||
-                        uri.host == 'play.google.com' ||
-                        uri.host == 'apps.apple.com' ||
-                        !["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme);
-                if (isExternal) {
-                  try {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } catch (_) {
-                    try {
-                      await launchUrl(uri, mode: LaunchMode.platformDefault);
-                    } catch (_) {}
-                  }
+                final Uri uri = navigationAction.request.url!;
+                if (isExternalPaymentLink(uri)) {
+                  await openExternalPaymentLink(uri);
                   return NavigationActionPolicy.CANCEL;
                 }
                 return NavigationActionPolicy.ALLOW;

@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/payment/widgets/external_payment_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -99,10 +100,8 @@ class _InsuranceCheckoutBrowser extends InAppBrowser {
     final uri = navigationAction.request.url;
     if (uri == null) return NavigationActionPolicy.ALLOW;
     // Mobile-money apps (Wave, Orange Money...) open outside the web view.
-    if (_isExternal(uri)) {
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (_) {}
+    if (_isExternal(uri) || isExternalPaymentLink(uri)) {
+      await openExternalPaymentLink(uri);
       return NavigationActionPolicy.CANCEL;
     }
     return NavigationActionPolicy.ALLOW;

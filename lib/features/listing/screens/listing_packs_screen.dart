@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/payment/widgets/external_payment_links.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -230,10 +231,8 @@ class _ListingCheckoutBrowser extends InAppBrowser {
   @override
   Future<NavigationActionPolicy> shouldOverrideUrlLoading(NavigationAction navigationAction) async {
     final uri = navigationAction.request.url;
-    if (uri != null && _isExternal(uri)) {
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (_) {}
+    if (uri != null && (_isExternal(uri) || isExternalPaymentLink(uri))) {
+      await openExternalPaymentLink(uri);
       return NavigationActionPolicy.CANCEL;
     }
     return NavigationActionPolicy.ALLOW;

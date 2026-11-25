@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/payment/widgets/external_payment_links.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ import 'package:sixam_mart/common/widgets/custom_app_bar.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:sixam_mart/features/checkout/widgets/payment_failed_dialog.dart';
 import 'package:sixam_mart/features/wallet/widgets/fund_payment_dialog_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:sixam_mart/api/api_client.dart';
 import 'package:sixam_mart/features/payment/widgets/paydunya_softpay.dart';
 
@@ -231,24 +231,9 @@ class MyInAppBrowser extends InAppBrowser {
 
     final Uri uri = Uri.parse(url.toString());
 
-    // Handle Wave deep links — two possible forms:
-    //   1. wave://capture/https://pay.wave.com/c/cos-xxx  (deep link with embedded URL)
-    //   2. https://pay.wave.com/c/cos-xxx                 (direct HTTPS redirect)
-    // Also handle Play Store links that PayDunya shows when Wave is not installed.
-    if (uri.scheme == 'wave' ||
-        uri.host == 'pay.wave.com' ||
-        uri.host == 'play.google.com' ||
-        uri.host == 'apps.apple.com' ||
-        uri.scheme == 'market') {
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (_) {
-        try {
-          await launchUrl(uri, mode: LaunchMode.platformDefault);
-        } catch (_) {}
-      }
-      return; // don't call paymentRedirect for these URLs
-    }
+    // Wallet apps (Wave, Orange Money), intent:// and store links open
+    // outside: shouldOverrideUrlLoading already cancelled them.
+    if (isExternalPaymentLink(uri)) return;
 
     Get.find<OrderController>().paymentRedirect(
       url: url.toString(), canRedirect: _canRedirect, onClose: () => close(),
@@ -320,25 +305,10 @@ class MyInAppBrowser extends InAppBrowser {
     }
     if (uri == null) return NavigationActionPolicy.ALLOW;
 
-    // Intercept Wave deep links, app store links, and any other non-browser schemes.
-    // wave://  — Wave app deep link (e.g. wave://capture/https://pay.wave.com/...)
-    // market:// — Android Play Store direct intent
-    // Non-http/https schemes — orange-money://, mtn://, etc.
-    final bool isExternal =
-        uri.scheme == 'wave' ||
-            uri.scheme == 'market' ||
-            uri.host == 'play.google.com' ||
-            uri.host == 'apps.apple.com' ||
-            !['http', 'https', 'file', 'chrome', 'data', 'javascript', 'about'].contains(uri.scheme);
-
-    if (isExternal) {
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (_) {
-        try {
-          await launchUrl(uri, mode: LaunchMode.platformDefault);
-        } catch (_) {}
-      }
+    // Wave (pay.wave.com / wave://), Orange Money, intent:// and store links
+    // open in the phone's apps; loaded here they left a blank page.
+    if (isExternalPaymentLink(uri)) {
+      await openExternalPaymentLink(uri);
       return NavigationActionPolicy.CANCEL;
     }
 
