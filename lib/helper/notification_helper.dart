@@ -54,6 +54,7 @@ class NotificationHelper {
             NotificationType.general: () => Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true)),
             NotificationType.taxi: () => Get.toNamed(RouteHelper.getRideRoute()),
             NotificationType.voyage: () => Get.to(() => const VoyageBookingsScreen()),
+            NotificationType.insurance: () => Get.toNamed(RouteHelper.getInsuranceRoute(policies: true)),
             NotificationType.trip: () => Get.to(()=> TaxiOrderDetailsScreen(tripId: int.parse(payload.orderId.toString()))),
           };
 
@@ -170,6 +171,7 @@ class NotificationHelper {
             NotificationType.general: () => Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true)),
             NotificationType.taxi: () => Get.toNamed(RouteHelper.getRideRoute()),
             NotificationType.voyage: () => Get.to(() => const VoyageBookingsScreen()),
+            NotificationType.insurance: () => Get.toNamed(RouteHelper.getInsuranceRoute(policies: true)),
             NotificationType.trip: () => Get.to(()=> TaxiOrderDetailsScreen(tripId: int.parse(message.data['order_id']))),
           };
 
@@ -277,6 +279,8 @@ class NotificationHelper {
         return NotificationBodyModel(notificationType: NotificationType.taxi);
       case 'voyage':
         return NotificationBodyModel(notificationType: NotificationType.voyage);
+      case 'insurance':
+        return NotificationBodyModel(notificationType: NotificationType.insurance);
       case 'block':
         return NotificationBodyModel(notificationType: NotificationType.block);
       case 'unblock':

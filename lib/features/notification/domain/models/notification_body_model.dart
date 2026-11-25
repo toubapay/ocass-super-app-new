@@ -19,6 +19,7 @@ enum NotificationType{
   // Noor Taxi rides and Je Voyage intercity trips.
   taxi,
   voyage,
+  insurance,
 }
 
 class NotificationBodyModel {
@@ -95,6 +96,7 @@ class NotificationBodyModel {
       NotificationType.trip.toString(): NotificationType.trip,
       NotificationType.taxi.toString(): NotificationType.taxi,
       NotificationType.voyage.toString(): NotificationType.voyage,
+      NotificationType.insurance.toString(): NotificationType.insurance,
     };
 
     return enumMap[enumString] ?? NotificationType.general;
