@@ -29,7 +29,7 @@ android {
     ndkVersion = "29.0.13846066"
 
     defaultConfig {
-        applicationId "com.Ocass.order"
+        applicationId "com.noorapp.order"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
