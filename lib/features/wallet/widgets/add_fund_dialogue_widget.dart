@@ -198,7 +198,7 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: isSelected
-                                      ? Colors.green
+                                      ? const Color(0xFF0E4D3A)
                                       : Theme.of(context).cardColor,
                                   border: Border.all(
                                       color: Theme.of(context).disabledColor),

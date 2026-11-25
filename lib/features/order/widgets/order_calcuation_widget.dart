@@ -370,7 +370,7 @@ class OrderCalculationWidget extends StatelessWidget {
                           ),
                           TextSpan(
                             text: Get.find<SplashController>().configModel!.businessName,
-                            style: robotoMedium.copyWith(color: Colors.blue, fontSize: Dimensions.fontSizeDefault, decoration: TextDecoration.underline),
+                            style: robotoMedium.copyWith(color: const Color(0xFF0E4D3A), fontSize: Dimensions.fontSizeDefault, decoration: TextDecoration.underline),
                           ),
                         ]), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
                       ),
@@ -409,7 +409,7 @@ class OrderCalculationWidget extends StatelessWidget {
                   ),
                   TextSpan(
                     text: Get.find<SplashController>().configModel!.businessName,
-                    style: robotoMedium.copyWith(color: Colors.blue, fontSize: Dimensions.fontSizeDefault, decoration: TextDecoration.underline),
+                    style: robotoMedium.copyWith(color: const Color(0xFF0E4D3A), fontSize: Dimensions.fontSizeDefault, decoration: TextDecoration.underline),
                   ),
                 ]), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
               ),

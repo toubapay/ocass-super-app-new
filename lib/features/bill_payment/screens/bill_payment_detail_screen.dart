@@ -35,7 +35,7 @@ class _BillPaymentDetailScreenState extends State<BillPaymentDetailScreen> {
   Color get _statusColor {
     if (_record.isSuccess) return const Color(0xFF00AA13);
     if (_record.isFailed)  return Colors.red;
-    return Colors.orange;
+    return const Color(0xFFB8901F);
   }
 
   IconData get _statusIcon {
@@ -64,7 +64,7 @@ class _BillPaymentDetailScreenState extends State<BillPaymentDetailScreen> {
   Color get _csStatusColor {
     if (_csIsSuccess) return const Color(0xFF00AA13);
     if (_csIsFailed)  return Colors.red;
-    return Colors.orange;
+    return const Color(0xFFB8901F);
   }
 
   IconData get _csStatusIcon {
@@ -136,7 +136,7 @@ class _BillPaymentDetailScreenState extends State<BillPaymentDetailScreen> {
         'Up to Date',
         'No status change received from provider.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: const Color(0xFF0E4D3A),
         colorText: Colors.white,
         margin: const EdgeInsets.all(16),
         borderRadius: 12,
@@ -300,7 +300,7 @@ class _BillPaymentDetailScreenState extends State<BillPaymentDetailScreen> {
             _row('Provider Fee',
                 '+ ${_record.lamFees!.toStringAsFixed(0)} ${_record.currency ?? 'XOF'}',
                 Icons.payments_outlined,
-                valueColor: Colors.orange.shade700),
+                valueColor: const Color(0xFF6E500A)),
           if ((_record.serviceCommission ?? 0) > 0)
             _row('Service Fee',
                 '+ ${_record.serviceCommission!.toStringAsFixed(0)} ${_record.currency ?? 'XOF'}',
@@ -448,18 +448,18 @@ class _BillPaymentDetailScreenState extends State<BillPaymentDetailScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: const Color(0xFFFBF1D3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade200, width: 1.2),
+        border: Border.all(color: const Color(0xFFE9D18A), width: 1.2),
       ),
       child: Row(children: [
         Icon(Icons.hourglass_top_rounded,
-            color: Colors.orange.shade700, size: 20),
+            color: const Color(0xFF6E500A), size: 20),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             'payment_is_being_processed_by_the_provider_tap_refresh_to_check_for_updates'.tr,
-            style: TextStyle(color: Colors.orange.shade800,
+            style: TextStyle(color: const Color(0xFF6E500A),
                 fontSize: 13, fontWeight: FontWeight.w600, height: 1.4),
           ),
         ),

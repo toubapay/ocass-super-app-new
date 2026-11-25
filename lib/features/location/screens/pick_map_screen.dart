@@ -406,7 +406,7 @@ class _PickMapScreenState extends State<PickMapScreen>
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: locationController.inZone
-                          ? Colors.green.withOpacity(0.9)
+                          ? const Color(0xFF0E4D3A).withOpacity(0.9)
                           : Colors.red.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
@@ -777,7 +777,7 @@ class _PickMapScreenState extends State<PickMapScreen>
                                 ? Icons.check_circle
                                 : Icons.error,
                             color: locationController.inZone
-                                ? Colors.green
+                                ? const Color(0xFF0E4D3A)
                                 : Colors.red,
                             size: 20,
                           ),
@@ -789,7 +789,7 @@ class _PickMapScreenState extends State<PickMapScreen>
                                   : 'not_in_service_area'.tr,
                               style: robotoMedium.copyWith(
                                 color: locationController.inZone
-                                    ? Colors.green
+                                    ? const Color(0xFF0E4D3A)
                                     : Colors.red,
                                 fontSize: Dimensions.fontSizeSmall,
                               ),

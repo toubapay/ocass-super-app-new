@@ -400,7 +400,7 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
                           height: 76,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Colors.blue.shade50, Colors.white],
+                              colors: [const Color(0xFFE4F1EA), Colors.white],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -505,7 +505,7 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
             height: 60,
             decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [const Color(0xFFF3F7FF), Colors.blue.shade50],
+                  colors: [const Color(0xFFF8EDCC), const Color(0xFFE4F1EA)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -746,7 +746,7 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F7FF),
+        color: const Color(0xFFF8EDCC),
         borderRadius: BorderRadius.circular(16),
         border:
             Border.all(color: const Color(0xFF0066CC).withValues(alpha: 0.15)),
@@ -758,7 +758,7 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
             _feeRow(
                 'Provider Fee (${ctrl.providerFeeLabel})',
                 '${providerFee.toStringAsFixed(0)} $currency',
-                valueColor: Colors.orange.shade700),
+                valueColor: const Color(0xFF6E500A)),
           _feeRow(
               'Platform Fee (${ctrl.commissionLabel})',
               '${platformFee.toStringAsFixed(0)} $currency',
@@ -813,7 +813,7 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F7FF),
+        color: const Color(0xFFF8EDCC),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: const Color(0xFF00AA13).withOpacity(0.12)),
         image: DecorationImage(
@@ -853,12 +853,12 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: const Color(0xFFB8901F).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text('unpaid'.tr,
                     style: TextStyle(
-                        color: Colors.orange,
+                        color: const Color(0xFFB8901F),
                         fontWeight: FontWeight.w900,
                         fontSize: 10)),
               ),
@@ -953,15 +953,15 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: isSuccess
-                        ? Colors.green.shade50
-                        : Colors.orange.shade50,
+                        ? const Color(0xFFE4F1EA)
+                        : const Color(0xFFFBF1D3),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     isSuccess
                         ? Icons.verified_rounded
                         : Icons.build_circle_outlined,
-                    color: isSuccess ? Colors.green : Colors.orange.shade700,
+                    color: isSuccess ? const Color(0xFF0E4D3A) : const Color(0xFF6E500A),
                     size: 72,
                   ),
                 ),
@@ -1409,7 +1409,7 @@ class _BillPaymentScreenState extends State<BillPaymentScreen>
       statusIcon = Icons.cancel_rounded;
       statusLabel = 'Failed';
     } else {
-      statusColor = Colors.orange;
+      statusColor = const Color(0xFFB8901F);
       statusIcon = Icons.hourglass_top_rounded;
       statusLabel = 'Pending';
     }

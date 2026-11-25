@@ -76,7 +76,7 @@ class _AccessLocationScreenState extends State<AccessLocationScreen> {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('back_press_again_to_exit'.tr, style: const TextStyle(color: Colors.white)),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: Colors.green,
+            backgroundColor: const Color(0xFF0E4D3A),
             duration: const Duration(seconds: 2),
             margin: const EdgeInsets.all(Dimensions.paddingSizeSmall),
           ));

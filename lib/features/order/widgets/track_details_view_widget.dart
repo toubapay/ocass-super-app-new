@@ -135,7 +135,7 @@ class TrackDetailsViewWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Colors.green,
+                color: const Color(0xFF0E4D3A),
               ),
               child: Text(
                 'call'.tr,
@@ -151,7 +151,7 @@ class TrackDetailsViewWidget extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: Get.context!.width >= 1300 ? 7 : Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                color: Colors.green,
+                color: const Color(0xFF0E4D3A),
               ),
               child: Icon(Icons.chat, size: 12, color: Theme.of(context).cardColor),
             ),
