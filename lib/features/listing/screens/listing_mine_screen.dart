@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/common/widgets/custom_image.dart';
@@ -267,8 +268,8 @@ class _ListingMineScreenState extends State<ListingMineScreen> {
                 const SizedBox(height: 10),
                 Row(children: [
                   if (pay['paydunya'] == true) Expanded(child: ListingButton(text: 'lst_pay_mobile'.tr, style: 'green', busy: busy, onTap: () => pay0('paydunya'))),
-                  if (pay['paydunya'] == true && pay['wallet'] == true) const SizedBox(width: 8),
-                  if (pay['wallet'] == true) Expanded(child: ListingButton(text: 'lst_pay_wallet'.tr, style: 'outline', busy: busy, onTap: () => pay0('wallet'))),
+                  if (!AppConstants.playSafe && pay['paydunya'] == true && pay['wallet'] == true) const SizedBox(width: 8),
+                  if (!AppConstants.playSafe && pay['wallet'] == true) Expanded(child: ListingButton(text: 'lst_pay_wallet'.tr, style: 'outline', busy: busy, onTap: () => pay0('wallet'))),
                 ]),
               ]),
             ),

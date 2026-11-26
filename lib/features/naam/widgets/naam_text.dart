@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,8 @@ class NaamText extends StatefulWidget {
     if (uri == null) return null;
     final seg = uri.pathSegments.where((s) => s.isNotEmpty).toList();
     final id = seg.length > 1 ? int.tryParse(seg[1]) : null;
+    const financial = {'portefeuille', 'envoyer', 'credit', 'factures', 'assurance', 'points', 'parrainage'};
+    if (AppConstants.playSafe && seg.isNotEmpty && financial.contains(seg.first)) return null;
     switch (seg.isEmpty ? '' : seg.first) {
       case '':
         return RouteHelper.getMainRoute('home');

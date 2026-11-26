@@ -264,7 +264,7 @@ class ConfigModel {
     footerText = json['footer_text'];
     landingPageLinks = json['landing_page_links'] != null ? LandingPageLinks.fromJson(json['landing_page_links']) : null;
     loyaltyPointExchangeRate = json['loyalty_point_exchange_rate'];
-    loyaltyPointItemPurchasePoint = json['loyalty_point_item_purchase_point']?.toDouble();
+    loyaltyPointItemPurchasePoint = AppConstants.playSafe ? 0 : json['loyalty_point_item_purchase_point']?.toDouble();
     loyaltyPointStatus = AppConstants.playSafe ? 0 : json['loyalty_point_status'];
     minimumPointToTransfer = json['loyalty_point_minimum_point'];
     customerWalletStatus = AppConstants.playSafe ? 0 : json['customer_wallet_status'];

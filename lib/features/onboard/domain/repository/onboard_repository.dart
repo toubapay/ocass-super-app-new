@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'package:get/get.dart';
 import 'package:sixam_mart/features/onboard/domain/repository/onboard_repository_interface.dart';
 import 'package:sixam_mart/features/onboard/domain/models/onboarding_model.dart';
@@ -10,7 +11,7 @@ class OnboardRepository implements OnboardRepositoryInterface {
     try {
       List<OnBoardingModel> onBoardingList = [
         OnBoardingModel(Images.onboard_1, 'on_boarding_1_title'.tr, 'on_boarding_1_description'.tr),
-        OnBoardingModel(Images.onboard_2, 'on_boarding_2_title'.tr, 'on_boarding_2_description'.tr),
+        OnBoardingModel(Images.onboard_2, 'on_boarding_2_title'.tr, (AppConstants.playSafe ? 'on_boarding_2_description_safe' : 'on_boarding_2_description').tr),
         OnBoardingModel(Images.onboard_3, 'on_boarding_3_title'.tr, 'on_boarding_3_description'.tr),
       ];
 

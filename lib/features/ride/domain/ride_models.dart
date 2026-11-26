@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 double _d(dynamic v) => v == null ? 0 : (v is num ? v.toDouble() : double.tryParse('$v') ?? 0);
@@ -43,8 +44,8 @@ class RideConfig {
   RideConfig.fromJson(Map<String, dynamic> j)
       : enabled = j['enabled'] == true,
         moduleName = j['module_name']?.toString(),
-        paymentMethods = (j['payment_methods'] as List? ?? []).map((e) => e.toString()).toList(),
-        walletBalance = _d(j['wallet_balance']);
+        paymentMethods = (j['payment_methods'] as List? ?? []).map((e) => e.toString()).where((m) => !(AppConstants.playSafe && m == 'wallet')).toList(),
+        walletBalance = AppConstants.playSafe ? 0 : _d(j['wallet_balance']);
 }
 
 class RideCategory {

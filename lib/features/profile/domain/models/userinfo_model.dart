@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'package:sixam_mart/features/chat/domain/models/conversation_model.dart';
 
 class UserInfoModel {
@@ -60,8 +61,8 @@ class UserInfoModel {
     password = json['password'];
     orderCount = json['order_count'];
     memberSinceDays = json['member_since_days'];
-    walletBalance = json['wallet_balance'].toDouble();
-    loyaltyPoint = json['loyalty_point'];
+    walletBalance = AppConstants.playSafe ? 0 : json['wallet_balance'].toDouble();
+    loyaltyPoint = AppConstants.playSafe ? 0 : json['loyalty_point'];
     refCode = json['ref_code'];
     socialId = json['social_id'];
     userInfo = json['userinfo'] != null ? User.fromJson(json['userinfo']) : null;

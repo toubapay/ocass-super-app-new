@@ -388,7 +388,10 @@ class _NaamScreenState extends State<NaamScreen> {
     final enabled = _cfg?['enabled'] == true;
     final greetings = _cfg?['greeting'] is Map ? _cfg!['greeting'] as Map : const {};
     final greeting = ((_lang == 'wo' ? greetings['wo'] : greetings['fr']) ?? '').toString().trim();
-    final suggestions = ((_cfg?['suggestions'] as List?) ?? []).map((s) => _suggestionText[_lang]?[s] ?? s.toString()).toList();
+    final suggestions = ((_cfg?['suggestions'] as List?) ?? [])
+        .where((s) => !(AppConstants.playSafe && s.toString().toLowerCase().contains('portefeuille')))
+        .map((s) => _suggestionText[_lang]?[s] ?? s.toString())
+        .toList();
     final phone = Get.find<SplashController>().configModel?.phone;
     final bodyStyle = TextStyle(fontSize: 15, height: 1.4, color: theme.textTheme.bodyLarge?.color);
 

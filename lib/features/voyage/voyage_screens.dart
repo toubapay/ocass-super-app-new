@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -277,7 +278,7 @@ class _VoyageBookingFormState extends State<VoyageBookingForm> {
   String? _method;
   bool _busy = false;
 
-  List<String> get _methods => List<String>.from(widget.config?['payment_methods'] ?? ['cash']);
+  List<String> get _methods => List<String>.from(widget.config?['payment_methods'] ?? ['cash']).where((m) => !(AppConstants.playSafe && m == 'wallet')).toList();
   double get _balance => Get.find<ProfileController>().userInfoModel?.walletBalance ?? 0;
 
   @override
@@ -668,7 +669,7 @@ class _VoyageTripScreenState extends State<VoyageTripScreen> {
 
   Future<void> _cancel(Map mine) async {
     final ok = await Get.dialog<bool>(AlertDialog(
-      content: const Text('Annuler ta réservation ? Si tu as payé par portefeuille, tu es remboursé tout de suite.'),
+      content: const Text(AppConstants.playSafe ? 'Annuler ta réservation ?' : 'Annuler ta réservation ? Si tu as payé par portefeuille, tu es remboursé tout de suite.'),
       actions: [
         TextButton(onPressed: () => Get.back(result: false), child: const Text('Non')),
         TextButton(onPressed: () => Get.back(result: true), child: const Text('Oui, annuler', style: TextStyle(color: NoorTheme.danger))),
