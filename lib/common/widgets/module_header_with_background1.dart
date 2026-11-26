@@ -190,7 +190,7 @@ class _ModuleHeaderWithBackgroundState
                               : 0,
                         ),
                         Expanded(child: _buildLocationSection()),
-                        _buildWalletIcon(),
+                        if (!AppConstants.playSafe) _buildWalletIcon(),
                         const SizedBox(width: Dimensions.paddingSizeExtraSmall),
                         _buildProfileIcon(),
                       ],

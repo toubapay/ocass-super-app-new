@@ -418,7 +418,7 @@ class _ModuleViewState extends State<ModuleView> {
                 const SizedBox(height: 10),
 
 
-                GetBuilder<ProfileController>(
+                if (!AppConstants.playSafe) GetBuilder<ProfileController>(
                   builder: (profileController) {
                     final balance =
                         profileController.userInfoModel?.walletBalance ?? 0;
@@ -684,7 +684,7 @@ class _ModuleViewState extends State<ModuleView> {
                               }
 
                               // ──── INSURANCE TILE ────
-                              tiles.add(Column(
+                              if (!AppConstants.playSafe) tiles.add(Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CustomInkWell(

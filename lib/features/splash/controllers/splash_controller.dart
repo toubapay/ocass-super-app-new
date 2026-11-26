@@ -325,7 +325,8 @@ class SplashController extends GetxController implements GetxService {
       _voyageModule = null;
       for (var module in moduleList) {
         if (module.moduleType == AppConstants.mobileMoney) {
-          _mobileMoneyModule = module;
+          // Play Store build: no money transfers between people (AppConstants.playSafe).
+          if (!AppConstants.playSafe) _mobileMoneyModule = module;
         } else if (module.moduleType == AppConstants.rideHailing) {
           _rideModule = module;
         } else if (module.moduleType == AppConstants.voyage) {

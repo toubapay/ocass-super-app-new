@@ -11,6 +11,12 @@ class AppConstants {
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
+
+  // Play Store build for a personal developer account (Google "Play Console
+  // Requirements"): no wallet, loyalty points, referral earnings, airtime,
+  // bill payment, motor insurance or money transfers. Build with
+  // --dart-define=PLAY_SAFE=true. The default build keeps every feature.
+  static const bool playSafe = bool.fromEnvironment('PLAY_SAFE', defaultValue: false);
   static const int balanceInputLen = 10;
   static const String webHostedUrl = 'https://ocass.net';
   static const bool useReactWebsite = false;

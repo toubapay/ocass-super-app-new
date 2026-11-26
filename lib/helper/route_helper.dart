@@ -98,6 +98,15 @@ import 'package:get/get.dart';
 import 'package:sixam_mart/features/wallet/screens/wallet_screen.dart';
 import 'package:sixam_mart/features/airtime/screens/airtime_screen_stepper.dart';
 
+/// Play Store build (AppConstants.playSafe): the wallet, loyalty points, referral,
+/// airtime, bill payment, motor insurance and money transfer pages are not
+/// reachable, whatever opens them (links, notifications, the Naam assistant).
+class _PlaySafeGuard extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) =>
+      AppConstants.playSafe ? const RouteSettings(name: RouteHelper.initial) : null;
+}
+
 class RouteHelper {
   static const String initial = '/';
   static const String splash = '/splash';
@@ -839,6 +848,7 @@ class RouteHelper {
                 inStorePage: Get.parameters['page'] == 'restaurant'))),
     GetPage(
         name: wallet,
+        middlewares: [_PlaySafeGuard()],
         page: () {
           return getRoute(WalletScreen(
             fundStatus:
@@ -849,10 +859,12 @@ class RouteHelper {
         }),
     GetPage(
         name: loyalty,
+        middlewares: [_PlaySafeGuard()],
         page: () => getRoute(LoyaltyScreen(
             fromNotification: Get.parameters['from_notification'] == 'true'))),
     GetPage(
-        name: referAndEarn, page: () => getRoute(const ReferAndEarnScreen())),
+        name: referAndEarn,
+        middlewares: [_PlaySafeGuard()], page: () => getRoute(const ReferAndEarnScreen())),
     GetPage(
         name: messages,
         page: () {
@@ -976,18 +988,21 @@ class RouteHelper {
         }),
     GetPage(
         name: airtime,
+        middlewares: [_PlaySafeGuard()],
         page: () {
           Get.lazyPut(() => AirtimeController());
           return const AirtimeScreenStepper();
         }),
     GetPage(
         name: billPayment,
+        middlewares: [_PlaySafeGuard()],
         page: () {
           Get.lazyPut(() => BillPaymentController());
           return getRoute(const BillPaymentScreen());
         }),
     GetPage(
         name: mobileMoney,
+        middlewares: [_PlaySafeGuard()],
         page: () {
           Get.lazyPut(() => MobileMoneyController());
           return getRoute(const MobileMoneyScreen());
@@ -1003,9 +1018,11 @@ class RouteHelper {
     GetPage(name: listing, page: () => getRoute(const ListingHomeScreen())),
     GetPage(
         name: insurance,
+        middlewares: [_PlaySafeGuard()],
         page: () => getRoute(InsuranceScreen(initialTab: Get.parameters['tab'] == '1' ? 1 : 0))),
     GetPage(
         name: billPaymentDetail,
+        middlewares: [_PlaySafeGuard()],
         page: () {
           final BillPaymentRecord record = Get.arguments as BillPaymentRecord;
           return BillPaymentDetailScreen(initialRecord: record);

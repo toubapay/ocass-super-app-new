@@ -1,4 +1,5 @@
 import 'package:sixam_mart/common/models/module_model.dart';
+import 'package:sixam_mart/util/app_constants.dart';
 
 class ConfigModel {
   String? businessName;
@@ -264,11 +265,11 @@ class ConfigModel {
     landingPageLinks = json['landing_page_links'] != null ? LandingPageLinks.fromJson(json['landing_page_links']) : null;
     loyaltyPointExchangeRate = json['loyalty_point_exchange_rate'];
     loyaltyPointItemPurchasePoint = json['loyalty_point_item_purchase_point']?.toDouble();
-    loyaltyPointStatus = json['loyalty_point_status'] ;
+    loyaltyPointStatus = AppConstants.playSafe ? 0 : json['loyalty_point_status'];
     minimumPointToTransfer = json['loyalty_point_minimum_point'];
-    customerWalletStatus = json['customer_wallet_status'];
+    customerWalletStatus = AppConstants.playSafe ? 0 : json['customer_wallet_status'];
     dmTipsStatus = json['dm_tips_status'];
-    refEarningStatus = json['ref_earning_status'];
+    refEarningStatus = AppConstants.playSafe ? 0 : json['ref_earning_status'];
     refundActiveStatus = json['refund_active_status'];
     refEarningExchangeRate = json['ref_earning_exchange_rate']?.toDouble();
     if (json['app_languages'] is List) {
@@ -310,7 +311,7 @@ class ConfigModel {
       });
     }
     digitalPaymentInfo = json['digital_payment_info'] != null ? DigitalPaymentInfo.fromJson(json['digital_payment_info']) : null;
-    addFundStatus = json['add_fund_status'] == 1;
+    addFundStatus = !AppConstants.playSafe && json['add_fund_status'] == 1;
     offlinePaymentStatus = json['offline_payment_status'] == 1;
     guestCheckoutStatus = json['guest_checkout_status'] == 1;
     adminCommission = json['admin_commission']?.toDouble();
@@ -337,8 +338,8 @@ class ConfigModel {
     billPaymentPlatformCommissionType  = json['bill_payment_platform_commission_type']?.toString() ?? 'percent';
     billPaymentProviderFeeValue        = (json['bill_payment_provider_fee_value'] as num?)?.toDouble() ?? 7.0;
     billPaymentProviderFeeType         = json['bill_payment_provider_fee_type']?.toString() ?? 'fixed';
-    airtimeStatus                      = json['airtime_status'] is int ? json['airtime_status'] : (json['airtime_status'] != null ? int.tryParse(json['airtime_status'].toString()) ?? 0 : 0);
-    billPaymentStatus                  = json['bill_payment_status'] is int ? json['bill_payment_status'] : (json['bill_payment_status'] != null ? int.tryParse(json['bill_payment_status'].toString()) ?? 0 : 0);
+    airtimeStatus                      = AppConstants.playSafe ? 0 : (json['airtime_status'] is int ? json['airtime_status'] : (json['airtime_status'] != null ? int.tryParse(json['airtime_status'].toString()) ?? 0 : 0));
+    billPaymentStatus                  = AppConstants.playSafe ? 0 : (json['bill_payment_status'] is int ? json['bill_payment_status'] : (json['bill_payment_status'] != null ? int.tryParse(json['bill_payment_status'].toString()) ?? 0 : 0));
     airtimeName                        = json['airtime_name']?.toString();
     billPaymentName                    = json['bill_payment_name']?.toString();
     airtimeLogo                        = json['airtime_logo']?.toString();
