@@ -37,6 +37,13 @@ android {
         multiDexEnabled true
     }
 
+    // Play build: drop permissions used only by features hidden with PLAY_SAFE.
+    if (System.getenv("NOOR_APP_ID")) {
+        sourceSets {
+            release { manifest.srcFile "src/playsafe/AndroidManifest.xml" }
+        }
+    }
+
     signingConfigs {
         release {
             keyAlias keystoreProperties["keyAlias"]
