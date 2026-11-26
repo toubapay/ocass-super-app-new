@@ -61,6 +61,63 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:123828989aab377787f92f",
+        "android_client_info": {
+          "package_name": "com.noorapp.order"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:e15c0ad3221ab88587f92f",
+        "android_client_info": {
+          "package_name": "com.noorapp.express"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362253661054:android:12561e0b3b92720187f92f",
+        "android_client_info": {
+          "package_name": "com.noorapp.marchand"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-UGSisMBXuEouRIVJQxkvre4PiuVJ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"
