@@ -79,8 +79,8 @@ class _ListingMineScreenState extends State<ListingMineScreen> {
                 },
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
+            if (!AppConstants.playSafe) const SizedBox(width: 8),
+            if (!AppConstants.playSafe) Expanded(
               child: ListingButton(
                 text: 'lst_packs'.tr,
                 style: 'outline',
@@ -91,7 +91,7 @@ class _ListingMineScreenState extends State<ListingMineScreen> {
               ),
             ),
           ]),
-          if (quota.isNotEmpty)
+          if (quota.isNotEmpty && !(AppConstants.playSafe && quota['subscription'] != null))
             Padding(
               padding: const EdgeInsets.only(top: 10, bottom: 4),
               child: Text(
@@ -158,7 +158,7 @@ class _ListingMineScreenState extends State<ListingMineScreen> {
         Row(children: [
           if (item.status == 'active') ...[
             _action('lst_mark_sold'.tr, Icons.check_circle_outline, () => _run(() => ListingApi.update(item.id, {'status': 'sold'}))),
-            _action('lst_boost'.tr, Icons.star_outline, () => _boost(item), color: LColors.goldDark),
+            if (!AppConstants.playSafe) _action('lst_boost'.tr, Icons.star_outline, () => _boost(item), color: LColors.goldDark),
           ],
           if (item.status == 'sold') _action('lst_back_on_sale'.tr, Icons.replay, () => _run(() => ListingApi.update(item.id, {'status': 'active'}))),
           _action('lst_delete'.tr, Icons.delete_outline, () => _confirmDelete(item), color: const Color(0xFFB42318)),

@@ -1,3 +1,4 @@
+import 'package:sixam_mart/util/app_constants.dart';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -144,6 +145,11 @@ class _ListingPostScreenState extends State<ListingPostScreen> {
       setState(() {
         _busy = false;
         _done = r.body;
+      });
+    } else if (r.statusCode == 402 && AppConstants.playSafe) {
+      setState(() {
+        _busy = false;
+        _error = 'lst_quota_none'.tr;
       });
     } else if (r.statusCode == 402) {
       setState(() => _busy = false);
@@ -406,7 +412,7 @@ class _QuotaLine extends StatelessWidget {
         const Icon(Icons.info_outline, size: 16, color: LColors.muted),
         const SizedBox(width: 6),
         Expanded(child: Text(text, style: robotoRegular.copyWith(fontSize: 12.5, color: LColors.muted))),
-        TextButton(onPressed: () => Get.to(() => const ListingPacksScreen()), child: Text('lst_packs'.tr, style: robotoBold.copyWith(color: LColors.green, fontSize: 12.5))),
+        if (!AppConstants.playSafe) TextButton(onPressed: () => Get.to(() => const ListingPacksScreen()), child: Text('lst_packs'.tr, style: robotoBold.copyWith(color: LColors.green, fontSize: 12.5))),
       ]),
     );
   }
