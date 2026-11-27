@@ -1,3 +1,4 @@
+import 'package:sixam_mart/helper/live_sync.dart';
 import 'package:sixam_mart/features/voyage/voyage_screens.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -68,6 +69,8 @@ class NotificationHelper {
       if (kDebugMode) {
         print("onMessage: ${message.data['type']}/${message.data}");
       }
+      // Live updates: the open ride / Je Voyage screens reload at once.
+      if (const ['taxi', 'voyage', 'voyage_message'].contains(message.data['type'])) LiveSync.instance.ping();
       if(message.data['type'] == 'demo_reset') {
         Get.dialog(const DemoResetDialogWidget(), barrierDismissible: false);
       }

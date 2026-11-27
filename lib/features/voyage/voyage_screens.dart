@@ -10,6 +10,7 @@ import 'package:sixam_mart/features/auth/controllers/auth_controller.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/features/noor_shop/noor_module_slides.dart';
 import 'package:sixam_mart/features/profile/controllers/profile_controller.dart';
+import 'package:sixam_mart/helper/live_sync.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/theme/light_theme.dart';
@@ -650,15 +651,20 @@ class _VoyageTripScreenState extends State<VoyageTripScreen> {
     super.initState();
     _load();
     VoyageApi.config().then((c) => mounted ? setState(() => _config = Map.from(c)) : null).catchError((_) => null);
-    // On the road: the car's position every 10 s.
-    _poll = Timer.periodic(const Duration(seconds: 10), (_) {
+    // Live updates: any change to the trip or the booking reloads it at once
+    // (LiveSync); on the road, the car's position every 30 s as a fallback.
+    _unlive = LiveSync.instance.subscribe(_load);
+    _poll = Timer.periodic(const Duration(seconds: 30), (_) {
       if (_trip?['live'] != null || ['boarding', 'in_progress'].contains(_trip?['status'])) _load();
     });
   }
 
+  VoidCallback? _unlive;
+
   @override
   void dispose() {
     _poll?.cancel();
+    _unlive?.call();
     super.dispose();
   }
 
@@ -951,11 +957,20 @@ class VoyageBookingsScreen extends StatefulWidget {
 class _VoyageBookingsScreenState extends State<VoyageBookingsScreen> {
   List<Map>? _upcoming;
   List<Map> _past = [];
+  VoidCallback? _unlive;
 
   @override
   void initState() {
     super.initState();
     _load();
+    // Live updates: boarding, departure, arrival, a driver's message.
+    _unlive = LiveSync.instance.subscribe(_load);
+  }
+
+  @override
+  void dispose() {
+    _unlive?.call();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -1222,12 +1237,17 @@ class _VoyageChatScreenState extends State<VoyageChatScreen> {
   void initState() {
     super.initState();
     _load();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _load());
+    // Live updates: a new message (or « lu ») at once; every 30 s as a fallback.
+    _unlive = LiveSync.instance.subscribe(_load);
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _load());
   }
+
+  VoidCallback? _unlive;
 
   @override
   void dispose() {
     _timer?.cancel();
+    _unlive?.call();
     _text.dispose();
     _scroll.dispose();
     super.dispose();
