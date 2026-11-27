@@ -59,6 +59,12 @@ class NoorCatalog {
     return _maps(b is Map ? b['banners'] : null).where((x) => '${x['image_full_url'] ?? ''}'.isNotEmpty).toList();
   }
 
+  /// The module's home slide show (admin: Module home slides manager).
+  static Future<List<Map<String, dynamic>>> moduleSlides(int moduleId) async {
+    final b = await _get('/api/v1/module-home-slides?module_id=$moduleId', moduleId);
+    return _maps(b is Map ? b['slides'] : null).where((x) => '${x['title'] ?? ''}'.isNotEmpty).toList();
+  }
+
   static Future<List<Map<String, dynamic>>> categories(int moduleId) async =>
       _maps(await _get(AppConstants.categoryUri, moduleId));
 
