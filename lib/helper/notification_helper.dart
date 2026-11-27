@@ -53,7 +53,7 @@ class NotificationHelper {
             NotificationType.loyalty_point: () => Get.toNamed(RouteHelper.getLoyaltyRoute(fromNotification: true)),
             NotificationType.general: () => Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true)),
             NotificationType.taxi: () => Get.toNamed(RouteHelper.getRideRoute()),
-            NotificationType.voyage: () => Get.to(() => const VoyageBookingsScreen()),
+            NotificationType.voyage: () => payload.conversationId != null ? Get.to(() => VoyageChatScreen(bookingId: payload.conversationId!)) : Get.to(() => const VoyageBookingsScreen()),
             NotificationType.insurance: () => Get.toNamed(RouteHelper.getInsuranceRoute(policies: true)),
             NotificationType.trip: () => Get.to(()=> TaxiOrderDetailsScreen(tripId: int.parse(payload.orderId.toString()))),
           };
@@ -170,7 +170,7 @@ class NotificationHelper {
             NotificationType.loyalty_point: () => Get.toNamed(RouteHelper.getLoyaltyRoute(fromNotification: true)),
             NotificationType.general: () => Get.toNamed(RouteHelper.getNotificationRoute(fromNotification: true)),
             NotificationType.taxi: () => Get.toNamed(RouteHelper.getRideRoute()),
-            NotificationType.voyage: () => Get.to(() => const VoyageBookingsScreen()),
+            NotificationType.voyage: () => notificationBody.conversationId != null ? Get.to(() => VoyageChatScreen(bookingId: notificationBody.conversationId!)) : Get.to(() => const VoyageBookingsScreen()),
             NotificationType.insurance: () => Get.toNamed(RouteHelper.getInsuranceRoute(policies: true)),
             NotificationType.trip: () => Get.to(()=> TaxiOrderDetailsScreen(tripId: int.parse(message.data['order_id']))),
           };
@@ -279,6 +279,9 @@ class NotificationHelper {
         return NotificationBodyModel(notificationType: NotificationType.taxi);
       case 'voyage':
         return NotificationBodyModel(notificationType: NotificationType.voyage);
+      case 'voyage_message':
+        // A driver's message: opens that conversation (booking id).
+        return NotificationBodyModel(notificationType: NotificationType.voyage, conversationId: int.tryParse('${data['booking_id'] ?? ''}'));
       case 'insurance':
         return NotificationBodyModel(notificationType: NotificationType.insurance);
       case 'block':
