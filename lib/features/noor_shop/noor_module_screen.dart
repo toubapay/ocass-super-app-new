@@ -7,6 +7,7 @@ import 'package:sixam_mart/common/widgets/custom_image.dart';
 import 'package:sixam_mart/features/item/domain/models/basic_campaign_model.dart';
 import 'package:sixam_mart/features/item/domain/models/item_model.dart';
 import 'package:sixam_mart/features/noor_shop/noor_catalog.dart';
+import 'package:sixam_mart/features/noor_shop/noor_module_slides.dart';
 import 'package:sixam_mart/features/noor_shop/noor_shop_widgets.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/features/store/domain/models/store_model.dart';
@@ -154,6 +155,8 @@ class _ModuleBodyState extends State<_ModuleBody> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    // The module's slide show (admin: Module home slides manager).
+                    NoorModuleSlides(moduleId: _moduleId, onCategory: (id) => _pick('$id')),
                     const _SearchBox(),
                     _ModuleChips(current: widget.module),
                     _Segmented(

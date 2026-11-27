@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sixam_mart/api/api_client.dart';
 import 'package:sixam_mart/features/auth/controllers/auth_controller.dart';
+import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
+import 'package:sixam_mart/features/noor_shop/noor_module_slides.dart';
 import 'package:sixam_mart/features/profile/controllers/profile_controller.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
@@ -503,6 +505,8 @@ class _VoyageHomeScreenState extends State<VoyageHomeScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView(padding: const EdgeInsets.all(16), children: [
+                // Je Voyage's slide show (admin: Module home slides manager).
+                NoorModuleSlides(moduleId: Get.find<SplashController>().voyageModule?.id, padding: const EdgeInsets.only(bottom: 14)),
                 if (_config?['enabled'] == false)
                   const Padding(padding: EdgeInsets.only(bottom: 12), child: Text('Je Voyage est momentanément indisponible.', style: TextStyle(color: NoorTheme.danger))),
                 _card(
