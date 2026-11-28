@@ -1,3 +1,4 @@
+import 'package:sixam_mart/helper/live_sync.dart';
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
@@ -312,14 +313,20 @@ class RideController extends GetxController {
   }
 
   /// Follows the ride every few seconds while it is ongoing.
+  void Function()? _unlive;
+
   void _setTrip(RideTrip? t) {
     final wasActive = trip?.isActive ?? false;
     trip = t;
     if (t != null && t.isActive) {
       _poll ??= Timer.periodic(const Duration(seconds: 4), (_) => _refresh());
+      // Live updates: driver found, arriving, started, cancelled... at once.
+      _unlive ??= LiveSync.instance.subscribe(_refresh);
     } else {
       _poll?.cancel();
       _poll = null;
+      _unlive?.call();
+      _unlive = null;
       if (wasActive && t?.status == 'completed') Get.find<ProfileController>().getUserInfo();
     }
   }
@@ -352,6 +359,7 @@ class RideController extends GetxController {
   @override
   void onClose() {
     _poll?.cancel();
+    _unlive?.call();
     _nearbyTimer?.cancel();
     super.onClose();
   }

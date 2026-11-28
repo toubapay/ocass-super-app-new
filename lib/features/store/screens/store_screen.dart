@@ -158,14 +158,7 @@ class _StoreScreenState extends State<StoreScreen> {
                                             .radiusDefault),
                                     child: Stack(
                                       children: [
-                                        CustomImage(
-                                          fit: BoxFit.cover,
-                                          height: 240,
-                                          width: 590,
-                                          image: store
-                                              ?.coverPhotoFullUrl ??
-                                              '',
-                                        ),
+                                        StoreCoverImage(url: store?.coverPhotoFullUrl, height: 240, width: 590),
                                         store?.discount != null
                                             ? Positioned(
                                           bottom: 0,
@@ -611,10 +604,7 @@ class _StoreScreenState extends State<StoreScreen> {
                           borderRadius: const BorderRadius.vertical(
                               bottom: Radius.circular(
                                   Dimensions.radiusExtraLarge2)),
-                          child: CustomImage(
-                            fit: BoxFit.cover,
-                            image: '${store!.coverPhotoFullUrl}',
-                          ),
+                          child: StoreCoverImage(url: store!.coverPhotoFullUrl),
                         ),
                         Container(
                           decoration: BoxDecoration(
@@ -1728,4 +1718,38 @@ class CategoryProduct {
   CategoryModel category;
   List<Item> products;
   CategoryProduct(this.category, this.products);
+}
+
+/// The shop's cover photo; without one, a Noor green banner with the logo
+/// (as the web app) rather than a placeholder picture.
+class StoreCoverImage extends StatelessWidget {
+  final String? url;
+  final double? height;
+  final double? width;
+  const StoreCoverImage({super.key, required this.url, this.height, this.width});
+
+  @override
+  Widget build(BuildContext context) {
+    final u = (url ?? '').trim();
+    if (u.isNotEmpty && u != 'null') {
+      return CustomImage(fit: BoxFit.cover, height: height, width: width, image: u);
+    }
+    return Container(
+      height: height,
+      width: width,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0B3D2E), Color(0xFF0E4D3A), Color(0xFF136B50)],
+          stops: [0, 0.55, 1],
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Image.asset(Images.logo, width: 88, height: 88, fit: BoxFit.cover),
+      ),
+    );
+  }
 }

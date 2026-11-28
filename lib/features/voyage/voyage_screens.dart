@@ -10,6 +10,7 @@ import 'package:sixam_mart/features/auth/controllers/auth_controller.dart';
 import 'package:sixam_mart/features/splash/controllers/splash_controller.dart';
 import 'package:sixam_mart/features/noor_shop/noor_module_slides.dart';
 import 'package:sixam_mart/features/profile/controllers/profile_controller.dart';
+import 'package:sixam_mart/helper/live_sync.dart';
 import 'package:sixam_mart/helper/price_converter.dart';
 import 'package:sixam_mart/helper/route_helper.dart';
 import 'package:sixam_mart/theme/light_theme.dart';
@@ -48,8 +49,12 @@ class VoyageApi {
       _body(await _api.postData('/api/v1/customer/voyage/trips/$id/book', {'seats': seats, 'payment_method': method}, handleError: false));
   static Future<dynamic> bookings() async => _body(await _api.getData('/api/v1/customer/voyage/bookings', handleError: false));
   static Future<dynamic> cancel(int id) async => _body(await _api.postData('/api/v1/customer/voyage/bookings/$id/cancel', {}, handleError: false));
-  static Future<dynamic> rate(int id, int stars) async =>
-      _body(await _api.postData('/api/v1/customer/voyage/bookings/$id/rate', {'rating': stars}, handleError: false));
+  static Future<dynamic> rate(int id, int stars, {String? comment}) async => _body(await _api.postData(
+      '/api/v1/customer/voyage/bookings/$id/rate', {'rating': stars, if (comment != null && comment.isNotEmpty) 'comment': comment}, handleError: false));
+  static Future<dynamic> messages(int id, {int after = 0}) async =>
+      _body(await _api.getData('/api/v1/customer/voyage/bookings/$id/messages?after=$after', handleError: false));
+  static Future<dynamic> sendMessage(int id, String message) async =>
+      _body(await _api.postData('/api/v1/customer/voyage/bookings/$id/messages', {'message': message}, handleError: false));
 }
 
 void _toast(Object e) => Get.snackbar('Je Voyage', '$e', snackPosition: SnackPosition.BOTTOM, margin: const EdgeInsets.all(12));
@@ -646,15 +651,20 @@ class _VoyageTripScreenState extends State<VoyageTripScreen> {
     super.initState();
     _load();
     VoyageApi.config().then((c) => mounted ? setState(() => _config = Map.from(c)) : null).catchError((_) => null);
-    // On the road: the car's position every 15 s.
-    _poll = Timer.periodic(const Duration(seconds: 15), (_) {
+    // Live updates: any change to the trip or the booking reloads it at once
+    // (LiveSync); on the road, the car's position every 30 s as a fallback.
+    _unlive = LiveSync.instance.subscribe(_load);
+    _poll = Timer.periodic(const Duration(seconds: 30), (_) {
       if (_trip?['live'] != null || ['boarding', 'in_progress'].contains(_trip?['status'])) _load();
     });
   }
 
+  VoidCallback? _unlive;
+
   @override
   void dispose() {
     _poll?.cancel();
+    _unlive?.call();
     super.dispose();
   }
 
@@ -813,6 +823,10 @@ class _VoyageTripScreenState extends State<VoyageTripScreen> {
               Text('${mine['seats']} place(s) · ${_money(mine['total'])} · '
                   '${mine['payment_method'] == 'cash' ? 'espèces, à payer au chauffeur' : mine['payment_status'] == 'refunded' ? 'remboursé' : 'payé par portefeuille'}'),
               Text('Référence ${mine['reference']}', style: const TextStyle(color: NoorTheme.muted, fontSize: 12.5)),
+              if (mine['can_chat'] == true) ...[
+                const SizedBox(height: 10),
+                VoyageChatButton(booking: mine, onBack: _load),
+              ],
               if (mine['can_cancel'] == true) ...[
                 const SizedBox(height: 10),
                 SizedBox(
@@ -825,8 +839,11 @@ class _VoyageTripScreenState extends State<VoyageTripScreen> {
                 ),
               ],
             ], border: _teal),
+          if (mine != null && t['status'] == 'completed' && (mine['can_rate'] == true || mine['rating'] != null))
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: VoyageRateCard(booking: mine, onDone: _load)),
           _section(Icons.place_outlined, t['live'] != null ? 'Le trajet en direct' : 'Départ', [
-            if ((t['meeting_point'] ?? '').toString().isNotEmpty)
+            if (t['live'] != null) VoyageLiveProgress(trip: t),
+            if (t['live'] == null && (t['meeting_point'] ?? '').toString().isNotEmpty)
               Padding(padding: const EdgeInsets.only(bottom: 8), child: Text('Rendez-vous : ${t['meeting_point']}', style: const TextStyle(color: NoorTheme.muted))),
             _mapView(t),
             if (t['live']?['updated_at'] != null)
@@ -940,11 +957,20 @@ class VoyageBookingsScreen extends StatefulWidget {
 class _VoyageBookingsScreenState extends State<VoyageBookingsScreen> {
   List<Map>? _upcoming;
   List<Map> _past = [];
+  VoidCallback? _unlive;
 
   @override
   void initState() {
     super.initState();
     _load();
+    // Live updates: boarding, departure, arrival, a driver's message.
+    _unlive = LiveSync.instance.subscribe(_load);
+  }
+
+  @override
+  void dispose() {
+    _unlive?.call();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -979,26 +1005,23 @@ class _VoyageBookingsScreenState extends State<VoyageBookingsScreen> {
           const SizedBox(height: 4),
           Text('${voyageDay(t['departure_date'])} · ${voyageTime(t['departure_time'])} · ${b['seats']} place(s) · ${_money(b['total'])}',
               style: const TextStyle(color: NoorTheme.muted)),
-          if (b['status'] == 'completed') ...[
-            const SizedBox(height: 6),
-            b['rating'] != null
-                ? Text('Ta note : ${'★' * _i(b['rating'])}', style: const TextStyle(color: Color(0xFFF5B301)))
-                : Row(children: [
-                    const Text('Note le chauffeur :'),
-                    for (var n = 1; n <= 5; n++)
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () async {
-                          try {
-                            await VoyageApi.rate(_i(b['id']), n);
-                            _load();
-                          } catch (e) {
-                            _toast(e);
-                          }
-                        },
-                        icon: const Icon(Icons.star_border_rounded, color: Color(0xFFF5B301)),
-                      ),
-                  ]),
+          if (b['can_chat'] == true || b['can_rate'] == true || b['rating'] != null) ...[
+            const SizedBox(height: 8),
+            Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
+              if (b['can_chat'] == true) VoyageChatButton(booking: b, onBack: _load, compact: true),
+              if (b['rating'] != null)
+                Text('Ta note : ${'★' * _i(b['rating'])}${'☆' * (5 - _i(b['rating']))}', style: const TextStyle(color: Color(0xFFF5B301), fontWeight: FontWeight.w700))
+              else if (b['can_rate'] == true)
+                FilledButton.icon(
+                  onPressed: () async {
+                    await Get.to(() => VoyageTripScreen(tripId: _i(t['id'])));
+                    _load();
+                  },
+                  style: FilledButton.styleFrom(backgroundColor: NoorTheme.green, shape: const StadiumBorder(), visualDensity: VisualDensity.compact),
+                  icon: const Icon(Icons.star_rounded, size: 18),
+                  label: const Text('Noter mon voyage'),
+                ),
+            ]),
           ],
         ]),
       ),
@@ -1036,6 +1059,460 @@ class _VoyageBookingsScreenState extends State<VoyageBookingsScreen> {
                 for (final b in _past) _row(b),
               ]),
             ),
+    );
+  }
+}
+
+
+// ------------------------------------------------------------------ live
+
+String _hm(String? iso) {
+  final d = DateTime.tryParse(iso ?? '')?.toLocal();
+  return d == null ? '' : DateFormat('HH:mm').format(d);
+}
+
+/// On the road: how far the vehicle is between the two cities, the
+/// kilometres left and the estimated arrival (as LiveProgress in the web app).
+class VoyageLiveProgress extends StatelessWidget {
+  final Map trip;
+  const VoyageLiveProgress({super.key, required this.trip});
+
+  @override
+  Widget build(BuildContext context) {
+    final live = Map.from(trip['live'] ?? {});
+    final progress = _d(live['progress']);
+    final updated = DateTime.tryParse('${live['updated_at'] ?? ''}')?.toLocal();
+    Widget fact(String label, String value) => Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(color: NoorTheme.bg, borderRadius: BorderRadius.circular(12)),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(label, style: const TextStyle(color: NoorTheme.muted, fontSize: 12)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+            ]),
+          ),
+        );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const _LiveDot(),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(trip['status'] == 'boarding' ? 'Embarquement en cours' : 'En route vers ${trip['destination']?['name']}',
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ]),
+        if (progress != null) ...[
+          const SizedBox(height: 12),
+          Row(children: [
+            Text('${trip['origin']?['name']}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: LayoutBuilder(builder: (_, c) {
+                final x = (c.maxWidth * progress).clamp(0.0, c.maxWidth);
+                return SizedBox(
+                  height: 28,
+                  child: Stack(clipBehavior: Clip.none, alignment: Alignment.centerLeft, children: [
+                    Container(height: 8, decoration: BoxDecoration(color: NoorTheme.line, borderRadius: BorderRadius.circular(4))),
+                    AnimatedContainer(duration: const Duration(milliseconds: 600), height: 8, width: x, decoration: BoxDecoration(color: NoorTheme.green, borderRadius: BorderRadius.circular(4))),
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 600),
+                      left: x - 14,
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: const BoxDecoration(color: NoorTheme.green, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6)]),
+                        child: const Icon(Icons.directions_bus_rounded, size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ]),
+                );
+              }),
+            ),
+            const SizedBox(width: 10),
+            Text('${trip['destination']?['name']}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+          ]),
+        ],
+        const SizedBox(height: 12),
+        Row(children: [
+          if (live['eta_at'] != null) ...[fact('Arrivée estimée', 'vers ${_hm(live['eta_at'])}'), const SizedBox(width: 8)],
+          if (live['remaining_km'] != null) ...[fact('Reste', '${(_d(live['remaining_km']) ?? 0).round()} km'), const SizedBox(width: 8)],
+          if (progress != null) fact('Parcouru', '${(progress * 100).round()} %'),
+        ]),
+        if (live['stale'] == true && updated != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text('Dernière position reçue il y a ${DateTime.now().difference(updated).inMinutes} min (réseau du chauffeur).',
+                style: const TextStyle(color: Color(0xFF9A6700), fontSize: 13)),
+          ),
+      ]),
+    );
+  }
+}
+
+class _LiveDot extends StatefulWidget {
+  const _LiveDot();
+  @override
+  State<_LiveDot> createState() => _LiveDotState();
+}
+
+class _LiveDotState extends State<_LiveDot> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _c,
+        builder: (_, __) => Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: const Color(0xFF16A34A),
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: const Color(0xFF16A34A).withValues(alpha: 0.5 * (1 - _c.value)), spreadRadius: 8 * _c.value)],
+          ),
+        ),
+      );
+}
+
+// ------------------------------------------------------------------ chat
+
+/// « Écrire au chauffeur », with the number of unread messages.
+class VoyageChatButton extends StatelessWidget {
+  final Map booking;
+  final VoidCallback? onBack;
+  final bool compact;
+  const VoyageChatButton({super.key, required this.booking, this.onBack, this.compact = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final unread = _i(booking['unread_messages']);
+    return OutlinedButton.icon(
+      onPressed: () async {
+        await Get.to(() => VoyageChatScreen(bookingId: _i(booking['id'])));
+        onBack?.call();
+      },
+      style: OutlinedButton.styleFrom(
+        foregroundColor: NoorTheme.green,
+        side: const BorderSide(color: NoorTheme.green, width: 1.5),
+        shape: const StadiumBorder(),
+        visualDensity: compact ? VisualDensity.compact : null,
+        padding: compact ? null : const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      icon: Badge(isLabelVisible: unread > 0, label: Text('$unread'), child: const Icon(Icons.chat_bubble_outline, size: 20)),
+      label: const Text('Écrire au chauffeur', style: TextStyle(fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
+/// The passenger's conversation with the driver of the trip (one per booking).
+class VoyageChatScreen extends StatefulWidget {
+  final int bookingId;
+  const VoyageChatScreen({super.key, required this.bookingId});
+  @override
+  State<VoyageChatScreen> createState() => _VoyageChatScreenState();
+}
+
+class _VoyageChatScreenState extends State<VoyageChatScreen> {
+  final List<Map> _messages = [];
+  Map? _driver;
+  String? _route;
+  bool _open = true;
+  bool _loaded = false;
+  int _last = 0;
+  bool _sending = false;
+  Timer? _timer;
+  final _text = TextEditingController();
+  final _scroll = ScrollController();
+
+  static const _quick = ['Je suis au point de rendez-vous', 'J’ai un bagage en plus', 'J’arrive dans 5 minutes', 'Merci !'];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+    // Live updates: a new message (or « lu ») at once; every 30 s as a fallback.
+    _unlive = LiveSync.instance.subscribe(_load);
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _load());
+  }
+
+  VoidCallback? _unlive;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _unlive?.call();
+    _text.dispose();
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _add(Iterable list) {
+    var grew = false;
+    for (final e in list) {
+      final m = Map.from(e);
+      if (_messages.any((x) => x['id'] == m['id'])) continue;
+      _messages.add(m);
+      if (_i(m['id']) > _last) _last = _i(m['id']);
+      grew = true;
+    }
+    if (grew) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      });
+    }
+  }
+
+  Future<void> _load() async {
+    try {
+      final r = await VoyageApi.messages(widget.bookingId, after: _last);
+      if (!mounted) return;
+      setState(() {
+        _add(r['messages'] ?? []);
+        _open = r['can_chat'] == true;
+        _driver = r['driver'] is Map ? Map.from(r['driver']) : _driver;
+        _route = r['trip']?['route']?.toString() ?? _route;
+        _loaded = true;
+      });
+    } catch (e) {
+      if (mounted && !_loaded) _toast(e);
+    }
+  }
+
+  Future<void> _send(String text) async {
+    if (text.trim().isEmpty || _sending) return;
+    setState(() => _sending = true);
+    try {
+      final r = await VoyageApi.sendMessage(widget.bookingId, text.trim());
+      _text.clear();
+      if (r?['message'] != null && mounted) setState(() => _add([r['message']]));
+    } catch (e) {
+      _toast(e);
+    }
+    if (mounted) setState(() => _sending = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final phone = _driver?['phone']?.toString();
+    return Scaffold(
+      backgroundColor: NoorTheme.bg,
+      appBar: AppBar(
+        title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('${_driver?['name'] ?? 'Ton chauffeur'}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+          if (_route != null) Text('Je Voyage · $_route', style: const TextStyle(fontSize: 12.5, color: Color(0xFFE4F1EA))),
+        ]),
+        actions: [
+          if (phone != null && phone.isNotEmpty) IconButton(onPressed: () => launchUrl(Uri.parse('tel:$phone')), icon: const Icon(Icons.phone), tooltip: 'Appeler'),
+        ],
+      ),
+      body: Column(children: [
+        Expanded(
+          child: !_loaded
+              ? const Center(child: CircularProgressIndicator())
+              : _messages.isEmpty
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text('Écris au chauffeur : bagages, point de rendez-vous, retard…', textAlign: TextAlign.center, style: TextStyle(color: NoorTheme.muted)),
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scroll,
+                      padding: const EdgeInsets.all(14),
+                      itemCount: _messages.length,
+                      itemBuilder: (_, i) {
+                        final m = _messages[i];
+                        final mine = m['mine'] == true;
+                        return Align(
+                          alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+                            decoration: BoxDecoration(
+                              color: mine ? NoorTheme.green : Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: mine ? null : Border.all(color: NoorTheme.line),
+                            ),
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Text('${m['body']}', style: TextStyle(color: mine ? Colors.white : NoorTheme.text, fontSize: 15)),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 3),
+                                child: Text('${_hm(m['created_at'])}${mine && m['read'] == true ? ' · lu' : ''}',
+                                    style: TextStyle(fontSize: 11, color: mine ? Colors.white70 : NoorTheme.muted)),
+                              ),
+                            ]),
+                          ),
+                        );
+                      },
+                    ),
+        ),
+        if (_loaded && !_open)
+          const Padding(padding: EdgeInsets.all(16), child: Text('La messagerie de ce voyage est fermée.', style: TextStyle(color: NoorTheme.muted)))
+        else ...[
+          SizedBox(
+            height: 44,
+            child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 10), children: [
+              for (final q in _quick)
+                Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: ActionChip(label: Text(q), onPressed: () => _send(q))),
+            ]),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 8, 10),
+              child: Row(children: [
+                Expanded(
+                  child: TextField(
+                    controller: _text,
+                    maxLength: 1000,
+                    buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+                    textCapitalization: TextCapitalization.sentences,
+                    onSubmitted: _send,
+                    decoration: InputDecoration(
+                      hintText: 'Ton message…',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: NoorTheme.line)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: NoorTheme.line)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                IconButton.filled(
+                  onPressed: _sending ? null : () => _send(_text.text),
+                  style: IconButton.styleFrom(backgroundColor: NoorTheme.green),
+                  icon: const Icon(Icons.send),
+                ),
+              ]),
+            ),
+          ),
+        ],
+      ]),
+    );
+  }
+}
+
+// ---------------------------------------------------------------- rating
+
+/// After arrival: stars, quick tags and a comment (as RateCard in the web app).
+class VoyageRateCard extends StatefulWidget {
+  final Map booking;
+  final VoidCallback? onDone;
+  const VoyageRateCard({super.key, required this.booking, this.onDone});
+  @override
+  State<VoyageRateCard> createState() => _VoyageRateCardState();
+}
+
+class _VoyageRateCardState extends State<VoyageRateCard> {
+  int _stars = 0;
+  final Set<String> _tags = {};
+  final _comment = TextEditingController();
+  bool _busy = false;
+
+  static const _tagList = ['Ponctuel', 'Conduite prudente', 'Véhicule propre', 'Sympathique', 'Trajet confortable'];
+  static const _words = ['Touche une étoile', 'Très mauvais', 'Mauvais', 'Correct', 'Bien', 'Excellent'];
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    setState(() => _busy = true);
+    try {
+      final text = [if (_tags.isNotEmpty) _tags.join(', '), if (_comment.text.trim().isNotEmpty) _comment.text.trim()].join(' · ');
+      await VoyageApi.rate(_i(widget.booking['id']), _stars, comment: text);
+      widget.onDone?.call();
+    } catch (e) {
+      _toast(e);
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
+  Widget _starRow(int value, {double size = 36, bool tap = false}) => Row(
+        mainAxisAlignment: tap ? MainAxisAlignment.center : MainAxisAlignment.start,
+        children: [
+          for (var n = 1; n <= 5; n++)
+            tap
+                ? IconButton(
+                    onPressed: () => setState(() => _stars = n),
+                    icon: Icon(n <= value ? Icons.star_rounded : Icons.star_border_rounded, size: size, color: const Color(0xFFF5B301)),
+                  )
+                : Icon(n <= value ? Icons.star_rounded : Icons.star_border_rounded, size: size, color: const Color(0xFFF5B301)),
+        ],
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final b = widget.booking;
+    final rated = b['rating'] != null;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xFFFFFAF0), Colors.white], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF5D77A), width: 1.5),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          const Icon(Icons.star_rounded, color: Color(0xFFF5B301)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(rated ? 'Ton avis' : 'Comment s’est passé ton voyage ?', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5))),
+        ]),
+        if (rated) ...[
+          const SizedBox(height: 6),
+          _starRow(_i(b['rating']), size: 24),
+          if ((b['rating_comment'] ?? '').toString().isNotEmpty)
+            Padding(padding: const EdgeInsets.only(top: 4), child: Text('« ${b['rating_comment']} »', style: const TextStyle(color: NoorTheme.muted))),
+          const SizedBox(height: 4),
+          const Text('Merci ! Ton avis aide les autres voyageurs.', style: TextStyle(color: NoorTheme.muted, fontSize: 12.5)),
+        ] else ...[
+          const SizedBox(height: 4),
+          const Text('Note ton chauffeur : ton avis est visible par les autres voyageurs.', style: TextStyle(color: NoorTheme.muted, fontSize: 13)),
+          const SizedBox(height: 4),
+          _starRow(_stars, tap: true),
+          Text(_words[_stars], textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800)),
+          if (_stars > 0) ...[
+            const SizedBox(height: 10),
+            Wrap(spacing: 8, runSpacing: 6, children: [
+              for (final t in _tagList)
+                FilterChip(
+                  label: Text(t),
+                  selected: _tags.contains(t),
+                  selectedColor: NoorTheme.goldSoft,
+                  onSelected: (on) => setState(() => on ? _tags.add(t) : _tags.remove(t)),
+                ),
+            ]),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _comment,
+              maxLines: 3,
+              maxLength: 220,
+              decoration: InputDecoration(
+                hintText: 'Un commentaire pour le chauffeur (facultatif)',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: NoorTheme.line)),
+              ),
+            ),
+            FilledButton(
+              onPressed: _busy ? null : _send,
+              style: FilledButton.styleFrom(backgroundColor: NoorTheme.green, shape: const StadiumBorder(), padding: const EdgeInsets.symmetric(vertical: 14)),
+              child: Text(_busy ? 'Envoi…' : 'Envoyer mon avis', style: const TextStyle(fontWeight: FontWeight.w800)),
+            ),
+          ],
+        ],
+      ]),
     );
   }
 }

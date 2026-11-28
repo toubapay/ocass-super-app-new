@@ -1,3 +1,4 @@
+import 'package:sixam_mart/features/store/domain/repositories/store_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -426,6 +427,7 @@ class StoreController extends GetxController implements GetxService {
 
   Future<Store?> getStoreDetails(Store store, bool fromModule, {bool fromCart = false, String slug = ''}) async {
     _categoryIndex = 0;
+    StoreRepository.storeModuleId = store.moduleId;
     if(store.name != null) {
       _store = store;
     }else {
@@ -435,6 +437,7 @@ class StoreController extends GetxController implements GetxService {
           ModuleHelper.getModule(), ModuleHelper.getCacheModule()?.id, ModuleHelper.getModule()?.id);
       if (storeDetails != null) {
         _store = storeDetails;
+        StoreRepository.storeModuleId = storeDetails.moduleId;
         Get.find<CheckoutController>().initializeTimeSlot(_store!);
         if(!fromCart && slug.isEmpty){
           Get.find<CheckoutController>().getDistanceInKM(

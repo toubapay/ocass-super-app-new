@@ -19,6 +19,10 @@ import 'package:sixam_mart/helper/header_helper.dart';
 import 'package:sixam_mart/util/app_constants.dart';
 
 class StoreRepository implements StoreRepositoryInterface {
+  /// Module of the store being viewed (set by StoreController): its
+  /// products, search, recommendations and banners are asked for with it.
+  static int? storeModuleId;
+
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
   StoreRepository({required this.apiClient, required this.sharedPreferences});
@@ -221,7 +225,7 @@ class StoreRepository implements StoreRepositoryInterface {
     ItemModel? storeItemModel;
     final filterString = filter != null ? jsonEncode(filter) : null;
     Response response = await apiClient.getData(
-      '${AppConstants.storeItemUri}?store_id=$storeID&category_id=$categoryID&offset=$offset&limit=13&type=$type&filter=$filterString&rating_count=${rating ?? ''}&min_price=${lowerValue ?? ''}&max_price=${upperValue ?? ''}');
+      '${AppConstants.storeItemUri}?store_id=$storeID&category_id=$categoryID&offset=$offset&limit=13&type=$type&filter=$filterString&rating_count=${rating ?? ''}&min_price=${lowerValue ?? ''}&max_price=${upperValue ?? ''}', moduleId: storeModuleId);
     if(response.statusCode == 200){
       storeItemModel = ItemModel.fromJson(response.body);
     }
@@ -232,7 +236,7 @@ class StoreRepository implements StoreRepositoryInterface {
   Future<ItemModel?> getStoreSearchItemList(String searchText, String? storeID, int offset, String type, int? categoryID) async {
     ItemModel? storeSearchItemModel;
     Response response = await apiClient.getData(
-      '${AppConstants.searchUri}items/search?store_id=$storeID&name=$searchText&offset=$offset&limit=10&type=$type&category_id=${categoryID ?? ''}');
+      '${AppConstants.searchUri}items/search?store_id=$storeID&name=$searchText&offset=$offset&limit=10&type=$type&category_id=${categoryID ?? ''}', moduleId: storeModuleId);
     if(response.statusCode == 200){
       storeSearchItemModel = ItemModel.fromJson(response.body);
     }
@@ -241,7 +245,7 @@ class StoreRepository implements StoreRepositoryInterface {
 
   Future<RecommendedItemModel?> _getStoreRecommendedItemList(int? storeId) async {
     RecommendedItemModel? recommendedItemModel;
-    Response response = await apiClient.getData('${AppConstants.storeRecommendedItemUri}?store_id=$storeId&offset=1&limit=50');
+    Response response = await apiClient.getData('${AppConstants.storeRecommendedItemUri}?store_id=$storeId&offset=1&limit=50', moduleId: storeModuleId);
     if(response.statusCode == 200){
       recommendedItemModel = RecommendedItemModel.fromJson(response.body);
     }
@@ -266,7 +270,7 @@ class StoreRepository implements StoreRepositoryInterface {
 
   Future<List<StoreBannerModel>?> _getStoreBannerList(int? storeId) async {
     List<StoreBannerModel>? storeBanners;
-    Response response = await apiClient.getData('${AppConstants.storeBannersUri}$storeId');
+    Response response = await apiClient.getData('${AppConstants.storeBannersUri}$storeId', moduleId: storeModuleId);
     if (response.statusCode == 200) {
       storeBanners = [];
       response.body.forEach((banner) => storeBanners!.add(StoreBannerModel.fromJson(banner)));
