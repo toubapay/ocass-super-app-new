@@ -96,7 +96,8 @@ class ApiClient extends GetxService {
   Future<Response> getData(String uri,
       {Map<String, dynamic>? query,
       Map<String, String>? headers,
-      bool handleError = true}) async {
+      bool handleError = true,
+      int? moduleId}) async {
     try {
       if (kDebugMode) {
         log('====> API Call: $uri\nHeader: ${headers ?? _mainHeaders}');
@@ -114,7 +115,13 @@ class ApiClient extends GetxService {
       http.Response response = await http
           .get(
             Uri.parse(appBaseUrl + uri),
-            headers: headers ?? _mainHeaders,
+            // A request about one store (its products, banners...) is sent
+            // with that store's module, not the last module the user opened:
+            // the server only returns a store's items for its own module.
+            headers: headers ??
+                (moduleId != null
+                    ? {..._mainHeaders, AppConstants.moduleId: '$moduleId'}
+                    : _mainHeaders),
           )
           .timeout(Duration(seconds: timeoutInSeconds));
       return handleResponse(response, uri, handleError);
